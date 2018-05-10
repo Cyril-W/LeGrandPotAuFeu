@@ -3,7 +3,6 @@
 [System.Serializable]
 public struct HexCoordinates
 {
-
     public int X { get; private set; }
 
     public int Z { get; private set; }
@@ -29,10 +28,10 @@ public struct HexCoordinates
 
     public static HexCoordinates FromPosition(Vector3 position)
     {
-        float x = position.x / (HexGrid.innerRadius * 2f);
+        float x = position.x / (HexMetrics.innerRadius * 2f);
         float y = -x;
 
-        float offset = position.z / (HexGrid.outerRadius * 3f);
+        float offset = position.z / (HexMetrics.outerRadius * 3f);
         x -= offset;
         y -= offset;
 

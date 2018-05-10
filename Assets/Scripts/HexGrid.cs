@@ -8,30 +8,24 @@ public enum HexDirection
 
 public static class HexDirectionExtensions
 {
-
     public static HexDirection Opposite(this HexDirection direction)
     {
         return (int)direction < 3 ? (direction + 3) : (direction - 3);
     }
+
+    public static HexDirection Previous(this HexDirection direction)
+    {
+        return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
+    }
+
+    public static HexDirection Next(this HexDirection direction)
+    {
+        return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
+    }
 }
 
-public class HexGrid : MonoBehaviour {
-
-    // Static part
-    public static float outerRadius = 10f;
-    public static float innerRadius = outerRadius * 0.866025404f;
-
-    public static Vector3[] corners = {
-        new Vector3(0f, 0f, outerRadius),
-        new Vector3(innerRadius, 0f, 0.5f * outerRadius),
-        new Vector3(innerRadius, 0f, -0.5f * outerRadius),
-        new Vector3(0f, 0f, -outerRadius),
-        new Vector3(-innerRadius, 0f, -0.5f * outerRadius),
-        new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
-        new Vector3(0f, 0f, outerRadius)
-    };
-
-    // Object part
+public class HexGrid : MonoBehaviour
+{
     [Header("Grid Size")]
     public int width = 6;
     public int height = 6;
@@ -72,9 +66,9 @@ public class HexGrid : MonoBehaviour {
     {
         HexCell cell = cells[i] = Instantiate(cellPrefab, transform);
         Vector3 position;
-        position.x = (x + z * 0.5f - z / 2) * (innerRadius * 2f);
+        position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
         position.y = 0f;
-        position.z = z * (outerRadius * 1.5f);
+        position.z = z * (HexMetrics.outerRadius * 1.5f);
         cell.transform.localPosition = position;
         cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
         cell.color = defaultColor;
