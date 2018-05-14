@@ -1,29 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public enum HexDirection
-{
-    NE, E, SE, SW, W, NW
-}
-
-public static class HexDirectionExtensions
-{
-    public static HexDirection Opposite(this HexDirection direction)
-    {
-        return (int)direction < 3 ? (direction + 3) : (direction - 3);
-    }
-
-    public static HexDirection Previous(this HexDirection direction)
-    {
-        return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
-    }
-
-    public static HexDirection Next(this HexDirection direction)
-    {
-        return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
-    }
-}
-
 public class HexGrid : MonoBehaviour
 {
     [Header("Grid Size")]
@@ -101,15 +78,20 @@ public class HexGrid : MonoBehaviour
         label.rectTransform.anchoredPosition = new Vector2(position.x - 1, position.z);
         label.text = cell.coordinates.ToStringOnSeparateLines();
         cell.gameObject.name = "Hex Cell " + cell.coordinates.ToString();
+        cell.uiRect = label.rectTransform;
     }
 
-    public void ColorCell(Vector3 position, Color color)
+    public void Refresh()
+    {
+        hexMesh.Triangulate(cells);
+    }
+
+    public HexCell GetCell(Vector3 position)
     {
         position = transform.InverseTransformPoint(position);
         HexCoordinates coordinates = HexCoordinates.FromPosition(position);
         int index = coordinates.X + coordinates.Z * width + coordinates.Z / 2;
-        HexCell cell = cells[index];
-        cell.color = color;
-        hexMesh.Triangulate(cells);
+        return cells[index];
+        //cell.color = color;
     }
 }

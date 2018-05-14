@@ -4,14 +4,15 @@ using UnityEngine.EventSystems;
 public class HexMapEditor : MonoBehaviour {
 
     public Color[] colors;
-
     public HexGrid hexGrid;
 
-    private Color activeColor;
+    Color activeColor;
+    int activeElevation;
 
     void Awake()
     {
         SelectColor(0);
+        SetElevation(1);
     }
 
     void Update()
@@ -28,12 +29,24 @@ public class HexMapEditor : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            hexGrid.ColorCell(hit.point, activeColor);
+            EditCell(hexGrid.GetCell(hit.point));
         }
+    }
+
+    void EditCell(HexCell cell)
+    {
+        cell.color = activeColor;
+        cell.Elevation = activeElevation;
+        hexGrid.Refresh();
     }
 
     public void SelectColor(int index)
     {
         activeColor = colors[index];
+    }
+
+    public void SetElevation(float elevation)
+    {
+        activeElevation = (int)elevation;
     }
 }
