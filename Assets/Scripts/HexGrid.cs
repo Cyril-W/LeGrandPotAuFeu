@@ -14,12 +14,17 @@ public class HexGrid : MonoBehaviour
     [Header("Cell Color")]
     public Color defaultColor = Color.white;
 
+    [Header("Noise Texture")]
+    public Texture2D noiseSource;
+
     HexCell[] cells;
     Canvas gridCanvas;
     HexMesh hexMesh;
 
     void Awake()
     {
+        HexMetrics.noiseSource = noiseSource;
+
         gridCanvas = GetComponentInChildren<Canvas>();
         hexMesh = GetComponentInChildren<HexMesh>();
 
@@ -37,6 +42,11 @@ public class HexGrid : MonoBehaviour
     void Start()
     {
         hexMesh.Triangulate(cells);
+    }
+
+    void OnEnable()
+    {
+        HexMetrics.noiseSource = noiseSource;
     }
 
     void CreateCell(int x, int z, int i)
@@ -79,6 +89,8 @@ public class HexGrid : MonoBehaviour
         label.text = cell.coordinates.ToStringOnSeparateLines();
         cell.gameObject.name = "Hex Cell " + cell.coordinates.ToString();
         cell.uiRect = label.rectTransform;
+
+        cell.Elevation = 0;
     }
 
     public void Refresh()
