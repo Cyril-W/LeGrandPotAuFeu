@@ -2,6 +2,9 @@
 using UnityEngine.EventSystems;
 
 namespace LeGrandPotAuFeu.HexGrid {
+	enum OptionalToggle {
+		Ignore, Yes, No
+	}
 	public class HexMapEditor : MonoBehaviour {
 		[Header("Color to pick from the UI")]
 		public Color[] colors;
@@ -10,17 +13,21 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public HexGrid hexGrid;
 
 		Color activeColor;
-		int activeElevation;
-		int activeWaterLevel;
-		bool applyColor;
+		int activeElevation = 0;
+		int activeWaterLevel = 0;
+		int activeUrbanLevel = 0;
+		int activeFarmLevel = 0;
+		int activePlantLevel = 0;
+		int brushSize = 0;
+
+		bool applyColor = false;
 		bool applyElevation = true;
 		bool applyWaterLevel = true;
-		int brushSize;
+		bool applyUrbanLevel = true;
+		bool applyFarmLevel = true;
+		bool applyPlantLevel = true;
 
-		void Awake() {
-			SelectColor(-1);
-			SetElevation(0);
-		}
+		OptionalToggle walledMode = OptionalToggle.Ignore;
 
 		void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -63,7 +70,23 @@ namespace LeGrandPotAuFeu.HexGrid {
 				if (applyWaterLevel) {
 					cell.WaterLevel = activeWaterLevel;
 				}
+				if (applyUrbanLevel) {
+					cell.UrbanLevel = activeUrbanLevel;
+				}
+				if (applyFarmLevel) {
+					cell.FarmLevel = activeFarmLevel;
+				}
+				if (applyPlantLevel) {
+					cell.PlantLevel = activePlantLevel;
+				}
+				if (walledMode != OptionalToggle.Ignore) {
+					cell.Walled = walledMode == OptionalToggle.Yes;
+				}
 			}
+		}
+
+		public void SetWalledMode(int mode) {
+			walledMode = (OptionalToggle)mode;
 		}
 
 		public void SelectColor(int index) {
@@ -87,6 +110,30 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		public void SetWaterLevel(float level) {
 			activeWaterLevel = (int)level;
+		}
+
+		public void SetApplyUrbanLevel(bool toggle) {
+			applyUrbanLevel = toggle;
+		}
+
+		public void SetUrbanLevel(float level) {
+			activeUrbanLevel = (int)level;
+		}
+
+		public void SetApplyFarmLevel(bool toggle) {
+			applyFarmLevel = toggle;
+		}
+
+		public void SetFarmLevel(float level) {
+			activeFarmLevel = (int)level;
+		}
+
+		public void SetApplyPlantLevel(bool toggle) {
+			applyPlantLevel = toggle;
+		}
+
+		public void SetPlantLevel(float level) {
+			activePlantLevel = (int)level;
 		}
 
 		public void SetBrushSize(float size) {

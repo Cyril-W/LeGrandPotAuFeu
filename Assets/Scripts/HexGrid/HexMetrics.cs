@@ -1,9 +1,20 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace LeGrandPotAuFeu.HexGrid {
 	public enum HexEdgeType {
 		Flat, Slope, Cliff
+	}
+	public struct HexHash {
+		public float a, b, c, d, e;
+		public static HexHash Create() {
+			HexHash hash;
+			hash.a = Random.value * 0.999f;
+			hash.b = Random.value * 0.999f;
+			hash.c = Random.value * 0.999f;
+			hash.d = Random.value * 0.999f;
+			hash.e = Random.value * 0.999f;
+			return hash;
+		}
 	}
 	public static class HexMetrics {
 		public const float outerRadius = 10f;
@@ -21,6 +32,60 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public const float waterElevationOffset = -0.25f;
 		public const float waterFactor = 0.6f;
 		public const float waterBlendFactor = 1f - waterFactor;
+		public const int hashGridSize = 256;
+		public const float hashGridScale = 0.25f;
+		public const float wallHeight = 3f;
+		public const float wallThickness = 0.75f;
+
+		public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far) {
+			Vector3 offset;
+			offset.x = far.x - near.x;
+			offset.y = 0f;
+			offset.z = far.z - near.z;
+			return offset.normalized * (wallThickness * 0.5f);
+		}
+		public static Vector3 WallLerp(Vector3 near, Vector3 far) {
+			near.x += (far.x - near.x) * 0.5f;
+			near.z += (far.z - near.z) * 0.5f;
+			float v =
+				near.y < far.y ? verticalTerraceStepSize : (1f - verticalTerraceStepSize);
+			near.y += (far.y - near.y) * v;
+			return near;
+		}
+
+		static HexHash[] hashGrid;
+
+		public static void InitializeHashGrid(int seed) {
+			hashGrid = new HexHash[hashGridSize * hashGridSize];
+			var currentState = Random.state;
+			Random.InitState(seed);
+			for (int i = 0; i < hashGrid.Length; i++) {
+				hashGrid[i] = HexHash.Create();
+			}
+			Random.state = currentState;
+		}
+
+		public static HexHash SampleHashGrid(Vector3 position) {
+			int x = (int)(position.x * hashGridScale) % hashGridSize;
+			if (x < 0) {
+				x += hashGridSize;
+			}
+			int z = (int)(position.z * hashGridScale) % hashGridSize;
+			if (z < 0) {
+				z += hashGridSize;
+			}
+			return hashGrid[x + z * hashGridSize];
+		}
+
+		static float[][] featureThresholds = {
+			new float[] {0.0f, 0.0f, 0.4f},
+			new float[] {0.0f, 0.4f, 0.6f},
+			new float[] {0.4f, 0.6f, 0.8f}
+		};
+
+		public static float[] GetFeatureThresholds(int level) {
+			return featureThresholds[level];
+		}
 
 		public static Texture2D noiseSource;
 
@@ -35,7 +100,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		};
 
 		public static Vector3 GetWaterCorner(HexDirection direction, bool isSecond) {
-			return corners[(int)direction + Convert.ToInt32(isSecond)] * waterFactor;
+			return corners[(int)direction + System.Convert.ToInt32(isSecond)] * waterFactor;
 		}
 
 		public static Vector3 GetWaterBridge(HexDirection direction) {
@@ -44,11 +109,11 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		public static Vector3 GetCorner(HexDirection direction, bool isSecond) {
-			return corners[(int)direction + Convert.ToInt32(isSecond)];
+			return corners[(int)direction + System.Convert.ToInt32(isSecond)];
 		}
 
 		public static Vector3 GetSolidCorner(HexDirection direction, bool isSecond) {
-			return corners[(int)direction + Convert.ToInt32(isSecond)] * solidFactor;
+			return corners[(int)direction + System.Convert.ToInt32(isSecond)] * solidFactor;
 		}
 
 		public static Vector3 GetBridge(HexDirection direction) {

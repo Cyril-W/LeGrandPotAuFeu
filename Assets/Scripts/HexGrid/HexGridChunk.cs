@@ -3,6 +3,7 @@
 namespace LeGrandPotAuFeu.HexGrid {
 	public class HexGridChunk : MonoBehaviour {
 		public HexMesh terrain, water, waterShore;
+		public HexFeatureManager features;
 
 		HexCell[] cells;
 		Canvas gridCanvas;
@@ -38,17 +39,22 @@ namespace LeGrandPotAuFeu.HexGrid {
 			terrain.Clear();
 			water.Clear();
 			waterShore.Clear();
+			features.Clear();
 			for (int i = 0; i < cells.Length; i++) {
 				Triangulate(cells[i]);
 			}
 			terrain.Apply();
 			water.Apply();
 			waterShore.Apply();
+			features.Apply();
 		}
 
 		void Triangulate(HexCell cell) {
 			for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
 				Triangulate(d, cell);
+			}
+			if (!cell.IsUnderwater) {
+				features.AddFeature(cell, cell.Position);
 			}
 		}
 
@@ -67,6 +73,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 			if (cell.IsUnderwater) {
 				TriangulateWater(direction, cell, center);
+			} else {
+				features.AddFeature(cell, (center + e.v1 + e.v5) * (1f / 3f));
 			}
 		}
 
@@ -165,6 +173,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 				TriangulateEdgeStrip(e1, cell.Color, e2, neighbor.Color);
 			}
 
+			features.AddWall(e1, cell, e2, neighbor);
+
 			HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
 			if (direction <= HexDirection.E && nextNeighbor != null) {
 				Vector3 v5 = e1.v5 + HexMetrics.GetBridge(direction.Next());
@@ -243,6 +253,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 				terrain.AddTriangle(bottom, left, right);
 				terrain.AddTriangleColor(bottomCell.Color, leftCell.Color, rightCell.Color);
 			}
+
+			features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
 		}
 
 		void TriangulateCornerTerraces(Vector3 begin, HexCell beginCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell) {

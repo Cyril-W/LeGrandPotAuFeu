@@ -5,6 +5,52 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public HexCoordinates coordinates;
 		public RectTransform uiRect;
 		public HexGridChunk chunk;
+		public int UrbanLevel {
+			get {
+				return urbanLevel;
+			}
+			set {
+				if (urbanLevel != value) {
+					urbanLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+		public int FarmLevel {
+			get {
+				return farmLevel;
+			}
+			set {
+				if (farmLevel != value) {
+					farmLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+		public int PlantLevel {
+			get {
+				return plantLevel;
+			}
+			set {
+				if (plantLevel != value) {
+					plantLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+		int urbanLevel, farmLevel, plantLevel;
+		public bool Walled {
+			get {
+				return walled;
+			}
+			set {
+				if (walled != value) {
+					walled = value;
+					Refresh();
+				}
+			}
+		}
+		bool walled;
 		public int WaterLevel {
 			get {
 				return waterLevel;
@@ -96,6 +142,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 			);
 		}
 
+		void RefreshSelfOnly() {
+			chunk.Refresh();
+		}
 		void Refresh() {
 			if (chunk) {
 				chunk.Refresh();

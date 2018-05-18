@@ -17,18 +17,29 @@ namespace LeGrandPotAuFeu.HexGrid {
 		[Header("Size of one chunk")]
 		public int chunkCountX = 4, chunkCountZ = 3;
 
+		[Header("Seed for the hash")]
+		public int seed = 1234;
+
 		HexCell[] cells;
 		HexGridChunk[] chunks;
 		int cellCountX, cellCountZ;
 
 		void Awake() {
 			HexMetrics.noiseSource = noiseSource;
+			HexMetrics.InitializeHashGrid(seed);
 
 			cellCountX = chunkCountX * HexMetrics.chunkSizeX;
 			cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
 
 			CreateChunks();
 			CreateCells();
+		}
+
+		void OnEnable() {
+			if (!HexMetrics.noiseSource) {
+				HexMetrics.noiseSource = noiseSource;
+				HexMetrics.InitializeHashGrid(seed);
+			}
 		}
 
 		void CreateChunks() {
@@ -50,10 +61,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 					CreateCell(x, z, i++);
 				}
 			}
-		}
-
-		void OnEnable() {
-			HexMetrics.noiseSource = noiseSource;
 		}
 
 		void CreateCell(int x, int z, int i) {
