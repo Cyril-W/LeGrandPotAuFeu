@@ -21,6 +21,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		int activeUrbanLevel = 0;
 		int activeFarmLevel = 0;
 		int activePlantLevel = 0;
+		int activeSpecialIndex = 0;
 		int brushSize = 0;
 
 		bool applyColor = false;
@@ -29,6 +30,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		bool applyUrbanLevel = false;
 		bool applyFarmLevel = false;
 		bool applyPlantLevel = false;
+		bool applySpecialIndex = false;
 
 		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
 
@@ -98,6 +100,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 				}
 				if (applyWaterLevel) {
 					cell.WaterLevel = activeWaterLevel;
+				}
+				if (applySpecialIndex) {
+					cell.SpecialIndex = activeSpecialIndex;
 				}
 				if (roadMode == OptionalToggle.No) {
 					cell.RemoveRoads();
@@ -179,6 +184,14 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		public void SetPlantLevel(float level) {
 			activePlantLevel = (int)level;
+		}
+
+		public void SetApplySpecialIndex(bool toggle) {
+			applySpecialIndex = toggle;
+		}
+
+		public void SetSpecialIndex(float index) {
+			activeSpecialIndex = (int)index;
 		}
 
 		public void SetBrushSize(float size) {

@@ -55,8 +55,13 @@ namespace LeGrandPotAuFeu.HexGrid {
 			for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
 				Triangulate(d, cell);
 			}
-			if (!cell.IsUnderwater && !cell.HasRoads) {
-				features.AddFeature(cell, cell.Position);
+			if (!cell.IsUnderwater) {
+				if (!cell.HasRoads) {
+					features.AddFeature(cell, cell.Position);
+				}
+				if (cell.IsSpecial) {
+					features.AddSpecialFeature(cell, cell.Position);
+				}
 			}
 		}
 

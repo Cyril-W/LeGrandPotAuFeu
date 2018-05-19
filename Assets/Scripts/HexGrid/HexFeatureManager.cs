@@ -12,6 +12,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 		[Header("From High to Low")]
 		public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
 		public HexMesh walls;
+		public Transform wallTower;
+		public Transform[] special;
 
 		Transform container;
 
@@ -28,7 +30,18 @@ namespace LeGrandPotAuFeu.HexGrid {
 			walls.Apply();
 		}
 
+		public void AddSpecialFeature(HexCell cell, Vector3 position) {
+			Transform instance = Instantiate(special[cell.SpecialIndex - 1], container);
+			instance.localPosition = HexMetrics.Perturb(position);
+			HexHash hash = HexMetrics.SampleHashGrid(position);
+			instance.localRotation = Quaternion.Euler(0f, 360f * hash.e, 0f);
+		}
+
 		public void AddFeature(HexCell cell, Vector3 position) {
+			if (cell.IsSpecial) {
+				return;
+			}
+
 			HexHash hash = HexMetrics.SampleHashGrid(position);
 			Transform prefab = PickPrefab(urbanCollections, cell.UrbanLevel, hash.a, hash.d);
 			Transform otherPrefab = PickPrefab(farmCollections, cell.FarmLevel, hash.b, hash.d);
@@ -105,31 +118,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 				AddWallSegment(c3, cell3, c1, cell1, c2, cell2);
 			}
 		}
-
-		void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell) {
-			if (pivotCell.IsUnderwater) {
-				return;
-			}
-
-			bool hasLeftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
-			bool hasRightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
-			if (hasLeftWall) {
-				if (hasRightWall) {
-					AddWallSegment(pivot, left, pivot, right);
-				} else if (leftCell.Elevation < rightCell.Elevation) {
-					AddWallWedge(pivot, left, right);
-				}	else {
-					AddWallCap(pivot, left);
-				}
-			} else if (hasRightWall) {
-				if (rightCell.Elevation < leftCell.Elevation) {
-					AddWallWedge(right, pivot, left);
-				} else {
-					AddWallCap(right, pivot);
-				}
-			}
-		}
-
+		
 		void AddWallCap(Vector3 near, Vector3 far) {
 			near = HexMetrics.Perturb(near);
 			far = HexMetrics.Perturb(far);
@@ -166,7 +155,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 			walls.AddTriangleUnperturbed(pointTop, v3, v4);
 		}
 
-		void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight) {
+		void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight, bool addTower = false) {
 			nearLeft = HexMetrics.Perturb(nearLeft);
 			farLeft = HexMetrics.Perturb(farLeft);
 			nearRight = HexMetrics.Perturb(nearRight);
@@ -197,6 +186,44 @@ namespace LeGrandPotAuFeu.HexGrid {
 			walls.AddQuadUnperturbed(v2, v1, v4, v3);
 
 			walls.AddQuadUnperturbed(t1, t2, v3, v4);
+
+			if (addTower) {
+				Transform towerInstance = Instantiate(wallTower);
+				towerInstance.transform.localPosition = (left + right) * 0.5f;
+				Vector3 rightDirection = right - left;
+				rightDirection.y = 0f;
+				towerInstance.transform.right = rightDirection;
+				towerInstance.SetParent(container, false);
+			}
+		}
+
+		void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell) {
+			if (pivotCell.IsUnderwater) {
+				return;
+			}
+
+			bool hasLeftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
+			bool hasRightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
+			if (hasLeftWall) {
+				if (hasRightWall) {
+					bool hasTower = false;
+					if (leftCell.Elevation == rightCell.Elevation) {
+						HexHash hash = HexMetrics.SampleHashGrid((pivot + left + right) * (1f / 3f));
+						hasTower = hash.e < HexMetrics.wallTowerThreshold;
+					}
+					AddWallSegment(pivot, left, pivot, right, hasTower);
+				} else if (leftCell.Elevation < rightCell.Elevation) {
+					AddWallWedge(pivot, left, right);
+				}	else {
+					AddWallCap(pivot, left);
+				}
+			} else if (hasRightWall) {
+				if (rightCell.Elevation < leftCell.Elevation) {
+					AddWallWedge(right, pivot, left);
+				} else {
+					AddWallCap(right, pivot);
+				}
+			}
 		}
 	}
 }

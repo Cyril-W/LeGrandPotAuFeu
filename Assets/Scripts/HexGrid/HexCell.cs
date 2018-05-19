@@ -16,6 +16,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 				}
 			}
 		}
+		int urbanLevel;
 		public int FarmLevel {
 			get {
 				return farmLevel;
@@ -27,6 +28,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 				}
 			}
 		}
+		int farmLevel;
 		public int PlantLevel {
 			get {
 				return plantLevel;
@@ -38,7 +40,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 				}
 			}
 		}
-		int urbanLevel, farmLevel, plantLevel;
+		int plantLevel;
 		public bool Walled {
 			get {
 				return walled;
@@ -133,6 +135,24 @@ namespace LeGrandPotAuFeu.HexGrid {
 				return false;
 			}
 		}
+		public int SpecialIndex {
+			get {
+				return specialIndex;
+			}
+			set {
+				if (specialIndex != value) {
+					specialIndex = value;
+					RemoveRoads();
+					RefreshSelfOnly();
+				}
+			}
+		}
+		int specialIndex;
+		public bool IsSpecial {
+			get {
+				return specialIndex > 0;
+			}
+		}
 
 		[SerializeField]
 		HexCell[] neighbors;
@@ -144,7 +164,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		public void AddRoad(HexDirection direction) {
-			if (!roads[(int)direction] && GetElevationDifference(direction) <= 1) {
+			if (!roads[(int)direction] && !IsSpecial && !GetNeighbor(direction).IsSpecial && GetElevationDifference(direction) <= 1) {
 				SetRoad((int)direction, true);
 			}
 		}
