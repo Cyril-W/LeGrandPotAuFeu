@@ -8,9 +8,12 @@ namespace LeGrandPotAuFeu.HexGrid {
 	public class HexMapEditor : MonoBehaviour {
 		[Header("Color to pick from the UI")]
 		public Color[] colors;
-
 		[Header("Drag'n'Drop")]
 		public HexGrid hexGrid;
+
+		bool isDrag;
+		HexDirection dragDirection;
+		HexCell previousCell;
 
 		Color activeColor;
 		int activeElevation = 0;
@@ -21,17 +24,19 @@ namespace LeGrandPotAuFeu.HexGrid {
 		int brushSize = 0;
 
 		bool applyColor = false;
-		bool applyElevation = true;
-		bool applyWaterLevel = true;
-		bool applyUrbanLevel = true;
-		bool applyFarmLevel = true;
-		bool applyPlantLevel = true;
+		bool applyElevation = false;
+		bool applyWaterLevel = false;
+		bool applyUrbanLevel = false;
+		bool applyFarmLevel = false;
+		bool applyPlantLevel = false;
 
-		OptionalToggle walledMode = OptionalToggle.Ignore;
+		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
 
 		void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
 				HandleInput();
+			} else {
+				previousCell = null;
 			}
 		}
 
@@ -39,8 +44,32 @@ namespace LeGrandPotAuFeu.HexGrid {
 			Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 			RaycastHit hit;
 			if (Physics.Raycast(inputRay, out hit)) {
-				EditCells(hexGrid.GetCell(hit.point));
+				HexCell currentCell = hexGrid.GetCell(hit.point);
+				if (previousCell && previousCell != currentCell) {
+					ValidateDrag(currentCell);
+				} else {
+					isDrag = false;
+				}
+				EditCells(currentCell);
+				previousCell = currentCell;
+				isDrag = true;
+			} else {
+				previousCell = null;
 			}
+		}
+
+		void ValidateDrag(HexCell currentCell) {
+			for (
+				dragDirection = HexDirection.NE;
+				dragDirection <= HexDirection.NW;
+				dragDirection++
+			) {
+				if (previousCell.GetNeighbor(dragDirection) == currentCell) {
+					isDrag = true;
+					return;
+				}
+			}
+			isDrag = false;
 		}
 
 		void EditCells(HexCell center) {
@@ -70,6 +99,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 				if (applyWaterLevel) {
 					cell.WaterLevel = activeWaterLevel;
 				}
+				if (roadMode == OptionalToggle.No) {
+					cell.RemoveRoads();
+				}
 				if (applyUrbanLevel) {
 					cell.UrbanLevel = activeUrbanLevel;
 				}
@@ -82,7 +114,20 @@ namespace LeGrandPotAuFeu.HexGrid {
 				if (walledMode != OptionalToggle.Ignore) {
 					cell.Walled = walledMode == OptionalToggle.Yes;
 				}
+
+				if (isDrag) {
+					HexCell otherCell = cell.GetNeighbor(dragDirection.Opposite());
+					if (otherCell) {
+						if (roadMode == OptionalToggle.Yes) {
+							otherCell.AddRoad(dragDirection);
+						}
+					}
+				}
 			}
+		}
+
+		public void SetRoadMode(int mode) {
+			roadMode = (OptionalToggle)mode;
 		}
 
 		public void SetWalledMode(int mode) {
