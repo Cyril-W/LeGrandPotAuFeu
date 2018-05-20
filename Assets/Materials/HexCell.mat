@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: HexCell
-  m_Shader: {fileID: 4800000, guid: a21eb2bb30f0f5e43be186673a13dd9d, type: 3}
+  m_Shader: {fileID: 4800000, guid: 3f800f2138c86e14ca090e109d358c97, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,7 +19,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 18700000, guid: 8d136aa82071f874c9c7d90570712752, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:

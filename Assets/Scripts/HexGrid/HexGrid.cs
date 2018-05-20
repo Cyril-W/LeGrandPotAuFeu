@@ -8,10 +8,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public HexCell cellPrefab;
 		public Text cellLabelPrefab;
 		public HexGridChunk chunkPrefab;
-
-		[Header("Cell Colors")]
-		public Color[] colors;
-
+		
 		[Header("Noise Texture")]
 		public Texture2D noiseSource;
 
@@ -29,7 +26,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 		void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
-			HexMetrics.colors = colors;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -57,7 +53,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 			if (!HexMetrics.noiseSource) {
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
-				HexMetrics.colors = colors;
 			}
 		}
 

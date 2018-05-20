@@ -79,11 +79,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 					HexMetrics.elevationStep;
 			}
 		}
-		public Color Color {
-			get {
-				return HexMetrics.colors[terrainTypeIndex];
-			}
-		}
 		public int TerrainTypeIndex {
 			get {
 				return terrainTypeIndex;

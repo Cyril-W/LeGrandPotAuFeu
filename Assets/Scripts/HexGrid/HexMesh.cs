@@ -5,10 +5,10 @@ using UnityEngine;
 namespace LeGrandPotAuFeu.HexGrid {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class HexMesh : MonoBehaviour {
-		public bool useCollider, useColors, useUVCoordinates;
+		public bool useCollider, useColors, useUVCoordinates, useTerrainTypes;
 
 		[NonSerialized]
-		List<Vector3> vertices;
+		List<Vector3> vertices, terrainTypes;
 		[NonSerialized]
 		List<Color> colors;
 		[NonSerialized]
@@ -35,6 +35,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 			if (useUVCoordinates) {
 				uvs = ListPool<Vector2>.Get();
 			}
+			if (useTerrainTypes) {
+				terrainTypes = ListPool<Vector3>.Get();
+			}
 			triangles = ListPool<int>.Get();
 		}
 
@@ -49,12 +52,29 @@ namespace LeGrandPotAuFeu.HexGrid {
 				hexMesh.SetUVs(0, uvs);
 				ListPool<Vector2>.Add(uvs);
 			}
+			if (useTerrainTypes) {
+				hexMesh.SetUVs(2, terrainTypes);
+				ListPool<Vector3>.Add(terrainTypes);
+			}
 			hexMesh.SetTriangles(triangles, 0);
 			ListPool<int>.Add(triangles);
 			hexMesh.RecalculateNormals();
 			if (useCollider) {
 				meshCollider.sharedMesh = hexMesh;
 			}
+		}
+
+		public void AddTriangleTerrainTypes(Vector3 types) {
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+		}
+
+		public void AddQuadTerrainTypes(Vector3 types) {
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
+			terrainTypes.Add(types);
 		}
 
 		public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector3 uv3) {
