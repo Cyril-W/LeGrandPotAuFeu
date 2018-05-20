@@ -40,6 +40,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public const float wallTowerThreshold = 1f; // don't want occasional tower
 
 		public static Texture2D noiseSource;
+		public static Color[] colors;
 
 		static HexHash[] hashGrid;
 

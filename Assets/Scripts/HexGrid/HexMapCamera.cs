@@ -16,11 +16,19 @@ namespace LeGrandPotAuFeu.HexGrid {
 		[Header("Drag'n'Drop")]
 		public HexGrid grid;
 
+		public static bool Locked {
+			set {
+				instance.enabled = !value;
+			}
+		}
+		static HexMapCamera instance;
+
 		Transform swivel, stick;
 		float zoom = 1f;
 		float rotationAngle;
 
 		void Awake() {
+			instance = this;
 			swivel = transform.GetChild(0);
 			stick = swivel.GetChild(0);
 		}
@@ -42,6 +50,10 @@ namespace LeGrandPotAuFeu.HexGrid {
 			if (xDelta != 0f || zDelta != 0f) {
 				AdjustPosition(xDelta, zDelta);
 			}
+		}
+
+		public static void ValidatePosition() {
+			instance.AdjustPosition(0f, 0f);
 		}
 
 		void AdjustZoom(float delta) {
@@ -75,10 +87,10 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		Vector3 ClampPosition(Vector3 position) {
-			float xMax = (grid.chunkCountX * HexMetrics.chunkSizeX - 0.5f) * (2f * HexMetrics.innerRadius);
+			float xMax = (grid.cellCountX * HexMetrics.chunkSizeX - 0.5f) * (2f * HexMetrics.innerRadius);
 			position.x = Mathf.Clamp(position.x, 0f, xMax);
 
-			float zMax = (grid.chunkCountZ * HexMetrics.chunkSizeZ - 1) * (1.5f * HexMetrics.outerRadius);
+			float zMax = (grid.cellCountZ * HexMetrics.chunkSizeZ - 1) * (1.5f * HexMetrics.outerRadius);
 			position.z = Mathf.Clamp(position.z, 0f, zMax);
 
 			return position;

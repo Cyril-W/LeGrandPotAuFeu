@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace LeGrandPotAuFeu.HexGrid {
 	public class HexCell : MonoBehaviour {
@@ -80,17 +81,21 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 		public Color Color {
 			get {
-				return color;
-			}
-			set {
-				if (color == value) {
-					return;
-				}
-				color = value;
-				Refresh();
+				return HexMetrics.colors[terrainTypeIndex];
 			}
 		}
-		Color color;
+		public int TerrainTypeIndex {
+			get {
+				return terrainTypeIndex;
+			}
+			set {
+				if (terrainTypeIndex != value) {
+					terrainTypeIndex = value;
+					Refresh();
+				}
+			}
+		}
+		int terrainTypeIndex;
 		public Vector3 Position {
 			get {
 				return transform.localPosition;
@@ -104,23 +109,13 @@ namespace LeGrandPotAuFeu.HexGrid {
 				if (elevation == value) {
 					return;
 				}
-
 				elevation = value;
-				Vector3 position = transform.localPosition;
-				position.y = value * HexMetrics.elevationStep;
-				position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;
-				transform.localPosition = position;
-
-				Vector3 uiPosition = uiRect.localPosition;
-				uiPosition.z = -position.y;
-				uiRect.localPosition = uiPosition;
-
+				RefreshPosition();
 				for (int i = 0; i < roads.Length; i++) {
 					if (roads[i] && GetElevationDifference((HexDirection)i) > 1) {
 						SetRoad(i, false);
 					}
 				}
-
 				Refresh();
 			}
 		}
@@ -210,9 +205,21 @@ namespace LeGrandPotAuFeu.HexGrid {
 			);
 		}
 
+		void RefreshPosition() {
+			Vector3 position = transform.localPosition;
+			position.y = elevation * HexMetrics.elevationStep;
+			position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;
+			transform.localPosition = position;
+
+			Vector3 uiPosition = uiRect.localPosition;
+			uiPosition.z = -position.y;
+			uiRect.localPosition = uiPosition;
+		}
+
 		void RefreshSelfOnly() {
 			chunk.Refresh();
 		}
+
 		void Refresh() {
 			if (chunk) {
 				chunk.Refresh();
@@ -222,6 +229,42 @@ namespace LeGrandPotAuFeu.HexGrid {
 						neighbor.chunk.Refresh();
 					}
 				}
+			}
+		}
+
+		public void Save(BinaryWriter writer) {
+			writer.Write((byte)terrainTypeIndex);
+			writer.Write((byte)elevation);
+			writer.Write((byte)waterLevel);
+			writer.Write((byte)urbanLevel);
+			writer.Write((byte)farmLevel);
+			writer.Write((byte)plantLevel);
+			writer.Write((byte)specialIndex);
+			writer.Write(walled);
+			// 0 if no road, 1 if road ... 6 bits, from right to left = from 0 to 5
+			int roadFlags = 0;
+			for (int i = 0; i < roads.Length; i++) {
+				if (roads[i]) {
+					roadFlags |= 1 << i;
+				}
+			}
+			writer.Write((byte)roadFlags);
+		}
+
+		public void Load(BinaryReader reader) {
+			terrainTypeIndex = reader.ReadByte();
+			elevation = reader.ReadByte();
+			RefreshPosition();
+			waterLevel = reader.ReadByte();
+			urbanLevel = reader.ReadByte();
+			farmLevel = reader.ReadByte();
+			plantLevel = reader.ReadByte();
+			specialIndex = reader.ReadByte();
+			walled = reader.ReadBoolean();
+			// see comment in above function Save()
+			int roadFlags = reader.ReadByte();
+			for (int i = 0; i < roads.Length; i++) {
+				roads[i] = (roadFlags & (1 << i)) != 0;
 			}
 		}
 	}

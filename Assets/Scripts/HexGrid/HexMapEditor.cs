@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace LeGrandPotAuFeu.HexGrid {
@@ -6,16 +7,13 @@ namespace LeGrandPotAuFeu.HexGrid {
 		Ignore, Yes, No
 	}
 	public class HexMapEditor : MonoBehaviour {
-		[Header("Color to pick from the UI")]
-		public Color[] colors;
-		[Header("Drag'n'Drop")]
 		public HexGrid hexGrid;
 
 		bool isDrag;
 		HexDirection dragDirection;
 		HexCell previousCell;
 
-		Color activeColor;
+		int activeTerrainTypeIndex = -1;
 		int activeElevation = 0;
 		int activeWaterLevel = 0;
 		int activeUrbanLevel = 0;
@@ -24,7 +22,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 		int activeSpecialIndex = 0;
 		int brushSize = 0;
 
-		bool applyColor = false;
 		bool applyElevation = false;
 		bool applyWaterLevel = false;
 		bool applyUrbanLevel = false;
@@ -92,8 +89,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		void EditCell(HexCell cell) {
 			if (cell) {
-				if (applyColor) {
-					cell.Color = activeColor;
+				if (activeTerrainTypeIndex >= 0) {
+					cell.TerrainTypeIndex = activeTerrainTypeIndex;
 				}
 				if (applyElevation) {
 					cell.Elevation = activeElevation;
@@ -139,11 +136,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 			walledMode = (OptionalToggle)mode;
 		}
 
-		public void SelectColor(int index) {
-			applyColor = index >= 0;
-			if (applyColor) {
-				activeColor = colors[index];
-			}
+		public void SetTerrainTypeIndex(int index) {
+			activeTerrainTypeIndex = index;
 		}
 
 		public void SetElevation(float elevation) {

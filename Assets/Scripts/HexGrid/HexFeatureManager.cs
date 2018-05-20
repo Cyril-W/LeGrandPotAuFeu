@@ -11,6 +11,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 	public class HexFeatureManager : MonoBehaviour {
 		[Header("From High to Low")]
 		public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
+		[Header("Drag'n'drop")]
 		public HexMesh walls;
 		public Transform wallTower;
 		public Transform[] special;
