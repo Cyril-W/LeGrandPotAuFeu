@@ -1,15 +1,17 @@
-﻿using System.Collections;
+﻿using LeGrandPotAuFeu.Unit;
+using LeGrandPotAuFeu.Utility;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Grid {
 	public class HexGrid : MonoBehaviour {
 		[Header("Prefabs")]
 		public HexCell cellPrefab;
 		public Text cellLabelPrefab;
 		public HexGridChunk chunkPrefab;
+		public HexUnit unitPrefab;
 
 		[Header("Path colors")]
 		public Color startColor = Color.blue;
@@ -26,6 +28,12 @@ namespace LeGrandPotAuFeu.HexGrid {
 		[Header("Seed for the hash")]
 		public int seed = 1234;
 
+		public bool HasPath {
+			get {
+				return currentPathExists;
+			}
+		}
+
 		HexCell[] cells;
 		HexGridChunk[] chunks;
 		int chunkCountX, chunkCountZ;
@@ -33,10 +41,12 @@ namespace LeGrandPotAuFeu.HexGrid {
 		int searchFrontierPhase;
 		HexCell currentPathFrom, currentPathTo;
 		bool currentPathExists;
+		List<HexUnit> units = new List<HexUnit>();
 
 		void Awake() {
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
+			HexUnit.unitPrefab = unitPrefab;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -47,6 +57,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 
 			ClearPath();
+			ClearUnits();
 			if (chunks != null) {
 				for (int i = 0; i < chunks.Length; i++) {
 					Destroy(chunks[i].gameObject);
@@ -65,6 +76,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 			if (!HexMetrics.noiseSource) {
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
+				HexUnit.unitPrefab = unitPrefab;
 			}
 		}
 
@@ -135,6 +147,14 @@ namespace LeGrandPotAuFeu.HexGrid {
 			chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
 		}
 
+		public HexCell GetCell(Ray ray) {
+			RaycastHit hit;
+			if (Physics.Raycast(ray, out hit)) {
+				return GetCell(hit.point);
+			}
+			return null;
+		}
+
 		public HexCell GetCell(Vector3 position) {
 			position = transform.InverseTransformPoint(position);
 			HexCoordinates coordinates = HexCoordinates.FromPosition(position);
@@ -167,10 +187,16 @@ namespace LeGrandPotAuFeu.HexGrid {
 			for (int i = 0; i < cells.Length; i++) {
 				cells[i].Save(writer);
 			}
+
+			writer.Write(units.Count);
+			for (int i = 0; i < units.Count; i++) {
+				units[i].Save(writer);
+			}
 		}
 
 		public void Load(BinaryReader reader, int header) {
 			ClearPath();
+			ClearUnits();
 			int x = 20, z = 15;
 			if (header >= 1) {
 				x = reader.ReadInt32();
@@ -186,6 +212,13 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 			for (int i = 0; i < chunks.Length; i++) {
 				chunks[i].Refresh();
+			}
+
+			if (header >= 2) {
+				int unitCount = reader.ReadInt32();
+				for (int i = 0; i < unitCount; i++) {
+					HexUnit.Load(reader, this);
+				}
 			}
 		}
 
@@ -225,7 +258,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 						continue;
 					}
 					HexEdgeType edgeType = current.GetEdgeType(neighbor);
-					if (edgeType == HexEdgeType.Cliff || neighbor.IsUnderwater || current.Walled != neighbor.Walled) {
+					if (edgeType == HexEdgeType.Cliff || neighbor.IsUnderwater || current.Walled != neighbor.Walled || neighbor.Unit) {
 						continue;
 					}
 
@@ -260,7 +293,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 			return false;
 		}
 
-		void ClearPath() {
+		public void ClearPath() {
 			if (currentPathExists) {
 				HexCell current = currentPathTo;
 				while (current != currentPathFrom) {
@@ -286,6 +319,25 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 			currentPathFrom.EnableHighlight(startColor);
 			currentPathTo.EnableHighlight(endColor);
+		}
+
+		void ClearUnits() {
+			for (int i = 0; i < units.Count; i++) {
+				units[i].Die();
+			}
+			units.Clear();
+		}
+
+		public void AddUnit(HexUnit unit, HexCell location, float orientation) {
+			units.Add(unit);
+			unit.transform.SetParent(transform, false);
+			unit.Location = location;
+			unit.Orientation = orientation;
+		}
+
+		public void RemoveUnit(HexUnit unit) {
+			units.Remove(unit);
+			unit.Die();
 		}
 	}
 }

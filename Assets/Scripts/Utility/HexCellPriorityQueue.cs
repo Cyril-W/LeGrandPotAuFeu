@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using LeGrandPotAuFeu.Grid;
+using System.Collections.Generic;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Utility {
 	public class HexCellPriorityQueue {
 		List<HexCell> list = new List<HexCell>();
 

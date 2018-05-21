@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using LeGrandPotAuFeu.Grid;
+using LeGrandPotAuFeu.Utility;
+using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.UI {
 	public class HexMapCamera : MonoBehaviour {
 		[Header("Stick Zoom Range")]
 		public float stickMinZoom = -250;

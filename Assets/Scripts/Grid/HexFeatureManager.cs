@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using LeGrandPotAuFeu.Utility;
+using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Grid {
 	[System.Serializable]
 	public struct HexFeatureCollection {
 		public Transform[] prefabs;

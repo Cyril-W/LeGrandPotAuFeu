@@ -1,4 +1,4 @@
-﻿namespace LeGrandPotAuFeu.HexGrid {
+﻿namespace LeGrandPotAuFeu.Utility {
 	public enum HexDirection {
 		NE, E, SE, SW, W, NW
 	}

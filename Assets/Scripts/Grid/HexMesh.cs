@@ -1,8 +1,9 @@
-﻿using System;
+﻿using LeGrandPotAuFeu.Utility;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Grid {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class HexMesh : MonoBehaviour {
 		public bool useCollider, useColors, useUVCoordinates, useTerrainTypes;

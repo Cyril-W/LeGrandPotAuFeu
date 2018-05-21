@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.UI {
 	public class SaveLoadItem : MonoBehaviour {
 		[HideInInspector]
 		public SaveLoadMenu menu;

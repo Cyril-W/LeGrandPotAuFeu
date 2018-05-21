@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Utility {
 	public static class ListPool<T> {
 		static Stack<List<T>> stack = new Stack<List<T>>();
 

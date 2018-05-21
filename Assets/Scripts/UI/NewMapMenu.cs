@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using LeGrandPotAuFeu.Grid;
+using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.UI {
 	public class NewMapMenu : MonoBehaviour {
 		public HexGrid hexGrid;
 

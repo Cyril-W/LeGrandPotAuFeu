@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using System.IO;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Utility {
 	[System.Serializable]
 	public struct HexCoordinates {
 		public int X { get; private set; }
@@ -59,6 +60,18 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		public string ToStringOnSeparateLines() {
 			return X.ToString() + "\n" + Y.ToString() + "\n" + Z.ToString();
+		}
+
+		public void Save(BinaryWriter writer) {
+			writer.Write(X);
+			writer.Write(Z);
+		}
+
+		public static HexCoordinates Load(BinaryReader reader) {
+			HexCoordinates c;
+			c.X = reader.ReadInt32();
+			c.Z = reader.ReadInt32();
+			return c;
 		}
 	}
 }

@@ -2,17 +2,17 @@
 using UnityEngine.UI;
 using System.IO;
 using System;
+using LeGrandPotAuFeu.Grid;
 
-namespace LeGrandPotAuFeu.HexGrid {
-	public class SaveLoadMenu : MonoBehaviour {
-		[Header("Current Map Version")]
-		public int version = 1;
-		[Header("Drag'n'drop")]
+namespace LeGrandPotAuFeu.UI {
+	public class SaveLoadMenu : MonoBehaviour { 
 		public HexGrid hexGrid;
 		public Text menuLabel, actionButtonLabel;
 		public InputField nameInput;
 		public RectTransform listContent;
 		public SaveLoadItem itemPrefab;
+
+		const int version = 2;
 
 		bool saveMode;
 

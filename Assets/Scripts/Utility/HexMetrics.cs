@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Utility {
 	public enum HexEdgeType {
 		Flat, Slope, Cliff
 	}

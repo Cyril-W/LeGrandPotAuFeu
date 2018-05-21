@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using LeGrandPotAuFeu.Grid;
+using LeGrandPotAuFeu.Unit;
+using LeGrandPotAuFeu.Utility;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.UI {
 	enum OptionalToggle {
 		Ignore, Yes, No
 	}
@@ -12,7 +14,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		bool isDrag;
 		HexDirection dragDirection;
-		HexCell previousCell, searchFromCell, searchToCell;
+		HexCell previousCell;
 
 		int activeTerrainTypeIndex = -1;
 		int activeElevation = 0;
@@ -29,7 +31,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 		bool applyFarmLevel = false;
 		bool applyPlantLevel = false;
 		bool applySpecialIndex = false;
-		bool editMode = true;
 
 		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
 
@@ -38,44 +39,37 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		void Update() {
-			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
-				HandleInput();
-			} else {
-				previousCell = null;
+			if (!EventSystem.current.IsPointerOverGameObject()) {
+				if (Input.GetMouseButton(0)) {
+					HandleInput();
+					return;
+				}
+				if (Input.GetKeyDown(KeyCode.U)) {
+					if (Input.GetKey(KeyCode.LeftShift)) {
+						DestroyUnit();
+					} else {
+						CreateUnit();
+					}
+					return;
+				}
 			}
+			previousCell = null;
+		}
+
+		HexCell GetCellUnderCursor() {			
+			return hexGrid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition)); ;
 		}
 
 		void HandleInput() {
-			Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit hit;
-			if (Physics.Raycast(inputRay, out hit)) {
-				HexCell currentCell = hexGrid.GetCell(hit.point);
+			HexCell currentCell = GetCellUnderCursor();
+			if (currentCell) {
 				if (previousCell && previousCell != currentCell) {
 					ValidateDrag(currentCell);
 				} else {
 					isDrag = false;
 				}
-				if (editMode) {
-					EditCells(currentCell);
-				} else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
-					if (searchFromCell != currentCell) {
-						if (searchFromCell) {
-							searchFromCell.DisableHighlight();
-						}
-						searchFromCell = currentCell;
-						searchFromCell.EnableHighlight(hexGrid.startColor);
-						if (searchToCell) {
-							hexGrid.FindPath(searchFromCell, searchToCell, 24);
-						}
-					}
-				} else if (searchFromCell && searchFromCell != currentCell) {
-					if (searchToCell != currentCell) {
-						searchToCell = currentCell;
-						hexGrid.FindPath(searchFromCell, searchToCell, 24);
-					}
-				}
+				EditCells(currentCell);
 				previousCell = currentCell;
-				isDrag = true;
 			} else {
 				previousCell = null;
 			}
@@ -152,6 +146,20 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 		}
 
+		void CreateUnit() {
+			HexCell cell = GetCellUnderCursor();
+			if (cell && !cell.Unit) {
+				hexGrid.AddUnit(Instantiate(HexUnit.unitPrefab), cell, Random.Range(0f, 360f));
+			}
+		}
+
+		void DestroyUnit() {
+			HexCell cell = GetCellUnderCursor();
+			if (cell && cell.Unit) {
+				hexGrid.RemoveUnit(cell.Unit);
+			}
+		}
+
 		public void SetRoadMode(int mode) {
 			roadMode = (OptionalToggle)mode;
 		}
@@ -225,8 +233,8 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		public void SetEditMode(bool toggle) {
-			editMode = toggle;
-			hexGrid.ShowUI(!toggle);
+			enabled = toggle;
+			gameObject.SetActive(toggle);
 		}
 	}
 }

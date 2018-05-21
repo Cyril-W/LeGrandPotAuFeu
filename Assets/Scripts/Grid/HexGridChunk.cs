@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using LeGrandPotAuFeu.Utility;
+using UnityEngine;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Grid {
 	public class HexGridChunk : MonoBehaviour {
 		public HexMesh terrain, roads, water, waterShore;
 		public HexFeatureManager features;

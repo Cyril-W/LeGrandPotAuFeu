@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using LeGrandPotAuFeu.Unit;
+using LeGrandPotAuFeu.Utility;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LeGrandPotAuFeu.HexGrid {
+namespace LeGrandPotAuFeu.Grid {
 	public class HexCell : MonoBehaviour {
 		public HexCoordinates coordinates;
 		public RectTransform uiRect;
@@ -162,6 +164,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 		}
 		public int SearchPhase { get; set; }
+		public HexUnit Unit { get; set; }
 
 		[SerializeField] HexCell[] neighbors;
 		[SerializeField] bool[] roads;
@@ -233,6 +236,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 
 		void RefreshSelfOnly() {
 			chunk.Refresh();
+			if (Unit) {
+				Unit.ValidateLocation();
+			}
 		}
 
 		void Refresh() {
@@ -243,6 +249,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 					if (neighbor != null && neighbor.chunk != chunk) {
 						neighbor.chunk.Refresh();
 					}
+				}
+				if (Unit) {
+					Unit.ValidateLocation();
 				}
 			}
 		}
