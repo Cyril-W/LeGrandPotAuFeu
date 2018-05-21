@@ -12,9 +12,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 		public HexGridChunk chunkPrefab;
 
 		[Header("Path colors")]
-		public Color startCell = Color.blue;
-		public Color pathCell = Color.gray;
-		public Color endCell = Color.red;
+		public Color startColor = Color.blue;
+		public Color pathColor = Color.gray;
+		public Color endColor = Color.red;
 
 		[Header("Noise Texture")]
 		public Texture2D noiseSource;
@@ -30,6 +30,9 @@ namespace LeGrandPotAuFeu.HexGrid {
 		HexGridChunk[] chunks;
 		int chunkCountX, chunkCountZ;
 		HexCellPriorityQueue searchFrontier;
+		int searchFrontierPhase;
+		HexCell currentPathFrom, currentPathTo;
+		bool currentPathExists;
 
 		void Awake() {
 			HexMetrics.noiseSource = noiseSource;
@@ -43,6 +46,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 				return false;
 			}
 
+			ClearPath();
 			if (chunks != null) {
 				for (int i = 0; i < chunks.Length; i++) {
 					Destroy(chunks[i].gameObject);
@@ -166,7 +170,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		public void Load(BinaryReader reader, int header) {
-			StopAllCoroutines();
+			ClearPath();
 			int x = 20, z = 15;
 			if (header >= 1) {
 				x = reader.ReadInt32();
@@ -185,61 +189,62 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 		}
 
-		public void FindPath(HexCell fromCell, HexCell toCell) {
-			StopAllCoroutines();
-			StartCoroutine(Search(fromCell, toCell));
+		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
+			ClearPath();
+			currentPathFrom = fromCell;
+			currentPathTo = toCell;
+			currentPathExists = Search(fromCell, toCell, speed);
+			if (currentPathExists) {
+				ShowPath(speed);
+			}
 		}
 
-		IEnumerator Search(HexCell fromCell, HexCell toCell) {
+		bool Search(HexCell fromCell, HexCell toCell, int speed) {
+			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
 			} else {
 				searchFrontier.Clear();
 			}
 
-			for (int i = 0; i < cells.Length; i++) {
-				cells[i].Distance = int.MaxValue;
-				cells[i].DisableHighlight();
-			}
-			fromCell.EnableHighlight(startCell);
-			toCell.EnableHighlight(endCell);
-
-			WaitForSeconds delay = new WaitForSeconds(1 / 60f);
+			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
 			while (searchFrontier.Count > 0) {
-				yield return delay;
 				HexCell current = searchFrontier.Dequeue();
+				current.SearchPhase += 1;
 
-				if (current == toCell) { // arrived
-					current = current.PathFrom;
-					while (current != fromCell) {
-						current.EnableHighlight(pathCell);
-						current = current.PathFrom;
-					}
-					break;
+				if (current == toCell) {
+					return true;
 				}
 
+				int currentTurn = current.Distance / speed;
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
-					if (neighbor == null) {
+					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
-
 					HexEdgeType edgeType = current.GetEdgeType(neighbor);
-					if (neighbor.IsUnderwater || edgeType == HexEdgeType.Cliff || current.Walled != neighbor.Walled) {
+					if (edgeType == HexEdgeType.Cliff || neighbor.IsUnderwater || current.Walled != neighbor.Walled) {
 						continue;
 					}
 
-					int distance = current.Distance;
+					int moveCost;
 					if (current.HasRoadThroughEdge(d)) {
-						distance += 1;
+						moveCost = 1;
 					} else {
-						distance += edgeType == HexEdgeType.Flat ? 5 : 10;
-						distance += neighbor.UrbanLevel + neighbor.FarmLevel + neighbor.PlantLevel;
+						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
+						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel + neighbor.PlantLevel;
 					}
 
-					if (neighbor.Distance == int.MaxValue) { // no distance found
+					int distance = current.Distance + moveCost;
+					int turn = distance / speed;
+					if (turn > currentTurn) {
+						distance = turn * speed + moveCost;
+					}
+
+					if (neighbor.SearchPhase < searchFrontierPhase) { // no distance found
+						neighbor.SearchPhase = searchFrontierPhase;
 						neighbor.Distance = distance;
 						neighbor.PathFrom = current;
 						neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
@@ -251,7 +256,36 @@ namespace LeGrandPotAuFeu.HexGrid {
 						searchFrontier.Change(neighbor, oldPriority);
 					}
 				}
-			}			
+			}
+			return false;
+		}
+
+		void ClearPath() {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {
+					current.SetLabel(null);
+					current.DisableHighlight();
+					current = current.PathFrom;
+				}
+				current.DisableHighlight();
+				currentPathExists = false;
+			}
+			currentPathFrom = currentPathTo = null;
+		}
+
+		void ShowPath(int speed) {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {
+					int turn = current.Distance / speed;
+					current.SetLabel(turn.ToString());
+					current.EnableHighlight(pathColor);
+					current = current.PathFrom;
+				}
+			}
+			currentPathFrom.EnableHighlight(startColor);
+			currentPathTo.EnableHighlight(endColor);
 		}
 	}
 }

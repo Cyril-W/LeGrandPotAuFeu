@@ -150,7 +150,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 			}
 			set {
 				distance = value;
-				UpdateDistanceLabel();
 			}
 		}
 		int distance;
@@ -162,13 +161,14 @@ namespace LeGrandPotAuFeu.HexGrid {
 				return distance + SearchHeuristic;
 			}
 		}
+		public int SearchPhase { get; set; }
 
 		[SerializeField] HexCell[] neighbors;
 		[SerializeField] bool[] roads;
 
-		void UpdateDistanceLabel() {
+		public void SetLabel(string text) {
 			Text label = uiRect.GetComponent<Text>();
-			label.text = distance == int.MaxValue ? "" : distance.ToString();
+			label.text = text;
 		}
 
 		public bool HasRoadThroughEdge(HexDirection direction) {
