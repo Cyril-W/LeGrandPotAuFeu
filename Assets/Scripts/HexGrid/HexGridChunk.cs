@@ -16,7 +16,6 @@ namespace LeGrandPotAuFeu.HexGrid {
 			gridCanvas = GetComponentInChildren<Canvas>();
 
 			cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
-			ShowUI(false);
 		}
 
 		void LateUpdate() {

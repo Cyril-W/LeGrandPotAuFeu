@@ -6,9 +6,9 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: HexCell
+  m_Name: Terrain
   m_Shader: {fileID: 4800000, guid: 3f800f2138c86e14ca090e109d358c97, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: GRID_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -18,6 +18,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _GridTex:
+        m_Texture: {fileID: 2800000, guid: 70a99355bb210cd47bdab8282be5c480, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 18700000, guid: 8d136aa82071f874c9c7d90570712752, type: 2}
         m_Scale: {x: 1, y: 1}

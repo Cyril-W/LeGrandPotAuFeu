@@ -8,10 +8,11 @@ namespace LeGrandPotAuFeu.HexGrid {
 	}
 	public class HexMapEditor : MonoBehaviour {
 		public HexGrid hexGrid;
+		public Material terrainMaterial;
 
 		bool isDrag;
 		HexDirection dragDirection;
-		HexCell previousCell;
+		HexCell previousCell, searchFromCell, searchToCell;
 
 		int activeTerrainTypeIndex = -1;
 		int activeElevation = 0;
@@ -28,8 +29,13 @@ namespace LeGrandPotAuFeu.HexGrid {
 		bool applyFarmLevel = false;
 		bool applyPlantLevel = false;
 		bool applySpecialIndex = false;
+		bool editMode = true;
 
 		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
+
+		void Awake() {
+			terrainMaterial.DisableKeyword("GRID_ON");
+		}
 
 		void Update() {
 			if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -49,7 +55,21 @@ namespace LeGrandPotAuFeu.HexGrid {
 				} else {
 					isDrag = false;
 				}
-				EditCells(currentCell);
+				if (editMode) {
+					EditCells(currentCell);
+				} else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
+					if (searchFromCell) {
+						searchFromCell.DisableHighlight();
+					}
+					searchFromCell = currentCell;
+					searchFromCell.EnableHighlight(hexGrid.startCell);
+					if (searchToCell) {
+						hexGrid.FindPath(searchFromCell, searchToCell);
+					}
+				} else if (searchFromCell && searchFromCell != currentCell) {
+					searchToCell = currentCell;
+					hexGrid.FindPath(searchFromCell, searchToCell);
+				}
 				previousCell = currentCell;
 				isDrag = true;
 			} else {
@@ -192,8 +212,17 @@ namespace LeGrandPotAuFeu.HexGrid {
 			brushSize = (int)size;
 		}
 
-		public void ShowUI(bool visible) {
-			hexGrid.ShowUI(visible);
+		public void ShowGrid(bool visible) {
+			if (visible) {
+				terrainMaterial.EnableKeyword("GRID_ON");
+			} else {
+				terrainMaterial.DisableKeyword("GRID_ON");
+			}
+		}
+
+		public void SetEditMode(bool toggle) {
+			editMode = toggle;
+			hexGrid.ShowUI(!toggle);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LeGrandPotAuFeu.HexGrid {
 	public class HexCell : MonoBehaviour {
@@ -143,11 +144,32 @@ namespace LeGrandPotAuFeu.HexGrid {
 				return specialIndex > 0;
 			}
 		}
+		public int Distance {
+			get {
+				return distance;
+			}
+			set {
+				distance = value;
+				UpdateDistanceLabel();
+			}
+		}
+		int distance;
+		public HexCell PathFrom { get; set; }
+		public HexCell NextWithSamePriority { get; set; }
+		public int SearchHeuristic { get; set; }
+		public int SearchPriority {
+			get {
+				return distance + SearchHeuristic;
+			}
+		}
 
-		[SerializeField]
-		HexCell[] neighbors;
-		[SerializeField]
-		bool[] roads;
+		[SerializeField] HexCell[] neighbors;
+		[SerializeField] bool[] roads;
+
+		void UpdateDistanceLabel() {
+			Text label = uiRect.GetComponent<Text>();
+			label.text = distance == int.MaxValue ? "" : distance.ToString();
+		}
 
 		public bool HasRoadThroughEdge(HexDirection direction) {
 			return roads[(int)direction];
@@ -195,9 +217,7 @@ namespace LeGrandPotAuFeu.HexGrid {
 		}
 
 		public HexEdgeType GetEdgeType(HexCell otherCell) {
-			return HexMetrics.GetEdgeType(
-					elevation, otherCell.elevation
-			);
+			return HexMetrics.GetEdgeType(elevation, otherCell.elevation);
 		}
 
 		void RefreshPosition() {
@@ -225,6 +245,17 @@ namespace LeGrandPotAuFeu.HexGrid {
 					}
 				}
 			}
+		}
+
+		public void DisableHighlight() {
+			Image highlight = uiRect.GetComponentInChildren<Image>();
+			highlight.enabled = false;
+		}
+
+		public void EnableHighlight(Color color) {
+			Image highlight = uiRect.GetComponentInChildren<Image>();
+			highlight.color = color;
+			highlight.enabled = true;
 		}
 
 		public void Save(BinaryWriter writer) {
