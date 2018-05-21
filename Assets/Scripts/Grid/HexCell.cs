@@ -9,79 +9,23 @@ namespace LeGrandPotAuFeu.Grid {
 		public HexCoordinates coordinates;
 		public RectTransform uiRect;
 		public HexGridChunk chunk;
-		public int UrbanLevel {
+
+		public Vector3 Position {
 			get {
-				return urbanLevel;
+				return transform.localPosition;
+			}
+		}
+		public int Distance {
+			get {
+				return distance;
 			}
 			set {
-				if (urbanLevel != value) {
-					urbanLevel = value;
-					RefreshSelfOnly();
-				}
+				distance = value;
 			}
 		}
-		int urbanLevel;
-		public int FarmLevel {
-			get {
-				return farmLevel;
-			}
-			set {
-				if (farmLevel != value) {
-					farmLevel = value;
-					RefreshSelfOnly();
-				}
-			}
-		}
-		int farmLevel;
-		public int PlantLevel {
-			get {
-				return plantLevel;
-			}
-			set {
-				if (plantLevel != value) {
-					plantLevel = value;
-					RefreshSelfOnly();
-				}
-			}
-		}
-		int plantLevel;
-		public bool Walled {
-			get {
-				return walled;
-			}
-			set {
-				if (walled != value) {
-					walled = value;
-					Refresh();
-				}
-			}
-		}
-		bool walled;
-		public int WaterLevel {
-			get {
-				return waterLevel;
-			}
-			set {
-				if (waterLevel == value) {
-					return;
-				}
-				waterLevel = value;
-				Refresh();
-			}
-		}
-		int waterLevel;
-		public bool IsUnderwater {
-			get {
-				return waterLevel > elevation;
-			}
-		}
-		public float WaterSurfaceY {
-			get {
-				return
-					(waterLevel + HexMetrics.waterElevationOffset) *
-					HexMetrics.elevationStep;
-			}
-		}
+		[SerializeField] HexCell[] neighbors;
+
+		public int Index { get; set; }
 		public int TerrainTypeIndex {
 			get {
 				return terrainTypeIndex;
@@ -89,14 +33,8 @@ namespace LeGrandPotAuFeu.Grid {
 			set {
 				if (terrainTypeIndex != value) {
 					terrainTypeIndex = value;
-					Refresh();
+					ShaderData.RefreshTerrain(this);
 				}
-			}
-		}
-		int terrainTypeIndex;
-		public Vector3 Position {
-			get {
-				return transform.localPosition;
 			}
 		}
 		public int Elevation {
@@ -117,15 +55,49 @@ namespace LeGrandPotAuFeu.Grid {
 				Refresh();
 			}
 		}
-		int elevation = int.MinValue;
-		public bool HasRoads {
+		public int WaterLevel {
 			get {
-				for (int i = 0; i < roads.Length; i++) {
-					if (roads[i]) {
-						return true;
-					}
+				return waterLevel;
+			}
+			set {
+				if (waterLevel == value) {
+					return;
 				}
-				return false;
+				waterLevel = value;
+				Refresh();
+			}
+		}
+		public int UrbanLevel {
+			get {
+				return urbanLevel;
+			}
+			set {
+				if (urbanLevel != value) {
+					urbanLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+		public int FarmLevel {
+			get {
+				return farmLevel;
+			}
+			set {
+				if (farmLevel != value) {
+					farmLevel = value;
+					RefreshSelfOnly();
+				}
+			}
+		}
+		public int PlantLevel {
+			get {
+				return plantLevel;
+			}
+			set {
+				if (plantLevel != value) {
+					plantLevel = value;
+					RefreshSelfOnly();
+				}
 			}
 		}
 		public int SpecialIndex {
@@ -140,21 +112,50 @@ namespace LeGrandPotAuFeu.Grid {
 				}
 			}
 		}
-		int specialIndex;
+		public float WaterSurfaceY {
+			get {
+				return
+					(waterLevel + HexMetrics.waterElevationOffset) *
+					HexMetrics.elevationStep;
+			}
+		}
+		public bool IsUnderwater {
+			get {
+				return waterLevel > elevation;
+			}
+		}
+		public bool Walled {
+			get {
+				return walled;
+			}
+			set {
+				if (walled != value) {
+					walled = value;
+					Refresh();
+				}
+			}
+		}
+		public bool HasRoads {
+			get {
+				for (int i = 0; i < roads.Length; i++) {
+					if (roads[i]) {
+						return true;
+					}
+				}
+				return false;
+			}
+		}
 		public bool IsSpecial {
 			get {
 				return specialIndex > 0;
 			}
 		}
-		public int Distance {
+		public bool IsVisible {
 			get {
-				return distance;
-			}
-			set {
-				distance = value;
+				return visibility > 0;
 			}
 		}
-		int distance;
+
 		public HexCell PathFrom { get; set; }
 		public HexCell NextWithSamePriority { get; set; }
 		public int SearchHeuristic { get; set; }
@@ -164,39 +165,25 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 		}
 		public int SearchPhase { get; set; }
-		public HexUnit Unit { get; set; }
 
-		[SerializeField] HexCell[] neighbors;
+		public HexUnit Unit { get; set; }
+		public HexCellShaderData ShaderData { get; set; }
+
+		int distance;
+		int terrainTypeIndex;
+		int elevation = int.MinValue;
+		int waterLevel;
+		int urbanLevel;
+		int farmLevel;
+		int plantLevel;
+		int specialIndex;
+		int visibility;
+		bool walled;
 		[SerializeField] bool[] roads;
 
 		public void SetLabel(string text) {
 			Text label = uiRect.GetComponent<Text>();
 			label.text = text;
-		}
-
-		public bool HasRoadThroughEdge(HexDirection direction) {
-			return roads[(int)direction];
-		}
-
-		public void AddRoad(HexDirection direction) {
-			if (!roads[(int)direction] && !IsSpecial && !GetNeighbor(direction).IsSpecial && GetElevationDifference(direction) <= 1) {
-				SetRoad((int)direction, true);
-			}
-		}
-
-		public void RemoveRoads() {
-			for (int i = 0; i < neighbors.Length; i++) {
-				if (roads[i]) {
-					SetRoad(i, false);
-				}
-			}
-		}
-
-		void SetRoad(int index, bool state) {
-			roads[index] = state;
-			neighbors[index].roads[(int)((HexDirection)index).Opposite()] = state;
-			neighbors[index].RefreshSelfOnly();
-			RefreshSelfOnly();
 		}
 
 		public int GetElevationDifference(HexDirection direction) {
@@ -223,21 +210,28 @@ namespace LeGrandPotAuFeu.Grid {
 			return HexMetrics.GetEdgeType(elevation, otherCell.elevation);
 		}
 
-		void RefreshPosition() {
-			Vector3 position = transform.localPosition;
-			position.y = elevation * HexMetrics.elevationStep;
-			position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;
-			transform.localPosition = position;
-
-			Vector3 uiPosition = uiRect.localPosition;
-			uiPosition.z = -position.y;
-			uiRect.localPosition = uiPosition;
+		void SetRoad(int index, bool state) {
+			roads[index] = state;
+			neighbors[index].roads[(int)((HexDirection)index).Opposite()] = state;
+			neighbors[index].RefreshSelfOnly();
+			RefreshSelfOnly();
 		}
 
-		void RefreshSelfOnly() {
-			chunk.Refresh();
-			if (Unit) {
-				Unit.ValidateLocation();
+		public bool HasRoadThroughEdge(HexDirection direction) {
+			return roads[(int)direction];
+		}
+
+		public void AddRoad(HexDirection direction) {
+			if (!roads[(int)direction] && !IsSpecial && !GetNeighbor(direction).IsSpecial && GetElevationDifference(direction) <= 1) {
+				SetRoad((int)direction, true);
+			}
+		}
+
+		public void RemoveRoads() {
+			for (int i = 0; i < neighbors.Length; i++) {
+				if (roads[i]) {
+					SetRoad(i, false);
+				}
 			}
 		}
 
@@ -256,15 +250,47 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 		}
 
-		public void DisableHighlight() {
-			Image highlight = uiRect.GetComponentInChildren<Image>();
-			highlight.enabled = false;
+		void RefreshSelfOnly() {
+			chunk.Refresh();
+			if (Unit) {
+				Unit.ValidateLocation();
+			}
+		}
+
+		void RefreshPosition() {
+			Vector3 position = transform.localPosition;
+			position.y = elevation * HexMetrics.elevationStep;
+			position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;
+			transform.localPosition = position;
+
+			Vector3 uiPosition = uiRect.localPosition;
+			uiPosition.z = -position.y;
+			uiRect.localPosition = uiPosition;
+		}
+
+		public void IncreaseVisibility() {
+			visibility += 1;
+			if (visibility == 1) {
+				ShaderData.RefreshVisibility(this);
+			}
+		}
+
+		public void DecreaseVisibility() {
+			visibility -= 1;
+			if (visibility == 0) {
+				ShaderData.RefreshVisibility(this);
+			}
 		}
 
 		public void EnableHighlight(Color color) {
 			Image highlight = uiRect.GetComponentInChildren<Image>();
 			highlight.color = color;
 			highlight.enabled = true;
+		}
+
+		public void DisableHighlight() {
+			Image highlight = uiRect.GetComponentInChildren<Image>();
+			highlight.enabled = false;
 		}
 
 		public void Save(BinaryWriter writer) {
@@ -288,6 +314,7 @@ namespace LeGrandPotAuFeu.Grid {
 
 		public void Load(BinaryReader reader) {
 			terrainTypeIndex = reader.ReadByte();
+			ShaderData.RefreshTerrain(this);
 			elevation = reader.ReadByte();
 			RefreshPosition();
 			waterLevel = reader.ReadByte();
