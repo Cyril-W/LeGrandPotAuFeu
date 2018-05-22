@@ -209,7 +209,7 @@ namespace LeGrandPotAuFeu.Grid {
 				}
 			}
 			for (int i = 0; i < cells.Length; i++) {
-				cells[i].Load(reader);
+				cells[i].Load(reader, header);
 			}
 			for (int i = 0; i < chunks.Length; i++) {
 				chunks[i].Refresh();
@@ -223,17 +223,18 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 		}
 
-		public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
+		public void FindPath(HexCell fromCell, HexCell toCell, HexUnit unit) {
 			ClearPath();
 			currentPathFrom = fromCell;
 			currentPathTo = toCell;
-			currentPathExists = Search(fromCell, toCell, speed);
+			currentPathExists = Search(fromCell, toCell, unit);
 			if (currentPathExists) {
-				ShowPath(speed);
+				ShowPath(unit.Speed);
 			}
 		}
 
-		bool Search(HexCell fromCell, HexCell toCell, int speed) {
+		bool Search(HexCell fromCell, HexCell toCell, HexUnit unit) {
+			int speed = unit.Speed;
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
@@ -258,17 +259,12 @@ namespace LeGrandPotAuFeu.Grid {
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
-					HexEdgeType edgeType = current.GetEdgeType(neighbor);
-					if (edgeType == HexEdgeType.Cliff || neighbor.IsUnderwater || current.Walled != neighbor.Walled || neighbor.Unit) {
+					if (!unit.IsValidDestination(neighbor)) {
 						continue;
 					}
-
-					int moveCost;
-					if (current.HasRoadThroughEdge(d)) {
-						moveCost = 1;
-					} else {
-						moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
-						moveCost += neighbor.UrbanLevel + neighbor.FarmLevel + neighbor.PlantLevel;
+					int moveCost = unit.GetMoveCost(current, neighbor, d);
+					if (moveCost < 0) {
+						continue;
 					}
 
 					int distance = current.Distance + moveCost;

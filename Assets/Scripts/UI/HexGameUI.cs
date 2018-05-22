@@ -10,6 +10,10 @@ namespace LeGrandPotAuFeu.UI {
 		HexCell currentCell;
 		HexUnit selectedUnit;
 
+		void Awake() {
+			Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+		}
+
 		void Update() {
 			if (!EventSystem.current.IsPointerOverGameObject()) {
 				if (Input.GetMouseButtonDown(0)) {
@@ -37,6 +41,11 @@ namespace LeGrandPotAuFeu.UI {
 			enabled = !toggle;
 			grid.ShowUI(!toggle);
 			grid.ClearPath();
+			if (toggle) {
+				Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+			} else {
+				Shader.DisableKeyword("HEX_MAP_EDIT_MODE");
+			}
 		}
 
 		void DoSelection() {
@@ -50,7 +59,7 @@ namespace LeGrandPotAuFeu.UI {
 		void DoPathfinding() {
 			if (UpdateCurrentCell()) {
 				if (currentCell && selectedUnit.IsValidDestination(currentCell)) {
-					grid.FindPath(selectedUnit.Location, currentCell, 24);
+					grid.FindPath(selectedUnit.Location, currentCell, selectedUnit);
 				} else {
 					grid.ClearPath();
 				}

@@ -12,7 +12,7 @@ namespace LeGrandPotAuFeu.UI {
 		public RectTransform listContent;
 		public SaveLoadItem itemPrefab;
 
-		const int version = 2;
+		const int version = 3;
 
 		bool saveMode;
 
