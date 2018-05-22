@@ -152,6 +152,14 @@ namespace LeGrandPotAuFeu.Grid {
 			chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
 		}
 
+		public HexCell GetCell(int xOffset, int zOffset) {
+			return cells[xOffset + zOffset * cellCountX];
+		}
+
+		public HexCell GetCell(int cellIndex) {
+			return cells[cellIndex];
+		}
+
 		public HexCell GetCell(Ray ray) {
 			RaycastHit hit;
 			if (Physics.Raycast(ray, out hit)) {
