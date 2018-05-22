@@ -45,6 +45,7 @@ namespace LeGrandPotAuFeu.Grid {
 			HexMetrics.InitializeHashGrid(seed);
 			HexUnit.unitPrefab = unitPrefab;
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
+			cellShaderData.Grid = this;
 			CreateMap(cellCountX, cellCountZ);
 		}
 
@@ -53,6 +54,7 @@ namespace LeGrandPotAuFeu.Grid {
 				HexMetrics.noiseSource = noiseSource;
 				HexMetrics.InitializeHashGrid(seed);
 				HexUnit.unitPrefab = unitPrefab;
+				ResetVisibility();
 			}
 		}
 
@@ -110,6 +112,8 @@ namespace LeGrandPotAuFeu.Grid {
 			cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 			cell.Index = i;
 			cell.ShaderData = cellShaderData;
+
+			cell.Explorable =	x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
 
 			if (x > 0) {
 				cell.SetNeighbor(HexDirection.W, cells[i - 1]);
@@ -208,6 +212,10 @@ namespace LeGrandPotAuFeu.Grid {
 					return;
 				}
 			}
+
+			bool originalImmediateMode = cellShaderData.ImmediateMode;
+			cellShaderData.ImmediateMode = true;
+
 			for (int i = 0; i < cells.Length; i++) {
 				cells[i].Load(reader, header);
 			}
@@ -221,6 +229,8 @@ namespace LeGrandPotAuFeu.Grid {
 					HexUnit.Load(reader, this);
 				}
 			}
+
+			cellShaderData.ImmediateMode = originalImmediateMode;
 		}
 
 		public void FindPath(HexCell fromCell, HexCell toCell, HexUnit unit) {
@@ -300,9 +310,11 @@ namespace LeGrandPotAuFeu.Grid {
 				searchFrontier.Clear();
 			}
 
+			range += fromCell.ViewElevation;
 			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
+			HexCoordinates fromCoordinates = fromCell.coordinates;
 			while (searchFrontier.Count > 0) {
 				HexCell current = searchFrontier.Dequeue();
 				current.SearchPhase += 1;
@@ -310,12 +322,12 @@ namespace LeGrandPotAuFeu.Grid {
 
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
-					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
+					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase || !neighbor.Explorable) {
 						continue;
 					}				
 
 					int distance = current.Distance + 1;
-					if (distance > range) {
+					if (distance + neighbor.ViewElevation > range || distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
 						continue;
 					}
 
@@ -409,6 +421,16 @@ namespace LeGrandPotAuFeu.Grid {
 		public void RemoveUnit(HexUnit unit) {
 			units.Remove(unit);
 			unit.Die();
+		}
+
+		public void ResetVisibility() {
+			for (int i = 0; i < cells.Length; i++) {
+				cells[i].ResetVisibility();
+			}
+			for (int i = 0; i < units.Count; i++) {
+				HexUnit unit = units[i];
+				IncreaseVisibility(unit.Location, unit.VisionRange);
+			}
 		}
 	}
 }

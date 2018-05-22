@@ -16,6 +16,11 @@ namespace LeGrandPotAuFeu.Unit {
 				return 24;
 			}
 		}
+		public int VisionRange {
+			get {
+				return 3;
+			}
+		}
 		public HexGrid Grid { get; set; }
 		public HexCell Location {
 			get {

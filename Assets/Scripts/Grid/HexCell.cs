@@ -45,7 +45,11 @@ namespace LeGrandPotAuFeu.Grid {
 				if (elevation == value) {
 					return;
 				}
+				int originalViewElevation = ViewElevation;
 				elevation = value;
+				if (ViewElevation != originalViewElevation) {
+					ShaderData.ViewElevationChanged();
+				}
 				RefreshPosition();
 				for (int i = 0; i < roads.Length; i++) {
 					if (roads[i] && GetElevationDifference((HexDirection)i) > 1) {
@@ -63,7 +67,11 @@ namespace LeGrandPotAuFeu.Grid {
 				if (waterLevel == value) {
 					return;
 				}
+				int originalViewElevation = ViewElevation;
 				waterLevel = value;
+				if (ViewElevation != originalViewElevation) {
+					ShaderData.ViewElevationChanged();
+				}
 				Refresh();
 			}
 		}
@@ -112,6 +120,11 @@ namespace LeGrandPotAuFeu.Grid {
 				}
 			}
 		}
+		public int ViewElevation {
+			get {
+				return elevation >= waterLevel ? elevation : waterLevel;
+			}
+		}
 		public float WaterSurfaceY {
 			get {
 				return
@@ -152,10 +165,18 @@ namespace LeGrandPotAuFeu.Grid {
 		}
 		public bool IsVisible {
 			get {
-				return visibility > 0;
+				return visibility > 0 && Explorable;
 			}
 		}
-		public bool IsExplored { get; private set; }
+		public bool IsExplored {
+			get {
+				return explored && Explorable;
+			}
+			private set {
+				explored = value;
+			}
+		}
+		public bool Explorable { get; set; }
 
 		public HexCell PathFrom { get; set; }
 		public HexCell NextWithSamePriority { get; set; }
@@ -180,6 +201,7 @@ namespace LeGrandPotAuFeu.Grid {
 		int specialIndex;
 		int visibility;
 		bool walled;
+		bool explored;
 		[SerializeField] bool[] roads;
 
 		public void SetLabel(string text) {
@@ -333,6 +355,13 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 			IsExplored = header >= 3 ? reader.ReadBoolean() : false;
 			ShaderData.RefreshVisibility(this);
+		}
+
+		public void ResetVisibility() {
+			if (visibility > 0) {
+				visibility = 0;
+				ShaderData.RefreshVisibility(this);
+			}
 		}
 	}
 }
