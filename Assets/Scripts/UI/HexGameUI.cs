@@ -51,7 +51,7 @@ namespace LeGrandPotAuFeu.UI {
 		void DoSelection() {
 			grid.ClearPath();
 			UpdateCurrentCell();
-			if (currentCell) {
+			if (currentCell && currentCell.Unit is HexPlayer) {
 				selectedUnit = currentCell.Unit;
 			}
 		}

@@ -24,6 +24,7 @@ namespace LeGrandPotAuFeu.UI {
 		int activePlantLevel = 0;
 		int activeSpecialIndex = 0;
 		int brushSize = 0;
+		int enemyType = 0;
 
 		bool applyElevation = false;
 		bool applyWaterLevel = false;
@@ -35,7 +36,7 @@ namespace LeGrandPotAuFeu.UI {
 		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
 
 		void Awake() {
-			terrainMaterial.DisableKeyword("GRID_ON");
+			terrainMaterial.EnableKeyword("GRID_ON");
 		}
 
 		void Update() {
@@ -44,12 +45,14 @@ namespace LeGrandPotAuFeu.UI {
 					HandleInput();
 					return;
 				}
-				if (Input.GetKeyDown(KeyCode.U)) {
-					if (Input.GetKey(KeyCode.LeftShift)) {
-						DestroyUnit();
-					} else {
-						CreateUnit();
-					}
+				if (Input.GetKey(KeyCode.LeftShift)) {
+					DestroyUnit();
+					return;
+				} else if (Input.GetKeyDown(KeyCode.U)) {
+					CreateUnit(false);
+					return;
+				} else if (Input.GetKeyDown(KeyCode.P)) {
+					CreateUnit(true);
 					return;
 				}
 			}
@@ -146,10 +149,10 @@ namespace LeGrandPotAuFeu.UI {
 			}
 		}
 
-		void CreateUnit() {
+		void CreateUnit(bool isPlayer) {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit && cell.Explorable) {
-				hexGrid.AddUnit(Instantiate(HexUnit.unitPrefab), cell, Random.Range(0f, 360f));
+				hexGrid.AddUnit(cell, Random.Range(0f, 360f), (isPlayer ? -1 : enemyType));
 			}
 		}
 
@@ -222,6 +225,10 @@ namespace LeGrandPotAuFeu.UI {
 
 		public void SetBrushSize(float size) {
 			brushSize = (int)size;
+		}
+
+		public void SetEnemyType(float type) {
+			enemyType = (int)type;
 		}
 
 		public void ShowGrid(bool visible) {

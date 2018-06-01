@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LeGrandPotAuFeu.Unit;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LeGrandPotAuFeu.Grid {
@@ -50,6 +51,10 @@ namespace LeGrandPotAuFeu.Grid {
 				transitioningCells.Add(cell);
 			}
 			enabled = true;
+		}
+
+		public void RefreshExplored(HexCell cell) {
+			cellTextureData[cell.Index].g = cell.IsExplored ? (byte)255 : (byte)0;
 		}
 
 		void LateUpdate() {

@@ -363,5 +363,10 @@ namespace LeGrandPotAuFeu.Grid {
 				ShaderData.RefreshVisibility(this);
 			}
 		}
+
+		public void ResetExplored() {
+			explored = false;
+			ShaderData.RefreshExplored(this);
+		}
 	}
 }

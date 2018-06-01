@@ -1,46 +1,14 @@
 ﻿using LeGrandPotAuFeu.Grid;
 using UnityEngine;
-using System.IO;
 using LeGrandPotAuFeu.Utility;
 using System.Collections.Generic;
 using System.Collections;
 
 namespace LeGrandPotAuFeu.Unit {
-	public class HexUnit : MonoBehaviour {
-		const float travelSpeed = 4f;
-		const float rotationSpeed = 180f;
-		const int visionRange = 3;
-
-		public int Speed {
-			get {
-				return 24;
-			}
-		}
-		public int VisionRange {
-			get {
-				return 3;
-			}
-		}
+	public abstract class HexUnit : MonoBehaviour {
+		public UnitStats unitStats;
 		public HexGrid Grid { get; set; }
-		public HexCell Location {
-			get {
-				return location;
-			}
-			set {
-				if (location) {
-					Grid.DecreaseVisibility(location, visionRange);
-					location.Unit = null;
-				}
-				location = value;
-				value.Unit = this;
-				Grid.IncreaseVisibility(value, visionRange);
-				transform.localPosition = value.Position;
-			}
-		}
-		HexCell location, currentTravelLocation;
-
-		List<HexCell> pathToTravel;
-
+		public abstract HexCell Location { get; set; }
 		public float Orientation {
 			get {
 				return orientation;
@@ -50,19 +18,31 @@ namespace LeGrandPotAuFeu.Unit {
 				transform.localRotation = Quaternion.Euler(0f, value, 0f);
 			}
 		}
-		float orientation;
 
-		public static HexUnit unitPrefab;
+		protected const float travelSpeed = 4f;
+		protected const float rotationSpeed = 180f;
 
-		void OnEnable() {
-			if (location) {
-				transform.localPosition = location.Position;
-				if (currentTravelLocation) {
-					Grid.IncreaseVisibility(location, visionRange);
-					Grid.DecreaseVisibility(currentTravelLocation, visionRange);
-					currentTravelLocation = null;
-				}
-			}
+		protected float orientation;
+		protected HexCell location, currentTravelLocation;
+		protected List<HexCell> pathToTravel;
+
+		public abstract void Die();
+
+		public void ValidateLocation() {
+			transform.localPosition = location.Position;
+		}
+
+		public bool IsValidDestination(HexCell cell) {
+			return cell.IsVisible && cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
+		}
+
+		public void Travel(List<HexCell> path) {
+			location.Unit = null;
+			location = path[path.Count - 1];
+			location.Unit = this;
+			pathToTravel = path;
+			StopAllCoroutines();
+			StartCoroutine(TravelPath());
 		}
 
 		public int GetMoveCost(HexCell fromCell, HexCell toCell, HexDirection direction) {
@@ -76,92 +56,15 @@ namespace LeGrandPotAuFeu.Unit {
 			} else if (fromCell.Walled != toCell.Walled) {
 				return -1;
 			} else {
-				moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
-				moveCost +=
-					toCell.UrbanLevel + toCell.FarmLevel + toCell.PlantLevel;
+				moveCost = edgeType == HexEdgeType.Flat ? 2 : 3;
+				moveCost +=	toCell.UrbanLevel + toCell.FarmLevel + toCell.PlantLevel;
 			}
 			return moveCost;
 		}
 
-		public void ValidateLocation() {
-			transform.localPosition = location.Position;
-		}
+		protected abstract IEnumerator TravelPath();
 
-		public void Die() {
-			if (location) {
-				Grid.DecreaseVisibility(location, visionRange);
-			}
-			location.Unit = null;
-			Destroy(gameObject);
-		}
-
-		public bool IsValidDestination(HexCell cell) {
-			return cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
-		}
-
-		public void Save(BinaryWriter writer) {
-			location.coordinates.Save(writer);
-			writer.Write(orientation);
-		}
-
-		public void Travel(List<HexCell> path) {
-			location.Unit = null;
-			location = path[path.Count - 1];
-			location.Unit = this;
-			pathToTravel = path;
-			StopAllCoroutines();
-			StartCoroutine(TravelPath());
-		}
-
-		IEnumerator TravelPath() {
-			Vector3 a, b, c = pathToTravel[0].Position;
-			yield return LookAt(pathToTravel[1].Position);
-			Grid.DecreaseVisibility(currentTravelLocation ? currentTravelLocation : pathToTravel[0], visionRange);
-
-			float t = Time.deltaTime * travelSpeed;
-			for (int i = 1; i < pathToTravel.Count; i++) {
-				currentTravelLocation = pathToTravel[i];
-				a = c;
-				b = pathToTravel[i - 1].Position;
-				c = (b + currentTravelLocation.Position) * 0.5f;
-				Grid.IncreaseVisibility(pathToTravel[i], visionRange);
-				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
-					transform.localPosition = BezierGetPoint(a, b, c, t);
-					Vector3 d = BezierGetDerivative(a, b, c, t);
-					d.y = 0f;
-					transform.localRotation = Quaternion.LookRotation(d);
-					yield return null;
-				}
-				Grid.DecreaseVisibility(pathToTravel[i], visionRange);
-				t -= 1f;
-			}
-			currentTravelLocation = null;
-
-			a = c;
-			b = location.Position;
-			c = b;
-			Grid.IncreaseVisibility(location, visionRange);
-			for (; t < 1f; t += Time.deltaTime * travelSpeed) {
-				transform.localPosition = BezierGetPoint(a, b, c, t);
-				Vector3 d = BezierGetDerivative(a, b, c, t);
-				d.y = 0f;
-				transform.localRotation = Quaternion.LookRotation(d);
-				yield return null;
-			}
-
-			transform.localPosition = location.Position;
-			orientation = transform.localRotation.eulerAngles.y;
-			ListPool<HexCell>.Add(pathToTravel);
-			pathToTravel = null;
-		}
-
-		public static void Load(BinaryReader reader, HexGrid grid) {
-			HexCoordinates coordinates = HexCoordinates.Load(reader);
-			float orientation = reader.ReadSingle();
-			grid.AddUnit(Instantiate(unitPrefab), grid.GetCell(coordinates), orientation);
-		}
-
-		IEnumerator LookAt(Vector3 point) {
+		protected IEnumerator LookAt(Vector3 point) {
 			point.y = transform.localPosition.y;
 			Quaternion fromRotation = transform.localRotation;
 			Quaternion toRotation = Quaternion.LookRotation(point - transform.localPosition);
@@ -170,7 +73,8 @@ namespace LeGrandPotAuFeu.Unit {
 			if (angle > 0f) {
 				float speed = rotationSpeed / angle;
 				for (float t = Time.deltaTime * speed; t < 1f; t += Time.deltaTime * speed) {
-					transform.localRotation = Quaternion.Slerp(fromRotation, toRotation, t);
+					transform.localRotation =
+						Quaternion.Slerp(fromRotation, toRotation, t);
 					yield return null;
 				}
 			}

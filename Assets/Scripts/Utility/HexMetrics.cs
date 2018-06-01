@@ -20,7 +20,7 @@ namespace LeGrandPotAuFeu.Utility {
 		public const float outerRadius = 10f;
 		public const float innerRadius = outerRadius * 0.866025404f;
 		public const float solidFactor = 0.8f;
-		public const float elevationStep = 3f;
+		public const float elevationStep = 5f;
 		public const int terracesPerSlope = 2;
 		public const int terraceSteps = terracesPerSlope * 2 + 1;
 		public const float horizontalTerraceStepSize = 1f / terraceSteps;

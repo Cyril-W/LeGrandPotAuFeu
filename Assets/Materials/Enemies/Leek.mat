@@ -6,9 +6,9 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Terrain
-  m_Shader: {fileID: 4800000, guid: 3f800f2138c86e14ca090e109d358c97, type: 3}
-  m_ShaderKeywords: GRID_ON
+  m_Name: Leek
+  m_Shader: {fileID: 4800000, guid: 48b599d446b99c74099d35f45164ff54, type: 3}
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -18,12 +18,12 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _GridTex:
-        m_Texture: {fileID: 2800000, guid: 70a99355bb210cd47bdab8282be5c480, type: 3}
+    - _GridCoordinates:
+        m_Texture: {fileID: 2800000, guid: c826deb0848722c4e99d464f9e30c4ae, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 18700000, guid: f4faa82f50cf01842896316b0ca5a5e0, type: 2}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
@@ -31,5 +31,5 @@ Material:
     - _Metallic: 0
     m_Colors:
     - _BackgroundColor: {r: 0.40784314, g: 0.38039216, b: 0.35686275, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 1, b: 0, a: 1}
     - _Specular: {r: 0.2, g: 0.2, b: 0.2, a: 1}

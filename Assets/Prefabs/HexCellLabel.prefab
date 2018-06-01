@@ -39,7 +39,7 @@ GameObject:
   - component: {fileID: 222502609421419332}
   - component: {fileID: 114268821006017388}
   m_Layer: 0
-  m_Name: Hex Cell Label
+  m_Name: HexCellLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
