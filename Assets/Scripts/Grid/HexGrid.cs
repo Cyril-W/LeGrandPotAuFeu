@@ -25,6 +25,9 @@ namespace LeGrandPotAuFeu.Grid {
 		[Header("Seed for the hash")]
 		public int seed = 1234;
 
+		public HexPlayer player { get; private set; }
+		public List<HexEnemy> enemies { get; private set; }
+
 		public bool HasPath {
 			get {
 				return currentPathExists;
@@ -38,11 +41,10 @@ namespace LeGrandPotAuFeu.Grid {
 		int searchFrontierPhase;
 		HexCell currentPathFrom, currentPathTo;
 		bool currentPathExists;
-		HexPlayer player;
-		List<HexEnemy> enemies = new List<HexEnemy>();
 		HexCellShaderData cellShaderData;
 
 		void Awake() {
+			enemies = new List<HexEnemy>();
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
@@ -245,18 +247,18 @@ namespace LeGrandPotAuFeu.Grid {
 			cellShaderData.ImmediateMode = originalImmediateMode;
 		}
 
-		public void FindPath(HexCell fromCell, HexCell toCell, HexUnit unit) {
+		public void FindPath(HexUnit unit, HexCell toCell) {
+			HexCell fromCell = unit.Location;
 			ClearPath();
 			currentPathFrom = fromCell;
 			currentPathTo = toCell;
 			currentPathExists = Search(fromCell, toCell, unit);
 			if (currentPathExists) {
-				ShowPath(unit.unitStats.endurance);
+				ShowPath();
 			}
 		}
 
 		bool Search(HexCell fromCell, HexCell toCell, HexUnit unit) {
-			int speed = unit.unitStats.endurance;
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
@@ -275,7 +277,6 @@ namespace LeGrandPotAuFeu.Grid {
 					return true;
 				}
 
-				int currentTurn = (current.Distance - 1) / speed;
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
 					HexCell neighbor = current.GetNeighbor(d);
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
@@ -290,9 +291,10 @@ namespace LeGrandPotAuFeu.Grid {
 					}
 
 					int distance = current.Distance + moveCost;
-					int turn = (distance - 1) / speed;
-					if (turn > currentTurn) {
-						distance = turn * speed + moveCost;
+					var player = unit as HexPlayer;
+					int endurance = player ? player.EnduranceLeft : unit.unitStats.endurance;
+					if (endurance <= 0 || (distance - 1) / endurance > 0) {
+						continue;
 					}
 
 					if (neighbor.SearchPhase < searchFrontierPhase) { // no distance found
@@ -310,6 +312,19 @@ namespace LeGrandPotAuFeu.Grid {
 				}
 			}
 			return false;
+		}
+
+		void ShowPath() {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {					
+					current.EnableHighlight(pathColor);
+					current = current.PathFrom;
+				}
+			}
+			currentPathFrom.EnableHighlight(startColor);
+			currentPathTo.EnableHighlight(endColor);
+			currentPathTo.SetLabel(currentPathTo.Distance.ToString());
 		}
 
 		List<HexCell> GetVisibleCells(HexCell fromCell, int range) {
@@ -394,20 +409,6 @@ namespace LeGrandPotAuFeu.Grid {
 				currentPathExists = false;
 			}
 			currentPathFrom = currentPathTo = null;
-		}
-
-		void ShowPath(int speed) {
-			if (currentPathExists) {
-				HexCell current = currentPathTo;
-				while (current != currentPathFrom) {
-					int turn = (current.Distance - 1) / speed;
-					current.SetLabel(turn.ToString());
-					current.EnableHighlight(pathColor);
-					current = current.PathFrom;
-				}
-			}
-			currentPathFrom.EnableHighlight(startColor);
-			currentPathTo.EnableHighlight(endColor);
 		}
 
 		public List<HexCell> GetPath() {

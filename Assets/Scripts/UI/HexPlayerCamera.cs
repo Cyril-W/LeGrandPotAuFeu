@@ -3,7 +3,7 @@ using LeGrandPotAuFeu.Utility;
 using UnityEngine;
 
 namespace LeGrandPotAuFeu.UI {
-	public class HexMapCamera : MonoBehaviour {
+	public class HexPlayerCamera : MonoBehaviour {
 		[Header("Stick Zoom Range")]
 		public float stickMinZoom = -250;
 		public float stickMaxZoom = -45;
@@ -23,7 +23,7 @@ namespace LeGrandPotAuFeu.UI {
 				instance.enabled = !value;
 			}
 		}
-		static HexMapCamera instance;
+		static HexPlayerCamera instance;
 
 		Transform swivel, stick;
 		float zoom = 1f;
@@ -89,10 +89,10 @@ namespace LeGrandPotAuFeu.UI {
 		}
 
 		Vector3 ClampPosition(Vector3 position) {
-			float xMax = grid.cellCountX * 2f * HexMetrics.innerRadius; // (grid.cellCountX * HexMetrics.chunkSizeX - 0.5f) * (2f * HexMetrics.innerRadius);
+			float xMax = (grid.cellCountX * HexMetrics.chunkSizeX - 0.5f) * (2f * HexMetrics.innerRadius);
 			position.x = Mathf.Clamp(position.x, 0f, xMax);
 
-			float zMax = grid.cellCountZ * 1.75f * HexMetrics.innerRadius; // (grid.cellCountZ * HexMetrics.chunkSizeZ - 1) * (1.5f * HexMetrics.outerRadius);
+			float zMax = (grid.cellCountZ * HexMetrics.chunkSizeZ - 1) * (1.5f * HexMetrics.outerRadius);
 			position.z = Mathf.Clamp(position.z, 0f, zMax);
 
 			return position;

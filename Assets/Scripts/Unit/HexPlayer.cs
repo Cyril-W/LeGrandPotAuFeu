@@ -7,6 +7,7 @@ using System.Collections;
 
 namespace LeGrandPotAuFeu.Unit {
 	public class HexPlayer : HexUnit {
+		public int EnduranceLeft { get; private set; }
 		public override HexCell Location {
 			get {
 				return location;
@@ -43,7 +44,13 @@ namespace LeGrandPotAuFeu.Unit {
 			Destroy(gameObject);
 		}
 
+		public void ResetEnduranceLeft() {
+			EnduranceLeft = unitStats.endurance;
+		}
+
 		protected override IEnumerator TravelPath() {
+			EnduranceLeft -= pathToTravel[pathToTravel.Count - 1].Distance;			
+
 			Vector3 a, b, c = pathToTravel[0].Position;
 			transform.localPosition = c;
 			yield return LookAt(pathToTravel[1].Position);

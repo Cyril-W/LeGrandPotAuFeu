@@ -9,7 +9,7 @@ namespace LeGrandPotAuFeu.UI {
 		Ignore, Yes, No
 	}
 	public class HexMapEditor : MonoBehaviour {
-		public HexGrid hexGrid;
+		public HexGrid grid;
 		public Material terrainMaterial;
 
 		bool isDrag;
@@ -37,6 +37,7 @@ namespace LeGrandPotAuFeu.UI {
 
 		void Awake() {
 			terrainMaterial.EnableKeyword("GRID_ON");
+			Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
 		}
 
 		void Update() {
@@ -60,7 +61,7 @@ namespace LeGrandPotAuFeu.UI {
 		}
 
 		HexCell GetCellUnderCursor() {			
-			return hexGrid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition)); ;
+			return grid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition)); ;
 		}
 
 		void HandleInput() {
@@ -98,12 +99,12 @@ namespace LeGrandPotAuFeu.UI {
 
 			for (int r = 0, z = centerZ - brushSize; z <= centerZ; z++, r++) {
 				for (int x = centerX - r; x <= centerX + brushSize; x++) {
-					EditCell(hexGrid.GetCell(new HexCoordinates(x, z)));
+					EditCell(grid.GetCell(new HexCoordinates(x, z)));
 				}
 			}
 			for (int r = 0, z = centerZ + brushSize; z > centerZ; z--, r++) {
 				for (int x = centerX - brushSize; x <= centerX + r; x++) {
-					EditCell(hexGrid.GetCell(new HexCoordinates(x, z)));
+					EditCell(grid.GetCell(new HexCoordinates(x, z)));
 				}
 			}
 		}
@@ -152,14 +153,14 @@ namespace LeGrandPotAuFeu.UI {
 		void CreateUnit(bool isPlayer) {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit && cell.Explorable) {
-				hexGrid.AddUnit(cell, Random.Range(0f, 360f), (isPlayer ? -1 : enemyType));
+				grid.AddUnit(cell, Random.Range(0f, 360f), (isPlayer ? -1 : enemyType));
 			}
 		}
 
 		void DestroyUnit() {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && cell.Unit) {
-				hexGrid.RemoveUnit(cell.Unit);
+				grid.RemoveUnit(cell.Unit);
 			}
 		}
 
@@ -239,9 +240,16 @@ namespace LeGrandPotAuFeu.UI {
 			}
 		}
 
-		public void SetEditMode(bool toggle) {
-			enabled = toggle;
-			gameObject.SetActive(toggle);
+		public void SetEditMode(bool isActive) {
+			enabled = isActive;
+			gameObject.SetActive(isActive);
+
+			grid.ShowUI(!isActive);
+			if (isActive) {
+				Shader.EnableKeyword("HEX_MAP_EDIT_MODE");
+			} else {
+				Shader.DisableKeyword("HEX_MAP_EDIT_MODE");
+			}
 		}
 	}
 }
