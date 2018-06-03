@@ -3,10 +3,15 @@ using UnityEngine;
 using LeGrandPotAuFeu.Utility;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 namespace LeGrandPotAuFeu.Unit {
 	public abstract class HexUnit : MonoBehaviour {
-		public UnitStats unitStats;
+		readonly float[] possibleOrientations = { 30, 90, 150, 210, 270, 330 };
+		protected const float travelSpeed = 4f;
+		protected const float rotationSpeed = 180f;
+
+		public int areaVisionRange;
 		public HexGrid Grid { get; set; }
 		public abstract HexCell Location { get; set; }
 		public float Orientation {
@@ -14,14 +19,25 @@ namespace LeGrandPotAuFeu.Unit {
 				return orientation;
 			}
 			set {
-				orientation = value;
-				transform.localRotation = Quaternion.Euler(0f, value, 0f);
+				orientation = possibleOrientations.OrderBy(x => Mathf.Abs(value - x)).First();
+				transform.localRotation = Quaternion.Euler(0f, orientation, 0f);
 			}
 		}
 
-		protected const float travelSpeed = 4f;
-		protected const float rotationSpeed = 180f;
-
+		public HexDirection facingDirection {
+			get {
+				int orientationEpsilon = 1;
+				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+					int expectedOrientation = 30 + 60 * (int)d;
+					int orientationDifference = Mathf.Abs(Mathf.RoundToInt(orientation) - expectedOrientation);
+					if (orientationDifference < orientationEpsilon) {
+						return d;
+					}
+				}
+				Debug.LogError("No orientation angle matched");
+				return HexDirection.NE;
+			}
+		}
 		protected float orientation;
 		protected HexCell location, currentTravelLocation;
 		protected List<HexCell> pathToTravel;

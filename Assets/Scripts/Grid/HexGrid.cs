@@ -11,12 +11,13 @@ namespace LeGrandPotAuFeu.Grid {
 		public HexPlayer playerPrefab;
 		public HexEnemy enemyPrefab;
 		public HexCell cellPrefab;
-		public Text cellLabelPrefab;
+		public RectTransform cellUI;
 		public HexGridChunk chunkPrefab;
-		[Header("Path colors")]
+		[Header("Game UI Colors")]
 		public Color startColor = Color.blue;
 		public Color pathColor = Color.gray;
-		public Color endColor = Color.red;
+		public Color endColor = Color.green;
+		public Color enemyColor = Color.red;
 		[Header("Noise Texture")]
 		public Texture2D noiseSource;
 		[Header("Size of the map")]
@@ -134,10 +135,10 @@ namespace LeGrandPotAuFeu.Grid {
 				}
 			}
 
-			Text label = Instantiate(cellLabelPrefab);
-			label.rectTransform.anchoredPosition = new Vector2(position.x, position.z);
+			RectTransform newCellUI = Instantiate(cellUI);
+			newCellUI.anchoredPosition = new Vector2(position.x, position.z);
 			cell.gameObject.name = "Hex Cell " + cell.coordinates.ToString();
-			cell.uiRect = label.rectTransform;
+			cell.UIRect = newCellUI;
 
 			cell.Elevation = 0;
 
@@ -292,7 +293,7 @@ namespace LeGrandPotAuFeu.Grid {
 
 					int distance = current.Distance + moveCost;
 					var player = unit as HexPlayer;
-					int endurance = player ? player.EnduranceLeft : unit.unitStats.endurance;
+					int endurance = player ? player.EnduranceLeft : unit.areaVisionRange;
 					if (endurance <= 0 || (distance - 1) / endurance > 0) {
 						continue;
 					}
@@ -327,7 +328,7 @@ namespace LeGrandPotAuFeu.Grid {
 			currentPathTo.SetLabel(currentPathTo.Distance.ToString());
 		}
 
-		List<HexCell> GetVisibleCells(HexCell fromCell, int range) {
+		public List<HexCell> GetAreaVisibleCells(HexCell fromCell, int range, bool applyElevation = true) {
 			List<HexCell> visibleCells = ListPool<HexCell>.Get();
 
 			searchFrontierPhase += 2;
@@ -337,7 +338,7 @@ namespace LeGrandPotAuFeu.Grid {
 				searchFrontier.Clear();
 			}
 
-			range += fromCell.ViewElevation;
+			range += applyElevation ? fromCell.ViewElevation : 0;
 			fromCell.SearchPhase = searchFrontierPhase;
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
@@ -348,33 +349,67 @@ namespace LeGrandPotAuFeu.Grid {
 				visibleCells.Add(current);
 
 				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
-					HexCell neighbor = current.GetNeighbor(d);
-					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase || !neighbor.Explorable) {
-						continue;
-					}				
+					GetVisibleCells(current, fromCoordinates, range, d);
+				}
+			}
+			return visibleCells;
+		}
 
-					int distance = current.Distance + 1;
-					if (distance + neighbor.ViewElevation > range || distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
-						continue;
-					}
+		public List<HexCell> GetLineVisibleCells(HexCell fromCell, int range, HexDirection? facingDirection = null) {
+			List<HexCell> visibleCells = ListPool<HexCell>.Get();
 
-					if (neighbor.SearchPhase < searchFrontierPhase) {
-						neighbor.SearchPhase = searchFrontierPhase;
-						neighbor.Distance = distance;
-						neighbor.SearchHeuristic = 0;
-						searchFrontier.Enqueue(neighbor);
-					} else if (distance < neighbor.Distance) {
-						int oldPriority = neighbor.SearchPriority;
-						neighbor.Distance = distance;
-						searchFrontier.Change(neighbor, oldPriority);
+			searchFrontierPhase += 2;
+			if (searchFrontier == null) {
+				searchFrontier = new HexCellPriorityQueue();
+			} else {
+				searchFrontier.Clear();
+			}
+
+			fromCell.SearchPhase = searchFrontierPhase;
+			fromCell.Distance = 0;
+			searchFrontier.Enqueue(fromCell);
+			HexCoordinates fromCoordinates = fromCell.coordinates;
+			while (searchFrontier.Count > 0) {
+				HexCell current = searchFrontier.Dequeue();
+				current.SearchPhase += 1;
+				visibleCells.Add(current);
+
+				if (facingDirection.HasValue) {
+					GetVisibleCells(current, fromCoordinates, range, facingDirection.Value);
+				} else {
+					for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+						GetVisibleCells(current, fromCoordinates, range, d);
 					}
 				}
 			}
 			return visibleCells;
 		}
 
+		void GetVisibleCells(HexCell current, HexCoordinates fromCoordinates, int range, HexDirection d) {
+			HexCell neighbor = current.GetNeighbor(d);
+			if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase || !neighbor.Explorable) {
+				return;
+			}
+
+			int distance = current.Distance + 1;
+			if (distance + neighbor.ViewElevation > range || distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
+				return;
+			}
+
+			if (neighbor.SearchPhase < searchFrontierPhase) {
+				neighbor.SearchPhase = searchFrontierPhase;
+				neighbor.Distance = distance;
+				neighbor.SearchHeuristic = 0;
+				searchFrontier.Enqueue(neighbor);
+			} else if (distance < neighbor.Distance) {
+				int oldPriority = neighbor.SearchPriority;
+				neighbor.Distance = distance;
+				searchFrontier.Change(neighbor, oldPriority);
+			}
+		}
+
 		public void IncreaseVisibility(HexCell fromCell, int range) {
-			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			List<HexCell> cells = GetAreaVisibleCells(fromCell, range);
 			foreach (var cell in cells) {
 				cell.IncreaseVisibility();
 				var enemy = cell.Unit as HexEnemy;
@@ -386,7 +421,7 @@ namespace LeGrandPotAuFeu.Grid {
 		}
 
 		public void DecreaseVisibility(HexCell fromCell, int range) {
-			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			List<HexCell> cells = GetAreaVisibleCells(fromCell, range);
 			foreach (var cell in cells) {
 				cell.DecreaseVisibility();
 				var enemy = cell.Unit as HexEnemy;
@@ -402,10 +437,10 @@ namespace LeGrandPotAuFeu.Grid {
 				HexCell current = currentPathTo;
 				while (current != currentPathFrom) {
 					current.SetLabel(null);
-					current.DisableHighlight();
+					current.DisableUI();
 					current = current.PathFrom;
 				}
-				current.DisableHighlight();
+				current.DisableUI();
 				currentPathExists = false;
 			}
 			currentPathFrom = currentPathTo = null;
@@ -443,25 +478,38 @@ namespace LeGrandPotAuFeu.Grid {
 			HexUnit unit;
 			if (isEnemy) {
 				unit = Instantiate(enemyPrefab, transform, false);
-				var enemyType = ((EnemyType)type).ToString();
-				UnitStats stats = Resources.Load<UnitStats>(enemyType + "Stats");
-				if (stats) {
-					unit.unitStats = stats;
-					var enemy = unit as HexEnemy;
-					enemies.Add(enemy);
-					enemy.type = type;
-					unit.transform.GetChild(type).gameObject.SetActive(true);
-					unit.name = enemyType + enemies.Count;
-				} else {
-					Debug.LogError("No stats found for: " + enemyType);
+				var enemy = unit as HexEnemy;
+				enemies.Add(enemy);
+				enemy.type = type;
+				switch (type) {
+					case 0:
+						enemy.areaVisionRange = 3;
+						enemy.lineVisionRange = 6;
+						break;
+					case 1:
+						enemy.areaVisionRange = 3;
+						enemy.lineVisionRange = 6;
+						break;
+					case 2:
+						enemy.areaVisionRange = 3;
+						enemy.lineVisionRange = 6;
+						break;
+					case 3:
+						enemy.areaVisionRange = 3;
+						enemy.lineVisionRange = 6;
+						break;
+					default:
+						Debug.LogError("Enemy type not supported: " + type);
+						break;
 				}
+				unit.transform.GetChild(type).gameObject.SetActive(true);
+				unit.name = ((EnemyType)type).ToString() + enemies.Count;
 			} else {
 				if (player) {
 					player.Die();
 					player = null;
 				}
 				unit = Instantiate(playerPrefab, transform, false);
-				ResetVisibility();
 				player = unit as HexPlayer;
 			}
 			unit.Grid = this;
@@ -483,7 +531,7 @@ namespace LeGrandPotAuFeu.Grid {
 				cells[i].ResetVisibility();
 			}
 			if (player) {
-				IncreaseVisibility(player.Location, player.unitStats.visionRange);
+				IncreaseVisibility(player.Location, player.areaVisionRange);
 			}
 		}
 

@@ -7,6 +7,8 @@ using System.Collections;
 
 namespace LeGrandPotAuFeu.Unit {
 	public class HexPlayer : HexUnit {
+		public int endurance;
+
 		public int EnduranceLeft { get; private set; }
 		public override HexCell Location {
 			get {
@@ -14,12 +16,12 @@ namespace LeGrandPotAuFeu.Unit {
 			}
 			set {
 				if (location) {
-					Grid.DecreaseVisibility(location, unitStats.visionRange);
+					Grid.DecreaseVisibility(location, areaVisionRange);
 					location.Unit = null;
 				}
 				location = value;
 				value.Unit = this;
-				Grid.IncreaseVisibility(value, unitStats.visionRange);
+				Grid.IncreaseVisibility(value, areaVisionRange);
 				transform.localPosition = value.Position;
 			}
 		}
@@ -28,8 +30,8 @@ namespace LeGrandPotAuFeu.Unit {
 			if (location) {
 				transform.localPosition = location.Position;
 				if (currentTravelLocation) {
-					Grid.IncreaseVisibility(location, unitStats.visionRange);
-					Grid.DecreaseVisibility(currentTravelLocation, unitStats.visionRange);
+					Grid.IncreaseVisibility(location, areaVisionRange);
+					Grid.DecreaseVisibility(currentTravelLocation, areaVisionRange);
 					currentTravelLocation = null;
 				}
 			}
@@ -37,7 +39,7 @@ namespace LeGrandPotAuFeu.Unit {
 
 		public override void Die() {
 			if (location) {
-				Grid.DecreaseVisibility(location, unitStats.visionRange);
+				Grid.DecreaseVisibility(location, areaVisionRange);
 				Grid.ResetExplored();
 			}
 			location.Unit = null;
@@ -45,7 +47,7 @@ namespace LeGrandPotAuFeu.Unit {
 		}
 
 		public void ResetEnduranceLeft() {
-			EnduranceLeft = unitStats.endurance;
+			EnduranceLeft = endurance;
 		}
 
 		protected override IEnumerator TravelPath() {
@@ -54,7 +56,7 @@ namespace LeGrandPotAuFeu.Unit {
 			Vector3 a, b, c = pathToTravel[0].Position;
 			transform.localPosition = c;
 			yield return LookAt(pathToTravel[1].Position);
-			Grid.DecreaseVisibility(currentTravelLocation ? currentTravelLocation : pathToTravel[0], unitStats.visionRange);
+			Grid.DecreaseVisibility(currentTravelLocation ? currentTravelLocation : pathToTravel[0], areaVisionRange);
 
 			float t = Time.deltaTime * travelSpeed;
 			for (int i = 1; i < pathToTravel.Count; i++) {
@@ -62,7 +64,7 @@ namespace LeGrandPotAuFeu.Unit {
 				a = c;
 				b = pathToTravel[i - 1].Position;
 				c = (b + currentTravelLocation.Position) * 0.5f;
-				Grid.IncreaseVisibility(pathToTravel[i], unitStats.visionRange);
+				Grid.IncreaseVisibility(pathToTravel[i], areaVisionRange);
 				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 					transform.localPosition = BezierGetPoint(a, b, c, t);
 					Vector3 d = BezierGetDerivative(a, b, c, t);
@@ -70,7 +72,7 @@ namespace LeGrandPotAuFeu.Unit {
 					transform.localRotation = Quaternion.LookRotation(d);					
 					yield return null;
 				}
-				Grid.DecreaseVisibility(pathToTravel[i], unitStats.visionRange);
+				Grid.DecreaseVisibility(pathToTravel[i], areaVisionRange);
 				t -= 1f;
 			}
 			currentTravelLocation = null;
@@ -78,7 +80,7 @@ namespace LeGrandPotAuFeu.Unit {
 			a = c;
 			b = location.Position;
 			c = b;
-			Grid.IncreaseVisibility(location, unitStats.visionRange);
+			Grid.IncreaseVisibility(location, areaVisionRange);
 			for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 				transform.localPosition = BezierGetPoint(a, b, c, t);
 				Vector3 d = BezierGetDerivative(a, b, c, t);

@@ -21,14 +21,15 @@ namespace LeGrandPotAuFeu.UI {
 		void OnEnable() {			
 			if (!grid.player) {
 				Debug.Log("No player found: adding default player...");
-				grid.AddUnit(grid.GetCell((grid.cellCountX * grid.cellCountZ) / 2), 0, -1);
+				grid.AddUnit(grid.GetCell((grid.cellCountX * grid.cellCountZ) / 2), 0, -1);				
 			}
 			player = grid.player;
-			var endurance = player.unitStats.endurance;
+			var endurance = player.endurance;
 			maxEnduranceText.text = endurance.ToString();
 			enduranceSlider.maxValue = endurance;
+			grid.ResetVisibility();
 
-			OnTurnPlayerTurnBegin();			
+			OnPlayerTurnBegin();			
 		}
 
 		void Update() {
@@ -42,12 +43,18 @@ namespace LeGrandPotAuFeu.UI {
 			}
 		}
 
-		public void OnTurnPlayerTurnBegin() {
+		void OnPlayerTurnBegin() {
 			player.ResetEnduranceLeft();
 			UpdateEnduranceLeft();
 			turnCount++;
 			UpdateTurn();
 			canPlayerMove = true;
+		}
+
+		public void OnPlayerTurnFinish() {
+			// move enemies
+
+			OnPlayerTurnBegin();
 		}
 
 		void UpdateTurn() {

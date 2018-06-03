@@ -7,7 +7,21 @@ using UnityEngine.UI;
 namespace LeGrandPotAuFeu.Grid {
 	public class HexCell : MonoBehaviour {
 		public HexCoordinates coordinates;
-		public RectTransform uiRect;
+		public RectTransform UIRect {
+			get { return uiRect; }
+			set {
+				uiRect = value;
+
+				var imgs = value.GetComponentsInChildren<Image>();
+				fullImg = imgs[0];
+				outlineImg = imgs[1];				
+				label = value.GetComponentInChildren<Text>();
+
+				if (!fullImg || !outlineImg || !label) {
+					Debug.LogError("HexCell UI Rect does not have all components");
+				}
+			}
+		}
 		public HexGridChunk chunk;
 
 		public Vector3 Position {
@@ -191,6 +205,10 @@ namespace LeGrandPotAuFeu.Grid {
 		public HexUnit Unit { get; set; }
 		public HexCellShaderData ShaderData { get; set; }
 
+		RectTransform uiRect;
+		Text label;
+		Image outlineImg;
+		Image fullImg;
 		int distance;
 		int terrainTypeIndex;
 		int elevation = int.MinValue;
@@ -205,7 +223,6 @@ namespace LeGrandPotAuFeu.Grid {
 		[SerializeField] bool[] roads;
 
 		public void SetLabel(string text) {
-			Text label = uiRect.GetComponent<Text>();
 			label.text = text;
 		}
 
@@ -286,9 +303,9 @@ namespace LeGrandPotAuFeu.Grid {
 			position.y += (HexMetrics.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;
 			transform.localPosition = position;
 
-			Vector3 uiPosition = uiRect.localPosition;
+			Vector3 uiPosition = UIRect.localPosition;
 			uiPosition.z = -position.y;
-			uiRect.localPosition = uiPosition;
+			UIRect.localPosition = uiPosition;
 		}
 
 		public void IncreaseVisibility() {
@@ -306,15 +323,22 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 		}
 
-		public void EnableHighlight(Color color) {
-			Image highlight = uiRect.GetComponentInChildren<Image>();
-			highlight.color = color;
-			highlight.enabled = true;
+		public void EnableHighlight(Color color, bool isOutline = true) {
+			if (isOutline) {
+				outlineImg.color = color;
+				outlineImg.enabled = true;
+			} else {
+				fullImg.color = color;
+				fullImg.enabled = true;
+			}
 		}
 
-		public void DisableHighlight() {
-			Image highlight = uiRect.GetComponentInChildren<Image>();
-			highlight.enabled = false;
+		public void DisableUI(bool isOutline = true) {
+			if (isOutline) {
+				outlineImg.enabled = false;
+			} else {
+				fullImg.enabled = false;
+			}
 		}
 
 		public void Save(BinaryWriter writer) {
@@ -362,6 +386,7 @@ namespace LeGrandPotAuFeu.Grid {
 				visibility = 0;
 				ShaderData.RefreshVisibility(this);
 			}
+			DisableUI(false);
 		}
 
 		public void ResetExplored() {

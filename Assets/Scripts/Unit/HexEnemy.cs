@@ -2,14 +2,15 @@
 using UnityEngine;
 using System.IO;
 using LeGrandPotAuFeu.Utility;
-using System.Collections.Generic;
 using System.Collections;
+using LeGrandPotAuFeu.StateMachine;
 
 namespace LeGrandPotAuFeu.Unit {
 	enum EnemyType {
 		Leek, Potato, Turnip, Carrot
 	}
 	public class HexEnemy : HexUnit {
+		public int lineVisionRange;
 		public int type;
 		public bool IsVisible {
 			get {
@@ -32,11 +33,13 @@ namespace LeGrandPotAuFeu.Unit {
 				transform.localPosition = value.Position;
 			}
 		}
+		public StateController stateController { get; private set; }
 
 		bool visible;
 		[SerializeField] MeshRenderer[] meshes;
 
 		void OnEnable() {
+			stateController = GetComponent<StateController>();
 			if (location) {
 				transform.localPosition = location.Position;
 				if (currentTravelLocation) {
@@ -50,9 +53,19 @@ namespace LeGrandPotAuFeu.Unit {
 			Destroy(gameObject);
 		}
 
-		public void UpdateVisibility(HexCell otherLocation = null) {
-			IsVisible = otherLocation ? otherLocation.IsVisible : location.IsVisible;
+		public void UpdateVisibility(HexCell dynamicLocation = null) {
+			IsVisible = dynamicLocation ? dynamicLocation.IsVisible : location.IsVisible;
 			meshes[type].enabled = IsVisible;
+
+			var cells = Grid.GetAreaVisibleCells(location, areaVisionRange, false);
+			cells.AddRange(Grid.GetLineVisibleCells(location, lineVisionRange, facingDirection));
+			foreach (var cell in cells) {
+				if (IsVisible && cell.IsExplored) {
+					cell.EnableHighlight(Grid.enemyColor, false);
+				} else {
+					cell.DisableUI(false);
+				}
+			}
 		}
 
 		protected override IEnumerator TravelPath() {

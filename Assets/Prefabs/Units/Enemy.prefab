@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4399891821784040}
   - component: {fileID: 114620441964322400}
+  - component: {fileID: 114329545856246896}
   - component: {fileID: 65215558490381838}
   m_Layer: 0
   m_Name: Enemy
@@ -345,6 +346,24 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114329545856246896
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1152513794224176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f91948e327772fb4082ec38a3e3523e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aiActive: 0
+  currentState: {fileID: 0}
+  remainState: {fileID: 0}
+  wayPointList: []
+  nextWayPoint: 0
+  chaseTarget: {fileID: 0}
+  stateTimeElapsed: 0
 --- !u!114 &114620441964322400
 MonoBehaviour:
   m_ObjectHideFlags: 1

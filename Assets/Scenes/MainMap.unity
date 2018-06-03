@@ -4927,7 +4927,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &633179309
 GameObject:
@@ -8667,48 +8667,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1078906828}
---- !u!1 &1092860532
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1092860534}
-  - component: {fileID: 1092860533}
-  m_Layer: 0
-  m_Name: Game Controller
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1092860533
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1092860532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89b98864800b2d04da31d2cfce164494, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  grid: {fileID: 1477476097}
-  gameUI: {fileID: 1016324136}
---- !u!4 &1092860534
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1092860532}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1101755095
 GameObject:
   m_ObjectHideFlags: 0
@@ -9160,8 +9118,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1092860533}
-        m_MethodName: OnTurnPlayerTurnFinish
+      - m_Target: {fileID: 1016324136}
+        m_MethodName: OnPlayerTurnFinish
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12149,13 +12107,13 @@ MonoBehaviour:
     type: 2}
   cellPrefab: {fileID: 114818799851248964, guid: 52097fb8e5d82d14daa11df756469652,
     type: 2}
-  cellLabelPrefab: {fileID: 114268821006017388, guid: 24cf1b59ab410a943adddc33327d0f78,
-    type: 2}
+  cellUI: {fileID: 224700592875202582, guid: 3dadf8e10070896458e4fb338403b916, type: 2}
   chunkPrefab: {fileID: 114509925166575734, guid: 36e09a2379fcc0e41acfec7586fbf819,
     type: 2}
   startColor: {r: 0, g: 0, b: 1, a: 1}
   pathColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   endColor: {r: 0, g: 1, b: 0, a: 1}
+  enemyColor: {r: 1, g: 0, b: 0, a: 0.19607843}
   noiseSource: {fileID: 2800000, guid: cd2ea2f0916da9d4583c920d5867739b, type: 3}
   cellCountX: 25
   cellCountZ: 15
@@ -12171,7 +12129,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1489670419
 GameObject:
@@ -16078,7 +16036,7 @@ RectTransform:
   - {fileID: 1064742077}
   - {fileID: 2091309270}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -16861,7 +16819,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2097398611
 GameObject:

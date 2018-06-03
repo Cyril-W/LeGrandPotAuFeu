@@ -1,41 +1,22 @@
-﻿using LeGrandPotAuFeu.Unit;
+﻿using LeGrandPotAuFeu.Grid;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace LeGrandPotAuFeu.StateMachine {
 	public class StateController : MonoBehaviour {
-		public bool aiActive;
-		public UnitStats unitStats;
+		public bool aiActive = false;		
 		public State currentState;
 		public State remainState;
 
 		[HideInInspector]
-		public NavMeshAgent navMeshAgent;
-		[HideInInspector]
-		public List<Transform> wayPointList;
-		[HideInInspector]
-		public int nextWayPoint;
-		[HideInInspector]
-		public Transform chaseTarget;
+		public HexCell nextDestination;
 		[HideInInspector]
 		public float stateTimeElapsed;
 
 		Vector3 eyes;
 
 		void Awake() {
-			navMeshAgent = GetComponent<NavMeshAgent>();
 			eyes = transform.position + Vector3.up;
-		}
-
-		public void SetupAI(bool aiActivationFromTankManager, List<Transform> wayPointsFromTankManager) {
-			wayPointList = wayPointsFromTankManager;
-			aiActive = aiActivationFromTankManager;
-			if (aiActive) {
-				navMeshAgent.enabled = true;
-			} else {
-				navMeshAgent.enabled = false;
-			}
 		}
 
 		void Update() {
