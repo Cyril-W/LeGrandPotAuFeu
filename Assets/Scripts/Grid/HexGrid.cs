@@ -8,8 +8,8 @@ using UnityEngine.UI;
 namespace LeGrandPotAuFeu.Grid {
 	public class HexGrid : MonoBehaviour {
 		[Header("Prefabs")]
-		public HexPlayer playerPrefab;
-		public HexEnemy enemyPrefab;
+		public HexUnit playerPrefab;
+		public HexUnit[] enemyPrefabs;
 		public HexCell cellPrefab;
 		public RectTransform cellUI;
 		public HexGridChunk chunkPrefab;
@@ -17,7 +17,8 @@ namespace LeGrandPotAuFeu.Grid {
 		public Color startColor = Color.blue;
 		public Color pathColor = Color.gray;
 		public Color endColor = Color.green;
-		public Color enemyColor = Color.red;
+		public Color enemyAreaColor = Color.red;
+		public Color enemyLineColor = Color.yellow;
 		[Header("Noise Texture")]
 		public Texture2D noiseSource;
 		[Header("Size of the map")]
@@ -25,9 +26,11 @@ namespace LeGrandPotAuFeu.Grid {
 		public int cellCountZ = 15;		
 		[Header("Seed for the hash")]
 		public int seed = 1234;
+		[Header("Debug tool")]
+		public bool displayCoordinates = false;
 
-		public HexPlayer player { get; private set; }
-		public List<HexEnemy> enemies { get; private set; }
+		public HexUnit Player { get; private set; }
+		public List<HexUnit> Enemies { get; private set; }
 
 		public bool HasPath {
 			get {
@@ -45,7 +48,7 @@ namespace LeGrandPotAuFeu.Grid {
 		HexCellShaderData cellShaderData;
 
 		void Awake() {
-			enemies = new List<HexEnemy>();
+			Enemies = new List<HexUnit>();
 			HexMetrics.noiseSource = noiseSource;
 			HexMetrics.InitializeHashGrid(seed);
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
@@ -139,6 +142,11 @@ namespace LeGrandPotAuFeu.Grid {
 			newCellUI.anchoredPosition = new Vector2(position.x, position.z);
 			cell.gameObject.name = "Hex Cell " + cell.coordinates.ToString();
 			cell.UIRect = newCellUI;
+			cell.UIRect.name = "Hex Cell UI " + cell.coordinates.ToString();
+
+			if (displayCoordinates) {
+				cell.SetLabel(cell.coordinates.ToStringOnSeparateLines(), 4);
+			}
 
 			cell.Elevation = 0;
 
@@ -204,11 +212,11 @@ namespace LeGrandPotAuFeu.Grid {
 				cells[i].Save(writer);
 			}
 
-			player.Save(writer);
+			Player.Save(writer);
 
-			writer.Write(enemies.Count);
-			for (int i = 0; i < enemies.Count; i++) {
-				enemies[i].Save(writer);
+			writer.Write(Enemies.Count);
+			foreach (var enemy in Enemies) {
+				enemy.Save(writer);
 			}
 		}
 
@@ -237,26 +245,41 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 
 			if (header >= 2) {
-				HexPlayer.Load(reader, this);
+				HexUnit.Load(reader, this); // load the player
 
 				int ennemyCount = reader.ReadInt32();
 				for (int i = 0; i < ennemyCount; i++) {
-					HexEnemy.Load(reader, this);
+					HexUnit.Load(reader, this); // load the enemies
 				}
 			}
 
 			cellShaderData.ImmediateMode = originalImmediateMode;
 		}
 
-		public void FindPath(HexUnit unit, HexCell toCell) {
+		public void FindPath(HexUnit unit, HexCell toCell, bool showPath = true) {
 			HexCell fromCell = unit.Location;
-			ClearPath();
+			if (showPath) {
+				ClearPath();
+			}
 			currentPathFrom = fromCell;
 			currentPathTo = toCell;
 			currentPathExists = Search(fromCell, toCell, unit);
-			if (currentPathExists) {
+			if (currentPathExists && showPath) {
 				ShowPath();
 			}
+		}
+
+		void ShowPath() {
+			if (currentPathExists) {
+				HexCell current = currentPathTo;
+				while (current != currentPathFrom) {					
+					current.SetOutlineColor(pathColor);
+					current = current.PathFrom;
+				}
+			}
+			currentPathFrom.SetOutlineColor(startColor);
+			currentPathTo.SetOutlineColor(endColor);
+			currentPathTo.SetLabel(currentPathTo.Distance.ToString());
 		}
 
 		bool Search(HexCell fromCell, HexCell toCell, HexUnit unit) {
@@ -292,8 +315,7 @@ namespace LeGrandPotAuFeu.Grid {
 					}
 
 					int distance = current.Distance + moveCost;
-					var player = unit as HexPlayer;
-					int endurance = player ? player.EnduranceLeft : unit.areaVisionRange;
+					int endurance = unit.Type == 0 ? unit.EnduranceLeft : int.MaxValue;
 					if (endurance <= 0 || (distance - 1) / endurance > 0) {
 						continue;
 					}
@@ -315,132 +337,15 @@ namespace LeGrandPotAuFeu.Grid {
 			return false;
 		}
 
-		void ShowPath() {
-			if (currentPathExists) {
-				HexCell current = currentPathTo;
-				while (current != currentPathFrom) {					
-					current.EnableHighlight(pathColor);
-					current = current.PathFrom;
-				}
-			}
-			currentPathFrom.EnableHighlight(startColor);
-			currentPathTo.EnableHighlight(endColor);
-			currentPathTo.SetLabel(currentPathTo.Distance.ToString());
-		}
-
-		public List<HexCell> GetAreaVisibleCells(HexCell fromCell, int range, bool applyElevation = true) {
-			List<HexCell> visibleCells = ListPool<HexCell>.Get();
-
-			searchFrontierPhase += 2;
-			if (searchFrontier == null) {
-				searchFrontier = new HexCellPriorityQueue();
-			} else {
-				searchFrontier.Clear();
-			}
-
-			range += applyElevation ? fromCell.ViewElevation : 0;
-			fromCell.SearchPhase = searchFrontierPhase;
-			fromCell.Distance = 0;
-			searchFrontier.Enqueue(fromCell);
-			HexCoordinates fromCoordinates = fromCell.coordinates;
-			while (searchFrontier.Count > 0) {
-				HexCell current = searchFrontier.Dequeue();
-				current.SearchPhase += 1;
-				visibleCells.Add(current);
-
-				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
-					GetVisibleCells(current, fromCoordinates, range, d);
-				}
-			}
-			return visibleCells;
-		}
-
-		public List<HexCell> GetLineVisibleCells(HexCell fromCell, int range, HexDirection? facingDirection = null) {
-			List<HexCell> visibleCells = ListPool<HexCell>.Get();
-
-			searchFrontierPhase += 2;
-			if (searchFrontier == null) {
-				searchFrontier = new HexCellPriorityQueue();
-			} else {
-				searchFrontier.Clear();
-			}
-
-			fromCell.SearchPhase = searchFrontierPhase;
-			fromCell.Distance = 0;
-			searchFrontier.Enqueue(fromCell);
-			HexCoordinates fromCoordinates = fromCell.coordinates;
-			while (searchFrontier.Count > 0) {
-				HexCell current = searchFrontier.Dequeue();
-				current.SearchPhase += 1;
-				visibleCells.Add(current);
-
-				if (facingDirection.HasValue) {
-					GetVisibleCells(current, fromCoordinates, range, facingDirection.Value);
-				} else {
-					for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
-						GetVisibleCells(current, fromCoordinates, range, d);
-					}
-				}
-			}
-			return visibleCells;
-		}
-
-		void GetVisibleCells(HexCell current, HexCoordinates fromCoordinates, int range, HexDirection d) {
-			HexCell neighbor = current.GetNeighbor(d);
-			if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase || !neighbor.Explorable) {
-				return;
-			}
-
-			int distance = current.Distance + 1;
-			if (distance + neighbor.ViewElevation > range || distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
-				return;
-			}
-
-			if (neighbor.SearchPhase < searchFrontierPhase) {
-				neighbor.SearchPhase = searchFrontierPhase;
-				neighbor.Distance = distance;
-				neighbor.SearchHeuristic = 0;
-				searchFrontier.Enqueue(neighbor);
-			} else if (distance < neighbor.Distance) {
-				int oldPriority = neighbor.SearchPriority;
-				neighbor.Distance = distance;
-				searchFrontier.Change(neighbor, oldPriority);
-			}
-		}
-
-		public void IncreaseVisibility(HexCell fromCell, int range) {
-			List<HexCell> cells = GetAreaVisibleCells(fromCell, range);
-			foreach (var cell in cells) {
-				cell.IncreaseVisibility();
-				var enemy = cell.Unit as HexEnemy;
-				if (enemy) {
-					enemy.UpdateVisibility();					
-				}
-			}
-			ListPool<HexCell>.Add(cells);
-		}
-
-		public void DecreaseVisibility(HexCell fromCell, int range) {
-			List<HexCell> cells = GetAreaVisibleCells(fromCell, range);
-			foreach (var cell in cells) {
-				cell.DecreaseVisibility();
-				var enemy = cell.Unit as HexEnemy;
-				if (enemy) {
-					enemy.UpdateVisibility();
-				}
-			}
-			ListPool<HexCell>.Add(cells);
-		}
-
 		public void ClearPath() {
 			if (currentPathExists) {
 				HexCell current = currentPathTo;
 				while (current != currentPathFrom) {
 					current.SetLabel(null);
-					current.DisableUI();
+					current.SetOutlineColor();
 					current = current.PathFrom;
 				}
-				current.DisableUI();
+				current.SetOutlineColor();
 				currentPathExists = false;
 			}
 			currentPathFrom = currentPathTo = null;
@@ -459,80 +364,132 @@ namespace LeGrandPotAuFeu.Grid {
 			return path;
 		}
 
-		void ClearUnits(bool isPlayerOnly = false) {
-			if (player) {
-				player.Die();
-				player = null;
-			}
-
-			if (!isPlayerOnly) {
-				for (int i = 0; i < enemies.Count; i++) {
-					enemies[i].Die();
-				}
-				enemies.Clear();
-			}
-		}
-
 		public void AddUnit(HexCell location, float orientation, int type) {
-			bool isEnemy = type >= 0;
+			bool isEnemy = type > 0;
 			HexUnit unit;
 			if (isEnemy) {
-				unit = Instantiate(enemyPrefab, transform, false);
-				var enemy = unit as HexEnemy;
-				enemies.Add(enemy);
-				enemy.type = type;
-				switch (type) {
-					case 0:
-						enemy.areaVisionRange = 3;
-						enemy.lineVisionRange = 6;
-						break;
-					case 1:
-						enemy.areaVisionRange = 3;
-						enemy.lineVisionRange = 6;
-						break;
-					case 2:
-						enemy.areaVisionRange = 3;
-						enemy.lineVisionRange = 6;
-						break;
-					case 3:
-						enemy.areaVisionRange = 3;
-						enemy.lineVisionRange = 6;
-						break;
-					default:
-						Debug.LogError("Enemy type not supported: " + type);
-						break;
-				}
-				unit.transform.GetChild(type).gameObject.SetActive(true);
-				unit.name = ((EnemyType)type).ToString() + enemies.Count;
+				unit = Instantiate(enemyPrefabs[type - 1], transform, false);
+				Enemies.Add(unit);								
 			} else {
-				if (player) {
-					player.Die();
-					player = null;
+				if (Player) {
+					Player.Die();
 				}
 				unit = Instantiate(playerPrefab, transform, false);
-				player = unit as HexPlayer;
+				Player = unit;
 			}
 			unit.Grid = this;
+			unit.Type = type;
 			unit.Location = location;
 			unit.Orientation = orientation;
+			var unitName = ((HexUnitType)type).ToString();
+			if (isEnemy) {
+				unitName += Enemies.FindAll(x => x.Type == type).Count;
+			}
+			unit.name = unitName;
 		}
 
 		public void RemoveUnit(HexUnit unit) {
 			unit.Die();
-			if (unit is HexPlayer) {
-				player = null;
-			} else if (unit is HexEnemy) {
-				enemies.Remove(unit as HexEnemy);
+			if (unit.Type == 0) {
+				Player = null;
+			} else {
+				Enemies.Remove(unit);
 			}
 		}
 
+		void ClearUnits() {
+			if (Player) {
+				Player.Die();
+				Player = null;
+			}
+			foreach (var enemy in Enemies) {
+				enemy.Die();
+			}
+			Enemies.Clear();			
+		}
+
+		List<HexCell> GetVisibleCells(HexCell fromCell, int range) {
+			List<HexCell> visibleCells = ListPool<HexCell>.Get();
+
+			searchFrontierPhase += 2;
+			if (searchFrontier == null) {
+				searchFrontier = new HexCellPriorityQueue();
+			} else {
+				searchFrontier.Clear();
+			}
+
+			fromCell.SearchPhase = searchFrontierPhase;
+			fromCell.Distance = 0;
+			searchFrontier.Enqueue(fromCell);
+			while (searchFrontier.Count > 0) {
+				HexCell current = searchFrontier.Dequeue();
+				current.SearchPhase += 1;
+				visibleCells.Add(current);
+
+				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+					HexCell neighbor = current.GetNeighbor(d);
+					if (
+						neighbor == null ||
+						neighbor.SearchPhase > searchFrontierPhase
+					) {
+						continue;
+					}
+
+					int distance = current.Distance + 1;
+					if (distance > range) {
+						continue;
+					}
+
+					if (neighbor.SearchPhase < searchFrontierPhase) {
+						neighbor.SearchPhase = searchFrontierPhase;
+						neighbor.Distance = distance;
+						neighbor.SearchHeuristic = 0;
+						searchFrontier.Enqueue(neighbor);
+					} else if (distance < neighbor.Distance) {
+						int oldPriority = neighbor.SearchPriority;
+						neighbor.Distance = distance;
+						searchFrontier.Change(neighbor, oldPriority);
+					}
+				}
+			}
+			return visibleCells;
+		}
+
+		public void IncreaseVisibility(HexUnit unit, HexCell dynamicLocation = null) {
+			HexCell fromCell = dynamicLocation ? dynamicLocation : unit.Location;
+			int range = unit.visionRange;
+			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			for (int i = 0; i < cells.Count; i++) {
+				if (unit.Type == 0) {
+					cells[i].IncreaseVisibility();
+				} else if (unit.IsSelected) {
+					cells[i].IsDangerous = true;
+				}
+			}
+			ListPool<HexCell>.Add(cells);			
+		}
+
+		public void DecreaseVisibility(HexUnit unit, HexCell dynamicLocation = null) {
+			HexCell fromCell = dynamicLocation ? dynamicLocation : unit.Location;
+			int range = unit.visionRange;
+			List<HexCell> cells = GetVisibleCells(fromCell, range);
+			for (int i = 0; i < cells.Count; i++) {
+				if (unit.Type == 0) {
+					cells[i].DecreaseVisibility();
+				} else {
+					cells[i].IsDangerous = false;
+				}
+			}
+			ListPool<HexCell>.Add(cells);
+		}
+
 		public void ResetVisibility() {
-			for (int i = 0; i < cells.Length; i++) {
+			/*for (int i = 0; i < cells.Length; i++) {
 				cells[i].ResetVisibility();
 			}
-			if (player) {
-				IncreaseVisibility(player.Location, player.areaVisionRange);
-			}
+			if (Player) {
+				IncreaseVisibility(Player.Location, Player.areaVisionRange);
+			}*/
 		}
 
 		public void ResetExplored() {

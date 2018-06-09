@@ -1,6 +1,5 @@
 ﻿using LeGrandPotAuFeu.Grid;
 using LeGrandPotAuFeu.Unit;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -12,58 +11,46 @@ namespace LeGrandPotAuFeu.UI {
 		public Text maxEnduranceText;
 		public Text currentEnduranceText;
 		public Slider enduranceSlider;
+		public Button turnFinishButton;
 
 		HexCell currentCell;
-		HexPlayer player;
+		HexUnit selectedEnemy;
 		bool canPlayerMove = false;
 		int turnCount = 0;
 
-		void OnEnable() {			
-			if (!grid.player) {
-				Debug.Log("No player found: adding default player...");
-				grid.AddUnit(grid.GetCell((grid.cellCountX * grid.cellCountZ) / 2), 0, -1);				
+		void OnEnable() {
+			HexUnit.OnFinished += OnUnitMoveFinish;
+
+			if (!grid.Player) {
+				Debug.LogWarning("No player found ; adding default player...");
+				var cell = grid.GetCell(0).GetNeighbor(Utility.HexDirection.NE);
+				grid.AddUnit(cell, 0, 0);
 			}
-			player = grid.player;
-			var endurance = player.endurance;
+			var endurance = grid.Player.EnduranceLeft;
 			maxEnduranceText.text = endurance.ToString();
 			enduranceSlider.maxValue = endurance;
 			grid.ResetVisibility();
 
-			OnPlayerTurnBegin();			
+			OnPlayerTurnBegin();	
+		}
+
+		void OnDisable() {
+			HexUnit.OnFinished -= OnUnitMoveFinish;
 		}
 
 		void Update() {
-			if (!EventSystem.current.IsPointerOverGameObject() && canPlayerMove) {
-				if (Input.GetMouseButtonDown(1)) {
-					StopAllCoroutines();
-					StartCoroutine(DoMove());
-				} else {
-					DoPathfinding();
-				}				
+			if (!EventSystem.current.IsPointerOverGameObject()) { 
+				if (Input.GetMouseButtonDown(0)) {
+					DoSelection();
+				}
+				if (canPlayerMove) {
+					if (Input.GetMouseButtonDown(1)) {
+						DoMove();
+					} else {
+						DoPathfinding();
+					}
+				}		
 			}
-		}
-
-		void OnPlayerTurnBegin() {
-			player.ResetEnduranceLeft();
-			UpdateEnduranceLeft();
-			turnCount++;
-			UpdateTurn();
-			canPlayerMove = true;
-		}
-
-		public void OnPlayerTurnFinish() {
-			// move enemies
-
-			OnPlayerTurnBegin();
-		}
-
-		void UpdateTurn() {
-			turnText.text = turnCount.ToString();			
-		}
-
-		void UpdateEnduranceLeft() {
-			enduranceSlider.value = player.EnduranceLeft;
-			currentEnduranceText.text = player.EnduranceLeft.ToString();
 		}
 
 		public void SetGameMode(bool isInactive) {
@@ -71,8 +58,75 @@ namespace LeGrandPotAuFeu.UI {
 			gameObject.SetActive(!isInactive);
 
 			if (isInactive) {
+				if (selectedEnemy) {
+					selectedEnemy.IsSelected = false;
+					selectedEnemy = null;
+				}
 				grid.ClearPath();
 			}				
+		}
+
+		public void OnClickTurnFinish() {
+			turnFinishButton.interactable = false;
+			canPlayerMove = false;
+			
+			//
+		}
+
+		void OnPlayerTurnBegin() {
+			grid.Player.ResetEnduranceLeft();
+			UpdateEnduranceLeft();
+			turnCount++;
+			UpdateTurn();
+			turnFinishButton.interactable = true;
+			canPlayerMove = true;
+		}
+
+		void OnUnitMoveFinish(HexUnit unit) {
+			if (unit.Type == 0) {
+				UpdateEnduranceLeft();
+				grid.ClearPath();
+				if (grid.Player.EnduranceLeft > 0) {
+					canPlayerMove = true;
+				}
+			} else {
+				foreach (var enemy in grid.Enemies) {
+					if (enemy.EnduranceLeft == 0) {
+						return;
+					}
+				}
+				OnPlayerTurnBegin();
+			}
+		}
+
+		void UpdateTurn() {
+			turnText.text = turnCount.ToString();			
+		}
+
+		void UpdateEnduranceLeft() {
+			enduranceSlider.value = grid.Player.EnduranceLeft;
+			currentEnduranceText.text = grid.Player.EnduranceLeft.ToString();
+		}
+
+		void DoSelection() {
+			if (selectedEnemy) {
+				selectedEnemy.IsSelected = false;
+			}
+
+			if (currentCell) {
+				var newEnemy = currentCell.Unit;
+				if (newEnemy && newEnemy.Type > 0) {
+					if (!selectedEnemy || selectedEnemy != newEnemy) {
+						selectedEnemy = newEnemy;
+						selectedEnemy.IsSelected = true;
+						return;
+					}			
+				}
+			}
+
+			if (selectedEnemy) {
+				selectedEnemy = null;
+			}
 		}
 
 		bool UpdateCurrentCell() {
@@ -86,23 +140,18 @@ namespace LeGrandPotAuFeu.UI {
 
 		void DoPathfinding() {
 			if (UpdateCurrentCell()) {
-				if (currentCell && player.IsValidDestination(currentCell)) {
-					grid.FindPath(player, currentCell);
+				if (currentCell && grid.Player.IsValidDestination(currentCell)) {
+					grid.FindPath(grid.Player, currentCell);
 				} else {
 					grid.ClearPath();
 				}
 			}
 		}
 
-		IEnumerator DoMove() {
+		void DoMove() {
 			if (grid.HasPath) {
-				canPlayerMove = false;
-				yield return player.Travel(grid.GetPath());
-				UpdateEnduranceLeft();
+				grid.Player.Travel(grid.GetPath());
 				grid.ClearPath();
-				if (player.EnduranceLeft > 0) {
-					canPlayerMove = true;
-				}
 			}
 		}
 	}

@@ -182,6 +182,17 @@ namespace LeGrandPotAuFeu.Grid {
 				return visibility > 0 && Explorable;
 			}
 		}
+		public bool IsDangerous {
+			get { return dangerous; }
+			set {
+				dangerous = value;
+				if (value) {
+					SetFullColor(Color.red);
+				} else {
+					SetFullColor();
+				}
+			}
+		}
 		public bool IsExplored {
 			get {
 				return explored && Explorable;
@@ -218,12 +229,24 @@ namespace LeGrandPotAuFeu.Grid {
 		int plantLevel;
 		int specialIndex;
 		int visibility;
+		bool dangerous;
 		bool walled;
 		bool explored;
 		[SerializeField] bool[] roads;
 
-		public void SetLabel(string text) {
+		public void SetLabel(string text, int fontSize = 8) {
 			label.text = text;
+			if (fontSize > 0 && fontSize < 8) {
+				label.fontSize = fontSize;
+			}
+		}
+
+		public void SetOutlineColor(Color? color = null) {
+			outlineImg.color = color.HasValue ? color.Value : Color.clear;
+		}
+
+		public void SetFullColor(Color? color = null) {
+			fullImg.color = color.HasValue ? color.Value : Color.clear;			
 		}
 
 		public int GetElevationDifference(HexDirection direction) {
@@ -323,24 +346,6 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 		}
 
-		public void EnableHighlight(Color color, bool isOutline = true) {
-			if (isOutline) {
-				outlineImg.color = color;
-				outlineImg.enabled = true;
-			} else {
-				fullImg.color = color;
-				fullImg.enabled = true;
-			}
-		}
-
-		public void DisableUI(bool isOutline = true) {
-			if (isOutline) {
-				outlineImg.enabled = false;
-			} else {
-				fullImg.enabled = false;
-			}
-		}
-
 		public void Save(BinaryWriter writer) {
 			writer.Write((byte)terrainTypeIndex);
 			writer.Write((byte)elevation);
@@ -386,7 +391,7 @@ namespace LeGrandPotAuFeu.Grid {
 				visibility = 0;
 				ShaderData.RefreshVisibility(this);
 			}
-			DisableUI(false);
+			SetFullColor();
 		}
 
 		public void ResetExplored() {

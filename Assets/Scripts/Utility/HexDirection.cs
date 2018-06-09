@@ -14,5 +14,24 @@
 		public static HexDirection Next(this HexDirection direction) {
 			return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
 		}
+
+		public static float Angle(this HexDirection direction) {
+			switch (direction) {
+				case HexDirection.NE:
+					return 30;
+				case HexDirection.E:
+					return 90;
+				case HexDirection.SE:
+					return 150;
+				case HexDirection.SW:
+					return 210;
+				case HexDirection.W:
+					return 270;
+				case HexDirection.NW:
+					return 330;
+				default:
+					return 0;
+			}
+		}
 	}
 }

@@ -24,7 +24,7 @@ namespace LeGrandPotAuFeu.UI {
 		int activePlantLevel = 0;
 		int activeSpecialIndex = 0;
 		int brushSize = 0;
-		int enemyType = 0;
+		int unitType = 1;
 
 		bool applyElevation = false;
 		bool applyWaterLevel = false;
@@ -50,10 +50,7 @@ namespace LeGrandPotAuFeu.UI {
 					DestroyUnit();
 					return;
 				} else if (Input.GetKeyDown(KeyCode.U)) {
-					CreateUnit(false);
-					return;
-				} else if (Input.GetKeyDown(KeyCode.P)) {
-					CreateUnit(true);
+					CreateUnit();
 					return;
 				}
 			}
@@ -150,10 +147,12 @@ namespace LeGrandPotAuFeu.UI {
 			}
 		}
 
-		void CreateUnit(bool isPlayer) {
+		void CreateUnit() {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit && cell.Explorable) {
-				grid.AddUnit(cell, Random.Range(0f, 360f), (isPlayer ? -1 : enemyType));
+				var hexDirections = System.Enum.GetValues(typeof(HexDirection));
+				var randomHexDirection = (HexDirection)hexDirections.GetValue(Random.Range(0, hexDirections.Length));
+				grid.AddUnit(cell, randomHexDirection.Angle(), unitType);
 			}
 		}
 
@@ -228,8 +227,8 @@ namespace LeGrandPotAuFeu.UI {
 			brushSize = (int)size;
 		}
 
-		public void SetEnemyType(float type) {
-			enemyType = (int)type;
+		public void SetUnitType(float type) {
+			unitType = (int)type;
 		}
 
 		public void ShowGrid(bool visible) {
