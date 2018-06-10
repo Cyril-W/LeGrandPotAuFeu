@@ -14,14 +14,11 @@ namespace LeGrandPotAuFeu.Unit {
 		public delegate void ClickAction(HexUnit unit);
 		public static event ClickAction OnFinished;
 
-		public int visionRange = 3;
-
 		public HexGrid Grid { get; set; }
 		public HexDirection FacingDirection {
 			get {
-				var hexDirections = System.Enum.GetValues(typeof(HexDirection)).Cast<HexDirection>();			
+				var hexDirections = System.Enum.GetValues(typeof(HexDirection)).Cast<HexDirection>();
 				var facingDirection = hexDirections.OrderBy(x => Mathf.Abs(orientation - x.Angle())).First();
-				Debug.Log(name + " faces : " + facingDirection);
 				return facingDirection;
 			}
 		}
@@ -45,7 +42,7 @@ namespace LeGrandPotAuFeu.Unit {
 				}
 				location = value;
 				value.Unit = this;
-				Grid.IncreaseVisibility(this);				
+				Grid.IncreaseVisibility(this);
 				transform.localPosition = value.Position;
 			}
 		}
@@ -54,29 +51,35 @@ namespace LeGrandPotAuFeu.Unit {
 		public bool IsSelected {
 			get { return selected; }
 			set {
-				selected = value;
-				if (value) {
-					Grid.IncreaseVisibility(this);
-				} else {
-					Grid.DecreaseVisibility(this);
+				if (Type > 0) {
+					selected = value;
+					UpdateVisibleCells();
 				}
 			}
 		}
 
+		public int visionRange = 3;
+		[Range(0, 6)]	public int numberDirection = 6;
 		[SerializeField] int endurance = 12;
 		[SerializeField] float travelSpeed = 4f;
 		[SerializeField] float rotationSpeed = 180f;
 		float orientation;
 		bool selected;
-		HexCell location;
-		List<HexCell> pathToTravel;
+		HexCell location, currentTravelLocation;
+		List<HexCell> pathToTravel, visibleCells;
 
 		void OnEnable() {
 			// If there is a recompile
 			if (location) {
 				transform.localPosition = location.Position;
+				if (currentTravelLocation) {
+					Grid.IncreaseVisibility(this);
+					Grid.DecreaseVisibility(this, currentTravelLocation);
+					currentTravelLocation = null;
+				}
 			}
 			EnduranceLeft = endurance;
+			UpdateVisibleCells();
 		}
 
 		public void ResetEnduranceLeft() {
@@ -108,8 +111,8 @@ namespace LeGrandPotAuFeu.Unit {
 			grid.AddUnit(grid.GetCell(coordinates), orientation, type);
 		}
 
-		public bool IsValidDestination(HexCell cell) {
-			return !cell.IsUnderwater && !cell.Unit;
+		public static bool IsValidDestination(HexCell cell) {
+			return !cell.IsUnderwater && !cell.Unit && cell.IsExplored;
 		}
 
 		public int GetMoveCost(HexCell fromCell, HexCell toCell, HexDirection direction) {
@@ -139,18 +142,26 @@ namespace LeGrandPotAuFeu.Unit {
 		IEnumerator TravelPath() {
 			if (Type == 0) {
 				EnduranceLeft -= pathToTravel[pathToTravel.Count - 1].Distance;
+			} else {
+				EnduranceLeft = 0;
 			}
 
 			Vector3 a, b, c = pathToTravel[0].Position;
 			yield return LookAt(pathToTravel[1].Position);
-			Grid.DecreaseVisibility(this, pathToTravel[0]);
+			Grid.DecreaseVisibility(this, currentTravelLocation ? currentTravelLocation : pathToTravel[0]);
 
 			float t = Time.deltaTime * travelSpeed;
 			for (int i = 1; i < pathToTravel.Count; i++) {
+				currentTravelLocation = pathToTravel[i];
 				a = c;
 				b = pathToTravel[i - 1].Position;
-				c = (b + pathToTravel[i].Position) * 0.5f;
+				if (i < pathToTravel.Count - 1) {
+					c = (b + pathToTravel[i].Position) * 0.5f;
+				} else {
+					c = pathToTravel[i].Position;
+				}
 				Grid.IncreaseVisibility(this, pathToTravel[i]);
+				UpdateVisibleCells();
 				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 					transform.localPosition = BezierGetPoint(a, b, c, t);
 					Vector3 d = BezierGetDerivative(a, b, c, t);
@@ -161,6 +172,7 @@ namespace LeGrandPotAuFeu.Unit {
 				Grid.DecreaseVisibility(this, pathToTravel[i]);
 				t -= 1f;
 			}
+			currentTravelLocation = null;
 
 			transform.localPosition = location.Position;
 			orientation = transform.localRotation.eulerAngles.y;
@@ -168,9 +180,6 @@ namespace LeGrandPotAuFeu.Unit {
 			ListPool<HexCell>.Add(pathToTravel);
 			pathToTravel = null;
 
-			if (Type > 0) {
-				EnduranceLeft = 0;
-			}
 			OnFinished(this);
 		}
 
@@ -200,6 +209,27 @@ namespace LeGrandPotAuFeu.Unit {
 
 		Vector3 BezierGetDerivative(Vector3 a, Vector3 b, Vector3 c, float t) {
 			return 2f * ((1f - t) * (b - a) + t * (c - b));
-		}		
+		}
+
+		public void UpdateVisibleCells() {			
+			// Not for player
+			if (Type > 0) {
+				if (visibleCells != null) {
+					SetVisibleCells(false);
+				}
+				visibleCells = Grid.GetVisibleCells(location, visionRange, false, FacingDirection, numberDirection);
+				SetVisibleCells(IsSelected);
+			}
+		}
+
+		void SetVisibleCells(bool isActive) {
+			foreach (var cell in visibleCells) {
+				if (isActive && cell.IsExplored) {
+					cell.SetFullColor(Grid.enemyVisionColor);
+				} else {
+					cell.SetFullColor();
+				}
+			}
+		}
 	}
 }

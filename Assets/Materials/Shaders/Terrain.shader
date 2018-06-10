@@ -6,6 +6,7 @@
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Specular("Specular", Color) = (0.2, 0.2, 0.2)
 		_BackgroundColor("Background Color", Color) = (0,0,0)
+		_DeadlyColor("Deadly Color", Color) = (0,0,0, 1)
 	}
 		SubShader{
 		Tags{ "RenderType" = "Opaque" }
@@ -27,6 +28,7 @@
 			float3 worldPos;
 			float3 terrain;
 			float4 visibility;
+			float3 deadly;
 		};
 
 		void vert(inout appdata_full v, out Input data) {
@@ -45,17 +47,26 @@
 			data.visibility.z = cell2.x;
 			data.visibility.xyz = lerp(0.25, 1, data.visibility.xyz);
 			data.visibility.w = cell0.y * v.color.x + cell1.y * v.color.y + cell2.y * v.color.z;
+		
+			data.deadly.x = cell0.z;
+			data.deadly.y = cell1.z;
+			data.deadly.z = cell2.z;
 		}
 
 		half _Glossiness;
 		fixed3 _Specular;
 		fixed4 _Color;
 		half3 _BackgroundColor;
+		fixed4 _DeadlyColor;
 
 		float4 GetTerrainColor(Input IN, int index) {
 			float3 uvw = float3(IN.worldPos.xz * 0.02, IN.terrain[index]);
 			float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, uvw);
-			return c * (IN.color[index] * IN.visibility[index]);
+			c *= IN.color[index] * IN.visibility[index];
+			if (IN.deadly[index] > 0) {
+				c *= _DeadlyColor;
+			}
+			return c;
 		}
 
 		void surf(Input IN, inout SurfaceOutputStandardSpecular  o) {

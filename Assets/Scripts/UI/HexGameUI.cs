@@ -26,6 +26,7 @@ namespace LeGrandPotAuFeu.UI {
 				var cell = grid.GetCell(0).GetNeighbor(Utility.HexDirection.NE);
 				grid.AddUnit(cell, 0, 0);
 			}
+			grid.Player.ResetEnduranceLeft();
 			var endurance = grid.Player.EnduranceLeft;
 			maxEnduranceText.text = endurance.ToString();
 			enduranceSlider.maxValue = endurance;
@@ -46,8 +47,8 @@ namespace LeGrandPotAuFeu.UI {
 				if (canPlayerMove) {
 					if (Input.GetMouseButtonDown(1)) {
 						DoMove();
-					} else {
-						DoPathfinding();
+					} else if (UpdateCurrentCell()) {
+						DoPathfinding(grid.Player);
 					}
 				}		
 			}
@@ -63,14 +64,22 @@ namespace LeGrandPotAuFeu.UI {
 					selectedEnemy = null;
 				}
 				grid.ClearPath();
-			}				
+			}			
 		}
 
 		public void OnClickTurnFinish() {
 			turnFinishButton.interactable = false;
 			canPlayerMove = false;
-			
-			//
+
+			foreach (var enemy in grid.Enemies) {
+				//currentCell = random from visible cell
+				// DoPathfinding(enemy);
+				// if (grid.HasPath) {
+				// enemy.Travel(grid.GetPath());
+				// }
+			}
+
+			OnPlayerTurnBegin();
 		}
 
 		void OnPlayerTurnBegin() {
@@ -138,13 +147,11 @@ namespace LeGrandPotAuFeu.UI {
 			return false;
 		}
 
-		void DoPathfinding() {
-			if (UpdateCurrentCell()) {
-				if (currentCell && grid.Player.IsValidDestination(currentCell)) {
-					grid.FindPath(grid.Player, currentCell);
-				} else {
-					grid.ClearPath();
-				}
+		void DoPathfinding(HexUnit unit) {
+			if (currentCell && HexUnit.IsValidDestination(currentCell)) {
+				grid.FindPath(unit, currentCell);
+			} else {
+				grid.ClearPath();
 			}
 		}
 

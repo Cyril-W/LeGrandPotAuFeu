@@ -182,15 +182,11 @@ namespace LeGrandPotAuFeu.Grid {
 				return visibility > 0 && Explorable;
 			}
 		}
-		public bool IsDangerous {
-			get { return dangerous; }
+		public bool IsDeadly {
+			get { return deadly; }
 			set {
-				dangerous = value;
-				if (value) {
-					SetFullColor(Color.red);
-				} else {
-					SetFullColor();
-				}
+				deadly = value;
+				ShaderData.RefreshDeadly(this);
 			}
 		}
 		public bool IsExplored {
@@ -229,7 +225,7 @@ namespace LeGrandPotAuFeu.Grid {
 		int plantLevel;
 		int specialIndex;
 		int visibility;
-		bool dangerous;
+		bool deadly;
 		bool walled;
 		bool explored;
 		[SerializeField] bool[] roads;

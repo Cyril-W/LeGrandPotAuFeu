@@ -12116,15 +12116,14 @@ MonoBehaviour:
   chunkPrefab: {fileID: 114509925166575734, guid: 36e09a2379fcc0e41acfec7586fbf819,
     type: 2}
   startColor: {r: 0, g: 0, b: 1, a: 1}
-  pathColor: {r: 0, g: 0, b: 0, a: 1}
+  pathColor: {r: 0.40784314, g: 0.38039216, b: 0.35686275, a: 1}
   endColor: {r: 0, g: 1, b: 0, a: 1}
-  enemyAreaColor: {r: 1, g: 0, b: 0, a: 0.39215687}
-  enemyLineColor: {r: 1, g: 1, b: 0, a: 0.39215687}
+  enemyVisionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 0.39215687}
   noiseSource: {fileID: 2800000, guid: cd2ea2f0916da9d4583c920d5867739b, type: 3}
   cellCountX: 25
   cellCountZ: 15
   seed: 1234
-  displayCoordinates: 1
+  displayCoordinates: 0
 --- !u!4 &1477476098
 Transform:
   m_ObjectHideFlags: 0
