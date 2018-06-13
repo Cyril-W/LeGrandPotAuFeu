@@ -137,8 +137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85b3ff052d86eda4daabb41c88494490, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 1
-  numberDirection: 6
-  endurance: 12
+  visionRange: 3
+  numberDirection: 3
+  endurance: 1
   travelSpeed: 4
   rotationSpeed: 180

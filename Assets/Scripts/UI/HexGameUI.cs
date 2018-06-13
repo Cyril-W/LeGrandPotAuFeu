@@ -1,8 +1,9 @@
 ﻿using LeGrandPotAuFeu.Grid;
 using LeGrandPotAuFeu.Unit;
+using LeGrandPotAuFeu.Utility;
+using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace LeGrandPotAuFeu.UI {
 	public class HexGameUI : MonoBehaviour {
@@ -24,13 +25,14 @@ namespace LeGrandPotAuFeu.UI {
 			if (!grid.Player) {
 				Debug.LogWarning("No player found ; adding default player...");
 				var cell = grid.GetCell(0).GetNeighbor(Utility.HexDirection.NE);
-				grid.AddUnit(cell, 0, 0);
+				grid.AddUnit(cell, 90, 0);
+			} else {
+				grid.ResetVisibility();
 			}
 			grid.Player.ResetEnduranceLeft();
 			var endurance = grid.Player.EnduranceLeft;
 			maxEnduranceText.text = endurance.ToString();
 			enduranceSlider.maxValue = endurance;
-			grid.ResetVisibility();
 
 			OnPlayerTurnBegin();	
 		}
@@ -71,12 +73,14 @@ namespace LeGrandPotAuFeu.UI {
 			turnFinishButton.interactable = false;
 			canPlayerMove = false;
 
-			foreach (var enemy in grid.Enemies) {
-				//currentCell = random from visible cell
-				// DoPathfinding(enemy);
-				// if (grid.HasPath) {
-				// enemy.Travel(grid.GetPath());
-				// }
+			for (int i = 0; i < grid.Enemies.Count; i++) {
+				var enemy = grid.Enemies[i];
+				enemy.Orientation = HexDirectionExtensions.GetRandomDirection();
+				currentCell = enemy.GetRandomVisibleCell();
+				DoPathfinding(enemy);
+				if (grid.HasPath) {
+					enemy.Travel(grid.GetPath());
+				}
 			}
 
 			OnPlayerTurnBegin();

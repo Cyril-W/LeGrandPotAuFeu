@@ -373,8 +373,8 @@ namespace LeGrandPotAuFeu.Grid {
 			}
 			unit.Grid = this;
 			unit.Type = type;
-			unit.Location = location;
 			unit.Orientation = orientation;
+			unit.Location = location;
 			var unitName = ((HexUnitType)type).ToString();
 			if (isEnemy) {
 				unitName += Enemies.FindAll(x => x.Type == type).Count;
@@ -404,7 +404,6 @@ namespace LeGrandPotAuFeu.Grid {
 
 		public List<HexCell> GetVisibleCells(HexCell fromCell, int range, bool applyElevation, HexDirection facingDirection, int nbDirections) {
 			List<HexCell> visibleCells = ListPool<HexCell>.Get();
-
 			searchFrontierPhase += 2;
 			if (searchFrontier == null) {
 				searchFrontier = new HexCellPriorityQueue();
@@ -419,22 +418,25 @@ namespace LeGrandPotAuFeu.Grid {
 			fromCell.Distance = 0;
 			searchFrontier.Enqueue(fromCell);
 			HexCoordinates fromCoordinates = fromCell.coordinates;
+
+			for (int i = 0; i < nbDirections / 2; i++) {
+				facingDirection = facingDirection.Previous();
+			}
+
 			while (searchFrontier.Count > 0) {
 				HexCell current = searchFrontier.Dequeue();
 				current.SearchPhase += 1;
 				visibleCells.Add(current);
-
-				for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
-					HexCell neighbor = current.GetNeighbor(d);
+				HexDirection currentFacingDirection = facingDirection;
+				for (int i = 0; i < nbDirections; i++, currentFacingDirection = currentFacingDirection.Next()) {
+					HexCell neighbor = current.GetNeighbor(currentFacingDirection);
 					if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
 						continue;
 					}
-
 					int distance = current.Distance + 1;
 					if (distance + neighbor.ViewElevation > range || distance > fromCoordinates.DistanceTo(neighbor.coordinates)) {
 						continue;
 					}
-
 					if (neighbor.SearchPhase < searchFrontierPhase) {
 						neighbor.SearchPhase = searchFrontierPhase;
 						neighbor.Distance = distance;
@@ -461,7 +463,7 @@ namespace LeGrandPotAuFeu.Grid {
 					cells[i].IsDeadly = true;
 				}
 
-				var enemy = i > 0 ? cells[i].Unit : null;
+				var enemy = cells[i].Unit;
 				if (enemy) {
 					enemy.UpdateVisibleCells();
 				}
@@ -480,7 +482,7 @@ namespace LeGrandPotAuFeu.Grid {
 					cells[i].IsDeadly = false;
 				}
 
-				var enemy = i > 0 ? cells[i].Unit : null;
+				var enemy = cells[i].Unit;
 				if (enemy) {
 					enemy.UpdateVisibleCells();
 				}

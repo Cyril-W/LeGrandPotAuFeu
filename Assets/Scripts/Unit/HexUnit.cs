@@ -29,6 +29,9 @@ namespace LeGrandPotAuFeu.Unit {
 			set {
 				orientation = value;
 				transform.localRotation = Quaternion.Euler(0f, value, 0f);
+				if (location) {
+					UpdateVisibleCells();
+				}
 			}
 		}
 		public HexCell Location {
@@ -218,8 +221,28 @@ namespace LeGrandPotAuFeu.Unit {
 					SetVisibleCells(false);
 				}
 				visibleCells = Grid.GetVisibleCells(location, visionRange, false, FacingDirection, numberDirection);
-				SetVisibleCells(IsSelected);
+				if (IsSelected) {
+					SetVisibleCells(IsSelected);
+				}
 			}
+		}
+
+		public HexCell GetRandomVisibleCell() {
+			// Not for player
+			if (Type > 0) {
+				HexCell randomCell = null;
+				int i = 0;
+				do {
+					randomCell = visibleCells[Random.Range(0, visibleCells.Count)];
+					i++;
+				} while (i < 100 && !IsValidDestination(randomCell));
+				if (i == 100) {
+					return null;
+				} else {
+					return randomCell;
+				}
+			} else
+				return null;
 		}
 
 		void SetVisibleCells(bool isActive) {

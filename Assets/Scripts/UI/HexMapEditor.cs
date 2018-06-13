@@ -150,9 +150,8 @@ namespace LeGrandPotAuFeu.UI {
 		void CreateUnit() {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit && cell.Explorable) {
-				var hexDirections = System.Enum.GetValues(typeof(HexDirection));
-				var randomHexDirection = (HexDirection)hexDirections.GetValue(Random.Range(0, hexDirections.Length));
-				grid.AddUnit(cell, randomHexDirection.Angle(), unitType);
+				var orientation = HexDirectionExtensions.GetRandomDirection();
+				grid.AddUnit(cell, orientation, unitType);
 			}
 		}
 

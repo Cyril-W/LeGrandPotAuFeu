@@ -1,4 +1,6 @@
-﻿namespace LeGrandPotAuFeu.Utility {
+﻿using UnityEngine;
+
+namespace LeGrandPotAuFeu.Utility {
 	public enum HexDirection {
 		NE, E, SE, SW, W, NW
 	}
@@ -32,6 +34,12 @@
 				default:
 					return 0;
 			}
+		}
+
+		public static float GetRandomDirection() {
+			var hexDirections = System.Enum.GetValues(typeof(HexDirection));
+			var randomDirection = (HexDirection)hexDirections.GetValue(Random.Range(0, hexDirections.Length));
+			return randomDirection.Angle();
 		}
 	}
 }
