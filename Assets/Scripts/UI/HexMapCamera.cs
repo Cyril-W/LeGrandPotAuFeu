@@ -5,27 +5,31 @@ using UnityEngine;
 namespace LeGrandPotAuFeu.UI {
 	public class HexMapCamera : MonoBehaviour {
 		[Header("Stick Zoom Range")]
-		public float stickMinZoom = -250;
-		public float stickMaxZoom = -45;
+		[SerializeField] float stickMinZoom = -250;
+		[SerializeField] float stickMaxZoom = -45;
 		[Header("Swivel Zoom Range")]
-		public float swivelMinZoom = 90;
-		public float swivelMaxZoom = 45;
+		[SerializeField] float swivelMinZoom = 90;
+		[SerializeField] float swivelMaxZoom = 45;
 		[Header("Movement Speed Range")]
-		public float moveSpeedMinZoom = 400;
-		public float moveSpeedMaxZoom = 100;
+		[SerializeField] float moveSpeedMinZoom = 400;
+		[SerializeField] float moveSpeedMaxZoom = 100;
+		[SerializeField] float distanceDamp = 5;
 		[Header("Rotation Speed")]
-		public float rotationSpeed = 180;
-		[Header("Drag'n'Drop")]
-		public HexGrid grid;
+		[SerializeField] float rotationSpeed = 180;
+		[SerializeField] float rotationDamp = 2;
+		[Header("Other")]
+		[SerializeField] HexGrid grid;
 
 		public static bool Locked {
 			set {
 				instance.enabled = !value;
 			}
 		}
+		public static bool isFocused { get; set; }
+
 		static HexMapCamera instance;
 
-		Transform swivel, stick;
+		Transform swivel, stick, player;
 		float zoom = 1f;
 		float rotationAngle;
 
@@ -36,21 +40,51 @@ namespace LeGrandPotAuFeu.UI {
 		}
 
 		void Update() {
-			float zoomDelta = Input.GetAxis("Mouse ScrollWheel");
-			if (zoomDelta != 0f) {
-				AdjustZoom(zoomDelta);
+			if (!isFocused) {
+				float zoomDelta = Input.GetAxis("Mouse ScrollWheel");
+				if (zoomDelta != 0f) {
+					AdjustZoom(zoomDelta);
+				}
+
+				float rotationDelta = Input.GetAxis("Rotation");
+				if (rotationDelta != 0f) {
+					AdjustRotation(rotationDelta);
+				}
+
+				float xDelta = Input.GetAxis("Horizontal");
+				float zDelta = Input.GetAxis("Vertical");
+				if (xDelta != 0f || zDelta != 0f) {
+					AdjustPosition(xDelta, zDelta);
+				}
 			}
+		}
 
-			float rotationDelta = Input.GetAxis("Rotation");
-			if (rotationDelta != 0f) {
-				AdjustRotation(rotationDelta);
-			}
+		private void FixedUpdate() {
+			if (isFocused) {
+				// dezoom ... maybe in relation to the height
+				AdjustZoom(Time.deltaTime);
 
+				if (!player) {
+					player = grid.Player.transform;
+				}
 
-			float xDelta = Input.GetAxis("Horizontal");
-			float zDelta = Input.GetAxis("Vertical");
-			if (xDelta != 0f || zDelta != 0f) {
-				AdjustPosition(xDelta, zDelta);
+				if (player) {
+					// position
+					Vector3 targetPos = player.position;
+					transform.position = Vector3.Lerp(transform.position, targetPos, distanceDamp * Time.deltaTime);
+
+					// rotation
+					Quaternion targetRot;
+					if (Input.GetMouseButton(0)) {
+						float rotationDelta = -Input.GetAxis("Mouse X");
+						if (rotationDelta != 0f) {
+							targetRot = Quaternion.Euler(Vector3.up * rotationDelta * rotationSpeed * Time.deltaTime);
+							player.localRotation = player.localRotation * targetRot;
+						}
+					} 	
+					targetRot = Quaternion.Euler(new Vector3(0, player.rotation.eulerAngles.y, 0f));
+					transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationDamp * Time.deltaTime);
+				}
 			}
 		}
 

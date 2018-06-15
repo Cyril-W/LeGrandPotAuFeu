@@ -30,7 +30,7 @@ namespace LeGrandPotAuFeu.Unit {
 				orientation = value;
 				transform.localRotation = Quaternion.Euler(0f, value, 0f);
 				if (location) {
-					UpdateVisibleCells();
+					UpdateDangerousCells();
 				}
 			}
 		}
@@ -56,7 +56,7 @@ namespace LeGrandPotAuFeu.Unit {
 			set {
 				if (Type > 0) {
 					selected = value;
-					UpdateVisibleCells();
+					UpdateDangerousCells();
 				}
 			}
 		}
@@ -82,7 +82,7 @@ namespace LeGrandPotAuFeu.Unit {
 				}
 			}
 			EnduranceLeft = endurance;
-			UpdateVisibleCells();
+			UpdateDangerousCells();
 		}
 
 		public void ResetEnduranceLeft() {
@@ -164,7 +164,7 @@ namespace LeGrandPotAuFeu.Unit {
 					c = pathToTravel[i].Position;
 				}
 				Grid.IncreaseVisibility(this, pathToTravel[i]);
-				UpdateVisibleCells();
+				UpdateDangerousCells();
 				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 					transform.localPosition = BezierGetPoint(a, b, c, t);
 					Vector3 d = BezierGetDerivative(a, b, c, t);
@@ -214,15 +214,19 @@ namespace LeGrandPotAuFeu.Unit {
 			return 2f * ((1f - t) * (b - a) + t * (c - b));
 		}
 
-		public void UpdateVisibleCells() {			
-			// Not for player
+		public void UpdateDangerousCells() {			
 			if (Type > 0) {
+				// get old list
 				if (visibleCells != null) {
-					SetVisibleCells(false);
+					SetDangerousCells(false);
 				}
+				// construct new list
 				visibleCells = Grid.GetVisibleCells(location, visionRange, false, FacingDirection, numberDirection);
+				// divide list between old and new
+
+				// set aspect of new list
 				if (IsSelected) {
-					SetVisibleCells(IsSelected);
+					SetDangerousCells(IsSelected);
 				}
 			}
 		}
@@ -245,10 +249,12 @@ namespace LeGrandPotAuFeu.Unit {
 				return null;
 		}
 
-		void SetVisibleCells(bool isActive) {
-			foreach (var cell in visibleCells) {
+		void SetDangerousCells(bool isActive) {
+			for (int i = 0; i < visibleCells.Count; i++) {
+				var cell = visibleCells[i];
 				if (isActive && cell.IsExplored) {
-					cell.SetFullColor(Grid.enemyVisionColor);
+					var color = Grid.dangerousGradient.Evaluate((float)i / visibleCells.Count);
+					cell.SetFullColor(color);
 				} else {
 					cell.SetFullColor();
 				}

@@ -13,10 +13,8 @@ namespace LeGrandPotAuFeu.Grid {
 		public RectTransform cellUI;
 		public HexGridChunk chunkPrefab;
 		[Header("Game UI Colors")]
-		public Color startColor = Color.blue;
-		public Color pathColor = Color.gray;
-		public Color endColor = Color.green;
-		public Color enemyVisionColor = Color.yellow;
+		public Gradient pathGradient;
+		public Gradient dangerousGradient;
 		[Header("Noise Texture")]
 		public Texture2D noiseSource;
 		[Header("Size of the map")]
@@ -265,14 +263,14 @@ namespace LeGrandPotAuFeu.Grid {
 
 		void ShowPath() {
 			if (currentPathExists) {
-				HexCell current = currentPathTo;
-				while (current != currentPathFrom) {					
-					current.SetOutlineColor(pathColor);
-					current = current.PathFrom;
+				List<HexCell> path = GetPath();
+				for (int i = 0; i < path.Count; i++) {
+					var color = pathGradient.Evaluate((float)i / path.Count);
+					path[i].SetOutlineColor(color);
 				}
 			}
-			currentPathFrom.SetOutlineColor(startColor);
-			currentPathTo.SetOutlineColor(endColor);
+			currentPathFrom.SetOutlineColor(pathGradient.Evaluate(0));
+			currentPathTo.SetOutlineColor(pathGradient.Evaluate(1));
 			currentPathTo.SetLabel(currentPathTo.Distance.ToString());
 		}
 
@@ -465,7 +463,7 @@ namespace LeGrandPotAuFeu.Grid {
 
 				var enemy = cells[i].Unit;
 				if (enemy) {
-					enemy.UpdateVisibleCells();
+					enemy.UpdateDangerousCells();
 				}
 			}
 			ListPool<HexCell>.Add(cells);			
@@ -484,7 +482,7 @@ namespace LeGrandPotAuFeu.Grid {
 
 				var enemy = cells[i].Unit;
 				if (enemy) {
-					enemy.UpdateVisibleCells();
+					enemy.UpdateDangerousCells();
 				}
 			}
 			ListPool<HexCell>.Add(cells);

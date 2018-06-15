@@ -59,6 +59,7 @@ namespace LeGrandPotAuFeu.UI {
 		public void SetGameMode(bool isInactive) {
 			enabled = !isInactive;
 			gameObject.SetActive(!isInactive);
+			HexMapCamera.isFocused = !isInactive;
 
 			if (isInactive) {
 				if (selectedEnemy) {
@@ -161,6 +162,7 @@ namespace LeGrandPotAuFeu.UI {
 
 		void DoMove() {
 			if (grid.HasPath) {
+				canPlayerMove = false;
 				grid.Player.Travel(grid.GetPath());
 				grid.ClearPath();
 			}
