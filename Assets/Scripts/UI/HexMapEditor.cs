@@ -1,6 +1,8 @@
 ﻿using LeGrandPotAuFeu.Grid;
 using LeGrandPotAuFeu.Unit;
 using LeGrandPotAuFeu.Utility;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -157,21 +159,37 @@ namespace LeGrandPotAuFeu.UI {
 
 		void DestroyUnit() {
 			HexCell cell = GetCellUnderCursor();
-			if (cell && cell.Unit) {
+			if (cell && cell.Unit && cell.Unit != grid.Player) {
 				grid.RemoveUnit(cell.Unit);
 			}
 		}
 
 		void AddSpecialIndex() {
 			HexCell cell = GetCellUnderCursor();
-			if (cell && !cell.Unit && cell.Explorable) {
-				cell.SpecialIndex = (int)heroType;
+			if (cell && !cell.Unit && cell.Explorable && cell.SpecialIndex == 0) {
+				if (grid.Player) {
+					var previousCell = grid.Player.GetCellWithHero(heroType.ToString());
+					if (previousCell) { // if this is a displacement
+						ResetSpecialIndex(previousCell);
+					} else { // if it is the first time				
+						grid.Player.UpdateHeroDisplay((int)heroType, false);
+					}
+					grid.Player.UpdateCellWithHero(heroType.ToString(), cell);
+				}
+				cell.SpecialIndex = (int)heroType;				
 			}
 		}
 
-		void ResetSpecialIndex() {
-			HexCell cell = GetCellUnderCursor();
-			if (cell) {
+		void ResetSpecialIndex(HexCell cell = null) {
+			if (cell == null) { // if this is not a displacement
+				cell = GetCellUnderCursor();
+				if (cell && cell.SpecialIndex > 0) {
+					grid.Player.UpdateHeroDisplay(cell.SpecialIndex, true);
+					grid.Player.UpdateCellWithHero(heroType.ToString(), null);
+					cell.SpecialIndex = 0;
+				}
+			}
+			if (cell && cell.SpecialIndex > 0) {
 				cell.SpecialIndex = 0;
 			}
 		}
@@ -238,7 +256,6 @@ namespace LeGrandPotAuFeu.UI {
 
 		public void SetHeroType(float type) {
 			heroType = (HexHeroType)type;
-			Debug.Log(heroType);
 		}
 
 		public void ShowGrid(bool visible) {

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace LeGrandPotAuFeu.Grid {
 	public class HexGrid : MonoBehaviour {
 		[Header("Prefabs")]
-		public HexUnit playerPrefab;
+		public HexPlayer playerPrefab;
 		public HexUnit[] enemyPrefabs;
 		public HexCell cellPrefab;
 		public RectTransform cellUI;
@@ -25,7 +25,7 @@ namespace LeGrandPotAuFeu.Grid {
 		[Header("Debug tool")]
 		public bool displayCoordinates = false;
 
-		public HexUnit Player { get; private set; }
+		public HexPlayer Player { get; private set; }
 		public List<HexUnit> Enemies { get; private set; }
 
 		public bool HasPath {
@@ -50,6 +50,9 @@ namespace LeGrandPotAuFeu.Grid {
 			cellShaderData = gameObject.AddComponent<HexCellShaderData>();
 			cellShaderData.Grid = this;
 			CreateMap(cellCountX, cellCountZ);
+			// Create a default player
+			var cell = GetCell(0).GetNeighbor(Utility.HexDirection.NE);
+			AddUnit(cell, 90, 0);
 		}
 
 		void OnEnable() {
@@ -366,8 +369,8 @@ namespace LeGrandPotAuFeu.Grid {
 				if (Player) {
 					Player.Die();
 				}
-				unit = Instantiate(playerPrefab, transform, false);
-				Player = unit;
+				Player = Instantiate(playerPrefab, transform, false);
+				unit = Player;
 			}
 			unit.Grid = this;
 			unit.Type = type;

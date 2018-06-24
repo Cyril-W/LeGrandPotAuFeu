@@ -37,7 +37,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4399891821784040}
   - component: {fileID: 65562179471517602}
-  - component: {fileID: 114396359636354250}
+  - component: {fileID: 114316343594063442}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -710,7 +710,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114396359636354250
+--- !u!114 &114316343594063442
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -718,7 +718,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1152513794224176}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85b3ff052d86eda4daabb41c88494490, type: 3}
+  m_Script: {fileID: 11500000, guid: 0f23f4fe6abc26b49a5293b70b3e93c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   visionRange: 3
@@ -726,3 +726,12 @@ MonoBehaviour:
   endurance: 12
   travelSpeed: 4
   rotationSpeed: 180
+  heroMeshes:
+  - {fileID: 1551121177785208}
+  - {fileID: 1421630156383526}
+  - {fileID: 1759718277287750}
+  - {fileID: 1731703708525818}
+  - {fileID: 1571060067182716}
+  - {fileID: 1506229683733436}
+  - {fileID: 1004265122134998}
+  - {fileID: 1243224821368390}

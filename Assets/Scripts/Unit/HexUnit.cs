@@ -10,9 +10,6 @@ namespace LeGrandPotAuFeu.Unit {
 	enum HexUnitType {
 		Player, Carrot, Leek, Potato, Turnip
 	}
-	enum HexHeroType {
-		Ranger, Mage, Elf, Barbarian, Thief, Paladin, Minstrel, Dwarf, Ogre
-	}
 	public class HexUnit : MonoBehaviour {
 		public delegate void ClickAction(HexUnit unit);
 		public static event ClickAction OnFinished;
