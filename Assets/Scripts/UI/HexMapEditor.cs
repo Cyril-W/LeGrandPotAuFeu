@@ -22,16 +22,15 @@ namespace LeGrandPotAuFeu.UI {
 		int activeUrbanLevel = 0;
 		int activeFarmLevel = 0;
 		int activePlantLevel = 0;
-		int activeSpecialIndex = 0;
 		int brushSize = 0;
-		int unitType = 1;
+		HexUnitType unitType = HexUnitType.Potato;
+		HexHeroType heroType = HexHeroType.Mage;
 
 		bool applyElevation = false;
 		bool applyWaterLevel = false;
 		bool applyUrbanLevel = false;
 		bool applyFarmLevel = false;
 		bool applyPlantLevel = false;
-		bool applySpecialIndex = false;
 
 		OptionalToggle roadMode, walledMode = OptionalToggle.Ignore;
 
@@ -48,9 +47,13 @@ namespace LeGrandPotAuFeu.UI {
 				}
 				if (Input.GetKey(KeyCode.LeftShift)) {
 					DestroyUnit();
+					ResetSpecialIndex();
 					return;
 				} else if (Input.GetKeyDown(KeyCode.U)) {
 					CreateUnit();
+					return;
+				} else if (Input.GetKeyDown(KeyCode.H)) {
+					AddSpecialIndex();
 					return;
 				}
 			}
@@ -117,9 +120,6 @@ namespace LeGrandPotAuFeu.UI {
 				if (applyWaterLevel) {
 					cell.WaterLevel = activeWaterLevel;
 				}
-				if (applySpecialIndex) {
-					cell.SpecialIndex = activeSpecialIndex;
-				}
 				if (roadMode == OptionalToggle.No) {
 					cell.RemoveRoads();
 				}
@@ -151,7 +151,7 @@ namespace LeGrandPotAuFeu.UI {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && !cell.Unit && cell.Explorable) {
 				var orientation = HexDirectionExtensions.GetRandomDirection();
-				grid.AddUnit(cell, orientation, unitType);
+				grid.AddUnit(cell, orientation, (int)unitType);
 			}
 		}
 
@@ -159,6 +159,20 @@ namespace LeGrandPotAuFeu.UI {
 			HexCell cell = GetCellUnderCursor();
 			if (cell && cell.Unit) {
 				grid.RemoveUnit(cell.Unit);
+			}
+		}
+
+		void AddSpecialIndex() {
+			HexCell cell = GetCellUnderCursor();
+			if (cell && !cell.Unit && cell.Explorable) {
+				cell.SpecialIndex = (int)heroType;
+			}
+		}
+
+		void ResetSpecialIndex() {
+			HexCell cell = GetCellUnderCursor();
+			if (cell) {
+				cell.SpecialIndex = 0;
 			}
 		}
 
@@ -214,20 +228,17 @@ namespace LeGrandPotAuFeu.UI {
 			activePlantLevel = (int)level;
 		}
 
-		public void SetApplySpecialIndex(bool toggle) {
-			applySpecialIndex = toggle;
-		}
-
-		public void SetSpecialIndex(float index) {
-			activeSpecialIndex = (int)index;
-		}
-
 		public void SetBrushSize(float size) {
 			brushSize = (int)size;
 		}
 
 		public void SetUnitType(float type) {
-			unitType = (int)type;
+			unitType = (HexUnitType)type;
+		}
+
+		public void SetHeroType(float type) {
+			heroType = (HexHeroType)type;
+			Debug.Log(heroType);
 		}
 
 		public void ShowGrid(bool visible) {

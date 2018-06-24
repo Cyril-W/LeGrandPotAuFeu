@@ -73,9 +73,11 @@ namespace LeGrandPotAuFeu.UI {
 		public void OnClickTurnFinish() {
 			turnFinishButton.interactable = false;
 			canPlayerMove = false;
+			grid.ClearPath();
 
 			for (int i = 0; i < grid.Enemies.Count; i++) {
 				var enemy = grid.Enemies[i];
+				enemy.ResetEnduranceLeft();
 				enemy.Orientation = HexDirectionExtensions.GetRandomDirection();
 				currentCell = enemy.GetRandomVisibleCell();
 				DoPathfinding(enemy);
@@ -83,8 +85,6 @@ namespace LeGrandPotAuFeu.UI {
 					enemy.Travel(grid.GetPath());
 				}
 			}
-
-			OnPlayerTurnBegin();
 		}
 
 		void OnPlayerTurnBegin() {
@@ -105,7 +105,7 @@ namespace LeGrandPotAuFeu.UI {
 				}
 			} else {
 				foreach (var enemy in grid.Enemies) {
-					if (enemy.EnduranceLeft == 0) {
+					if (enemy.EnduranceLeft > 0) {
 						return;
 					}
 				}

@@ -566,8 +566,14 @@ MonoBehaviour:
   walls: {fileID: 114280338975176074}
   wallTower: {fileID: 4808105046936526, guid: f5ac56d52586bee49b52c5a34c642c63, type: 2}
   special:
-  - {fileID: 4889055174899642, guid: d60b760a807f0354a8fbc01659f8c528, type: 2}
-  - {fileID: 4131906109140024, guid: 1192b1c7e9c39df429ff171d9eb98307, type: 2}
+  - {fileID: 4426360822487880, guid: 1f519817498fcc54a80b2fbcdc681352, type: 2}
+  - {fileID: 4258160394492696, guid: 08498781e5f79da44935d0c6579047b0, type: 2}
+  - {fileID: 4155287796046788, guid: 4e9759702896ca340afed033626fb1a3, type: 2}
+  - {fileID: 4907559663296206, guid: 2dab1f85b50f67c42968d08bab3a2a92, type: 2}
+  - {fileID: 4976885424604510, guid: 662e00245b72cb94a8bc5862f7370bd2, type: 2}
+  - {fileID: 4137269057490080, guid: a4e5d3bfc67c53547b27e4e9db0f76de, type: 2}
+  - {fileID: 4536661142325540, guid: 79c77617bbf54e14eb0387544365c569, type: 2}
+  - {fileID: 4978026488121772, guid: 9cbd5b63134884741ae78238c70a177e, type: 2}
 --- !u!114 &114509925166575734
 MonoBehaviour:
   m_ObjectHideFlags: 1
