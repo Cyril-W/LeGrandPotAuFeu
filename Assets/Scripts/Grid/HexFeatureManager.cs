@@ -68,7 +68,6 @@ namespace LeGrandPotAuFeu.Grid {
 				return;
 			}
 			Transform instance = Instantiate(prefab, container);
-			position.y += instance.localScale.y * 0.5f;
 			instance.localPosition = HexMetrics.Perturb(position);
 			instance.localRotation = Quaternion.Euler(0f, 360f * hash.e, 0f);
 		}

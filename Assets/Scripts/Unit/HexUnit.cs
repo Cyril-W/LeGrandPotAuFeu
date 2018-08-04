@@ -11,8 +11,8 @@ namespace LeGrandPotAuFeu.Unit {
 		Player, Carrot, Leek, Potato, Turnip
 	}
 	public class HexUnit : MonoBehaviour {
-		public delegate void ClickAction(HexUnit unit);
-		public static event ClickAction OnFinished;
+		public delegate void EndMovement(HexUnit unit);
+		public static event EndMovement OnMovementEnd;
 
 		public HexGrid Grid { get; set; }
 		public HexDirection FacingDirection {
@@ -165,6 +165,7 @@ namespace LeGrandPotAuFeu.Unit {
 				}
 				Grid.IncreaseVisibility(this, pathToTravel[i]);
 				UpdateDangerousCells();
+				TryToSaveHero(currentTravelLocation);
 				for (; t < 1f; t += Time.deltaTime * travelSpeed) {
 					transform.localPosition = BezierGetPoint(a, b, c, t);
 					Vector3 d = BezierGetDerivative(a, b, c, t);
@@ -183,7 +184,11 @@ namespace LeGrandPotAuFeu.Unit {
 			ListPool<HexCell>.Add(pathToTravel);
 			pathToTravel = null;
 
-			OnFinished(this);
+			OnMovementEnd(this);
+		}
+
+		protected virtual void TryToSaveHero(HexCell cell) {
+			// do nothing, it is only for HexPlayer
 		}
 
 		IEnumerator LookAt(Vector3 point) {

@@ -8,7 +8,10 @@ namespace LeGrandPotAuFeu.Unit {
 		Ranger, Mage, Elf, Barbarian, Thief, Paladin, Minstrel, Dwarf, Ogre
 	}
 	public class HexPlayer : HexUnit {
-		Dictionary<string, HexCell> heroesLocation = new Dictionary<string, HexCell>();
+		public delegate void SaveHero(HexCell cell, string heroType);
+		public static event SaveHero OnHeroSaved;
+
+		Dictionary<string, HexCell> heroesLocation = new Dictionary<string, HexCell>(); // could be replaced with int index rather than hexcell
 		[SerializeField] GameObject[] heroMeshes;
 
 		private void Awake() {
@@ -33,6 +36,13 @@ namespace LeGrandPotAuFeu.Unit {
 
 		public void UpdateHeroDisplay(int index, bool isActive) {
 			heroMeshes[index].SetActive(isActive);
+		}
+
+		protected override void TryToSaveHero(HexCell cell) {
+			if (cell.SpecialIndex > 0) {
+				var heroType = ((HexHeroType)cell.SpecialIndex).ToString();
+				OnHeroSaved(cell, heroType);
+			}
 		}
 	}
 }

@@ -20,7 +20,8 @@ namespace LeGrandPotAuFeu.UI {
 		int turnCount = 0;
 
 		void OnEnable() {
-			HexUnit.OnFinished += OnUnitMoveFinish;
+			HexUnit.OnMovementEnd += OnUnitMoveFinish;
+			HexPlayer.OnHeroSaved += OnHeroSaved;
 
 			if (!grid.Player) {
 				Debug.LogWarning("No player found ; adding default player...");
@@ -38,7 +39,8 @@ namespace LeGrandPotAuFeu.UI {
 		}
 
 		void OnDisable() {
-			HexUnit.OnFinished -= OnUnitMoveFinish;
+			HexUnit.OnMovementEnd -= OnUnitMoveFinish;
+			HexPlayer.OnHeroSaved -= OnHeroSaved;
 		}
 
 		void Update() {
@@ -75,14 +77,18 @@ namespace LeGrandPotAuFeu.UI {
 			canPlayerMove = false;
 			grid.ClearPath();
 
-			for (int i = 0; i < grid.Enemies.Count; i++) {
-				var enemy = grid.Enemies[i];
-				enemy.ResetEnduranceLeft();
-				enemy.Orientation = HexDirectionExtensions.GetRandomDirection();
-				currentCell = enemy.GetRandomVisibleCell();
-				DoPathfinding(enemy);
-				if (grid.HasPath) {
-					enemy.Travel(grid.GetPath());
+			if (grid.Enemies.Count <= 0) {
+				OnPlayerTurnBegin();
+			} else {
+				for (int i = 0; i < grid.Enemies.Count; i++) {
+					var enemy = grid.Enemies[i];
+					enemy.ResetEnduranceLeft();
+					enemy.Orientation = HexDirectionExtensions.GetRandomDirection();
+					currentCell = enemy.GetRandomVisibleCell();
+					DoPathfinding(enemy);
+					if (grid.HasPath) {
+						enemy.Travel(grid.GetPath());
+					}
 				}
 			}
 		}
@@ -100,6 +106,7 @@ namespace LeGrandPotAuFeu.UI {
 			if (unit.Type == 0) {
 				UpdateEnduranceLeft();
 				grid.ClearPath();
+				turnFinishButton.interactable = true;
 				if (grid.Player.EnduranceLeft > 0) {
 					canPlayerMove = true;
 				}
@@ -111,6 +118,15 @@ namespace LeGrandPotAuFeu.UI {
 				}
 				OnPlayerTurnBegin();
 			}
+		}
+
+		void OnHeroSaved(HexCell cell, string heroType) {
+			grid.Player.UpdateHeroDisplay(cell.SpecialIndex, true);
+			grid.Player.UpdateCellWithHero(heroType, null);
+			cell.SpecialIndex = 0;
+
+			// check if there is one more hero to save
+			// otherwise win the game
 		}
 
 		void UpdateTurn() {
@@ -163,6 +179,7 @@ namespace LeGrandPotAuFeu.UI {
 		void DoMove() {
 			if (grid.HasPath) {
 				canPlayerMove = false;
+				turnFinishButton.interactable = false;
 				grid.Player.Travel(grid.GetPath());
 				grid.ClearPath();
 			}
