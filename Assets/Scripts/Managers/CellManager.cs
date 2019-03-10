@@ -3,32 +3,38 @@
 public class CellManager : MonoBehaviour {
     [Header("Drag'n'drop")]
     [SerializeField] Transform cellTransform;
-    [SerializeField] Renderer cellRenderer;
     [Header("Coordinates")]
     [SerializeField] int x;
     [SerializeField] int y;
     [SerializeField] int z;
-    [Header("Clickable Shader")]
-    [SerializeField] string shaderParameterName;
-    [SerializeField] float notClickable;
-    [SerializeField] float clickable;
+    [Header("Animation")]
+    [SerializeField] Animator cellAnimator;
+    [SerializeField] BoolName boolIsVisible;
+    [SerializeField] BoolName boolIsClickable;
 
     public int X { get { return x; } set { x = value; } }
     public int Y { get { return y; } set { y = value; } }
     public int Z { get { return z; } set { z = value; } }
     public Vector3 Coordinates { get { return new Vector3(X, Y, Z); } }
 
+    public bool IsVisible {
+        get { return isVisible; }
+        set {
+            isVisible = value;
+            cellAnimator.SetBool(boolIsVisible.name, isVisible);
+        }
+    }
     public bool IsClickable {
         get { return isClickable; }
         set {
             isClickable = value;
-            cellRenderer.material.SetFloat(shaderParameterName, isClickable ? clickable : notClickable);
+            cellAnimator.SetBool(boolIsClickable.name, isClickable);
         }
     }
     public CellManagerEvent OnClicked;
 
     CellManager cellManagerN, cellManagerS, cellManagerE, cellManagerW;
-    bool isClickable;
+    bool isClickable, isVisible;
 
     void OnValidate() {
         if (cellTransform != null) {
@@ -42,18 +48,18 @@ public class CellManager : MonoBehaviour {
         }
     }
 
-    public CellManager GetOrSetCellManager(CellDirection cellDirection) {
-        var cellManager = GetCellManager(cellDirection);
+    public CellManager GetOrSetNeighbor(CellDirection cellDirection) {
+        var cellManager = GetNeighbor(cellDirection);
         if (cellManager == null) {
             cellManager = CellsManager.GetNeighbor(this, cellDirection);
             if (cellManager != null) {
-                SetCellManager(cellManager, cellDirection);
+                SetNeighbor(cellManager, cellDirection);
             }
         }
         return cellManager;
     }
 
-    CellManager GetCellManager(CellDirection cellDirection) {
+    CellManager GetNeighbor(CellDirection cellDirection) {
         switch (cellDirection) {
             case CellDirection.N:
                 return cellManagerN;
@@ -68,7 +74,7 @@ public class CellManager : MonoBehaviour {
         }
     }
 
-    void SetCellManager(CellManager cellManager, CellDirection cellDirection) {
+    void SetNeighbor(CellManager cellManager, CellDirection cellDirection) {
         switch (cellDirection) {
             case CellDirection.N:
                 cellManagerN = cellManager;
@@ -87,7 +93,7 @@ public class CellManager : MonoBehaviour {
         }
     }
 
-    public Vector3 GetNeighboorCoordinates(CellDirection cellDirection) {
+    public Vector3 GetNeighborCoordinates(CellDirection cellDirection) {
         switch (cellDirection) {
             case CellDirection.N:
                 return new Vector3(X, Y, Z + 1);
