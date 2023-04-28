@@ -152,6 +152,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c598c4f333081346a537fd1172c29c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackingGuards: []
+  timeScaleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 1
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0.72842103
+    - serializedVersion: 3
+      time: 1
+      value: 0.5
+      inSlope: -1.4919465
+      outSlope: -1.4919465
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.042877734
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  postProcessVolume: {fileID: 673646388}
+  vignetteIntensityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.25
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.6
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  currentTimeScale: 0
   destinyCoins:
   - {fileID: 9081209079602887031}
   - {fileID: 424645218}
@@ -1699,6 +1750,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 652893427}
   m_CullTransparentMesh: 1
+--- !u!1 &673646386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 673646387}
+  - component: {fileID: 673646388}
+  m_Layer: 0
+  m_Name: GlobalPostProcessVolume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &673646387
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673646386}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 955443265}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &673646388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673646386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 56a6013f18b71b14b8dbc40006860ccf, type: 2}
 --- !u!4 &800693762 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6966995812720158146, guid: eaec1db876152d247944192fe0bc5156, type: 3}
@@ -2244,7 +2343,8 @@ Transform:
   m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
   m_LocalPosition: {x: 6.3, y: 12.106602, z: -31.806602}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 673646387}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2271,7 +2371,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -4654,6 +4754,42 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2124580597}
     m_Modifications:
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.atime0
+      value: 29491
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.atime1
+      value: 65535
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.ctime1
+      value: 29684
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.key1.a
+      value: 0.58431375
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.key1.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.key1.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.key1.r
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.m_NumAlphaKeys
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: visionGradient.m_NumColorKeys
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7204770445929025015, guid: f32437161ea8144449d54c10581e0d32, type: 3}
       propertyPath: m_Name
       value: GuardBehavior

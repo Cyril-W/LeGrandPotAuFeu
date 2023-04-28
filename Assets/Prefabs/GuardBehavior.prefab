@@ -366,7 +366,7 @@ MonoBehaviour:
   viewMask:
     serializedVersion: 2
     m_Bits: 8
-  detectionTime: 0.75
+  detectionTime: 2
   edgeResolveIterations: 6
   edgeDistanceThreshold: 0.5
   meshResolution: 0.5

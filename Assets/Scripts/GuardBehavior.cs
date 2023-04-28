@@ -69,7 +69,11 @@ public class GuardBehavior : MonoBehaviour {
     Material viewMaterial;
     int currentWaypoint = 0;
     float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime;
-    bool currentCanSeePlayer = false;
+    bool canSeePlayer = false, previousCanMove;
+
+    void OnValidate() {
+        previousCanMove = canMove;
+    }
 
     void Start() {
         waypoints = new Vector3[waypointsHolder.childCount];
@@ -84,7 +88,7 @@ public class GuardBehavior : MonoBehaviour {
         if (viewMeshFilter != null) viewMeshFilter.mesh = viewMesh;
         viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>();
         if (viewMeshRenderer != null) viewMaterial = viewMeshRenderer.material;
-
+        previousCanMove = canMove;
     }
 
     void FixedUpdate() {
@@ -121,16 +125,21 @@ public class GuardBehavior : MonoBehaviour {
     }
 
     void VisionCheck() {
-        currentCanSeePlayer = CanSeePlayer();
-        if (currentCanSeePlayer) {
+        canSeePlayer = CanSeePlayer();
+        canMove = canSeePlayer ? false : previousCanMove;
+        if (canSeePlayer) {
             currentDetectionTime -= Time.deltaTime;
+            if (DestinyManager.Instance != null) DestinyManager.Instance.DestinyTimeScale(this, 1 - (currentDetectionTime / detectionTime));
             if (currentDetectionTime <= 0f) {
-                if (DestinyManager.Instance != null) DestinyManager.Instance.DestinyPointLose();
+                if (DestinyManager.Instance != null) {
+                    DestinyManager.Instance.DestinyPointLose(this);              
+                }
                 gameObject.SetActive(false);
             }
         } else {
             currentDetectionTime = detectionTime;
-        }
+            if (DestinyManager.Instance != null) DestinyManager.Instance.LostTrack(this);
+        }   
         if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
     }
 
