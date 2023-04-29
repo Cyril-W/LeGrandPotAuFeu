@@ -435,6 +435,14 @@ MonoBehaviour:
   - Hero: 1
     Model: {fileID: 1748481472}
     Saved: 0
+  layer: 3
+  teleportArea: {fileID: 0}
+  numberXTeleportPoints: 20
+  numberZTeleportPoints: 20
+  distanceToObstacles: 0.5
+  distanceToPlayer: 1
+  sphereSize: 0.5
+  sphereColor: {r: 1, g: 0, b: 1, a: 1}
 --- !u!1 &6966995813051493740
 GameObject:
   m_ObjectHideFlags: 0

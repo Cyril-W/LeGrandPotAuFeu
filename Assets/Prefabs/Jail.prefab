@@ -517,6 +517,7 @@ MonoBehaviour:
   ColliderTag: Player
   BoxWireColor: {r: 0.764151, g: 0.37686625, b: 0.24150053, a: 1}
   BoxColor: {r: 1, g: 0.71182334, b: 0, a: 0.33333334}
+  sendTriggerExitOnDisable: 1
   OnTriggerEnterEvent:
     m_PersistentCalls:
       m_Calls:
@@ -550,6 +551,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  lastCollider: {fileID: 0}
 --- !u!1 &801164344843876483
 GameObject:
   m_ObjectHideFlags: 0
@@ -2821,7 +2823,7 @@ GameObject:
   - component: {fileID: 482042461875678032}
   - component: {fileID: 4387871128180675491}
   m_Layer: 3
-  m_Name: Reference
+  m_Name: Reference_Jail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2918,6 +2920,7 @@ MonoBehaviour:
   ColliderTag: 
   BoxWireColor: {r: 0, g: 1, b: 0, a: 1}
   BoxColor: {r: 0, g: 1, b: 0, a: 0.20784314}
+  sendTriggerExitOnDisable: 1
   OnTriggerEnterEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -2927,6 +2930,7 @@ MonoBehaviour:
   OnTriggerExitEvent:
     m_PersistentCalls:
       m_Calls: []
+  lastCollider: {fileID: 0}
 --- !u!1 &4770496631621146077
 GameObject:
   m_ObjectHideFlags: 0
@@ -4255,6 +4259,7 @@ MonoBehaviour:
   openInteractor: {fileID: 800220012197059419}
   closeInteractor: {fileID: 8451241121074232054}
   jailPivot: {fileID: 5680563771517229543}
+  rotationDuration: 1
 --- !u!1 &7487932897543801444
 GameObject:
   m_ObjectHideFlags: 0
@@ -5015,6 +5020,7 @@ MonoBehaviour:
   ColliderTag: Player
   BoxWireColor: {r: 0.764151, g: 0.37686625, b: 0.24150053, a: 1}
   BoxColor: {r: 1, g: 0.71182334, b: 0, a: 0.33333334}
+  sendTriggerExitOnDisable: 1
   OnTriggerEnterEvent:
     m_PersistentCalls:
       m_Calls:
@@ -5048,6 +5054,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  lastCollider: {fileID: 0}
 --- !u!1 &8487768133806312603
 GameObject:
   m_ObjectHideFlags: 0

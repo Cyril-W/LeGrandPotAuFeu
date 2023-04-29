@@ -812,7 +812,7 @@ GameObject:
   - component: {fileID: 8066520555967063720}
   - component: {fileID: 1665679771067662716}
   m_Layer: 0
-  m_Name: Reference
+  m_Name: Reference_House
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -847,6 +847,7 @@ MonoBehaviour:
   ColliderTag: 
   BoxWireColor: {r: 0, g: 1, b: 0, a: 1}
   BoxColor: {r: 0, g: 1, b: 0, a: 0.15686275}
+  sendTriggerExitOnDisable: 1
   OnTriggerEnterEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -856,6 +857,7 @@ MonoBehaviour:
   OnTriggerExitEvent:
     m_PersistentCalls:
       m_Calls: []
+  lastCollider: {fileID: 0}
 --- !u!1 &8282893067660246909
 GameObject:
   m_ObjectHideFlags: 0
