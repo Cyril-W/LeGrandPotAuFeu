@@ -61,4 +61,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-[Ll]ogs/*
+/[Ll]ogs/
