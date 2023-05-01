@@ -5,13 +5,16 @@ using System.Collections.Generic;
 
 [Serializable]
 public class HeroModel {
+    [HideInInspector] public string HeroName;
     public Hero Hero;
     public GameObject Model;
+    public SpellBehavior SpellBehavior;
+    public HeroBehavior HeroBehavior;
     public bool Saved = false;
 }
 
 public class GroupBehavior : MonoBehaviour {
-    [SerializeField] HeroModel[] heores;
+    [SerializeField] HeroModel[] heroes;
     [Header("Witch")]
     [SerializeField, Layer] int layer = 3;
     [SerializeField] BoxCollider teleportArea;
@@ -25,11 +28,25 @@ public class GroupBehavior : MonoBehaviour {
     List<Collider> collidersToAvoid = new List<Collider>();
     List<Vector3> teleportPoints = new List<Vector3>();
 
-    void Start() {
-        foreach (var h in heores) {
-            if (h.Model != null) h.Model.SetActive(h.Saved);
+    [ContextMenu("Fill Hero Models")]
+    void FillHeroeModels () {
+        var spellBehaviors = FindObjectsOfType<SpellBehavior>();
+        var heroBehaviors = FindObjectsOfType<HeroBehavior>();
+        foreach (var h in heroes) {
+            h.HeroName = h.Hero.ToString();
+            if (h.Model == null) { 
+                var child = transform.GetChild(1).Find("Witch");
+                if (child != null) h.Model = child.gameObject;
+            }
+            if (h.SpellBehavior == null) { h.SpellBehavior = spellBehaviors.FirstOrDefault(sB => sB.GetHero() == h.Hero); }
+            if (h.HeroBehavior == null) { h.HeroBehavior = heroBehaviors.FirstOrDefault(hB => hB.GetHero() == h.Hero); }
         }
+    }
 
+    void OnEnable() {
+        foreach (var h in heroes) {
+            UpdateHero(h, h.Saved);
+        }
         collidersToAvoid.Clear();
         var boxColliders = FindObjectsOfType<BoxCollider>();
         foreach (var coll in boxColliders) {
@@ -39,7 +56,6 @@ public class GroupBehavior : MonoBehaviour {
         foreach (var coll in sphereColliders) {
             if (coll.enabled && coll.gameObject.layer == layer) collidersToAvoid.Add(coll);
         }
-
         GetTeleportPoints();
     }
 
@@ -81,13 +97,19 @@ public class GroupBehavior : MonoBehaviour {
     }
 
     public void SaveHero(Hero hero) {
-        if (heores.Any(h => h.Hero == hero)) {
-            var savedHero = heores.Where(h => h.Hero == hero).FirstOrDefault();
-            if (savedHero != null && savedHero.Model != null) {
-                savedHero.Saved = true;
-                savedHero.Model.SetActive(savedHero.Saved);
+        if (heroes.Any(h => h.Hero == hero)) {
+            var savedHero = heroes.Where(h => h.Hero == hero).FirstOrDefault();
+            if (savedHero != null) {
+                UpdateHero(savedHero, true);
             }
         }
+    }
+
+    void UpdateHero(HeroModel hero, bool saved) {
+        hero.Saved = saved;
+        if (hero.Model != null) hero.Model.SetActive(hero.Saved);
+        if (hero.SpellBehavior != null) hero.SpellBehavior.gameObject.SetActive(hero.Saved);
+        if (hero.HeroBehavior != null) hero.HeroBehavior.gameObject.SetActive(!hero.Saved);
     }
 
     void OnDrawGizmos() {
