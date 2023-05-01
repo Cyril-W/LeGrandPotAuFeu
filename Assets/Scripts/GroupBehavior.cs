@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Cinemachine;
 
 [Serializable]
 public class HeroModel {
@@ -16,6 +17,7 @@ public class HeroModel {
 public class GroupBehavior : MonoBehaviour {
     [SerializeField] HeroModel[] heroes;
     [Header("Witch")]
+    [SerializeField] float teleportaDuration = 2f;
     [SerializeField, Layer] int layer = 3;
     [SerializeField] BoxCollider teleportArea;
     [SerializeField, Range(0, 100)] int numberXTeleportPoints = 20;
@@ -24,9 +26,16 @@ public class GroupBehavior : MonoBehaviour {
     [SerializeField] float distanceToPlayer = 1f;
     [SerializeField] float sphereSize = 0.1f;
     [SerializeField] Color sphereColor = Color.magenta;
+    [Header("Elf")]
+    [SerializeField] CinemachineVirtualCamera virtualCamera;
+    [SerializeField] Vector2 minMaxLens = new Vector2(40f, 50f);
+    [SerializeField] float visionChangeDuration = 1f;
+    [SerializeField] float visionDuration = 5f;
 
     List<Collider> collidersToAvoid = new List<Collider>();
     List<Vector3> teleportPoints = new List<Vector3>();
+    float currentTeleportTime = 0f,  currentVisionTime = 0f, currentVisionChangeTime = 0f;
+    ThirdPersonController tpc;
 
     [ContextMenu("Fill Hero Models")]
     void FillHeroeModels () {
@@ -57,12 +66,31 @@ public class GroupBehavior : MonoBehaviour {
             if (coll.enabled && coll.gameObject.layer == layer) collidersToAvoid.Add(coll);
         }
         GetTeleportPoints();
+        if (tpc == null) { tpc = GetComponent<ThirdPersonController>(); }
+    }
+
+    void FixedUpdate() {
+        if (currentTeleportTime > 0f) {
+            currentTeleportTime -= Time.deltaTime;
+            if (currentTeleportTime <= 0f && tpc != null) tpc.enabled = true;
+        }
+        if (currentVisionChangeTime > 0f) {
+            currentVisionChangeTime -= Time.deltaTime;
+            virtualCamera.m_Lens.FieldOfView = Mathf.Lerp(currentVisionTime <= 0f ? minMaxLens.x : minMaxLens.y, currentVisionTime <= 0f ? minMaxLens.y : minMaxLens.x, currentVisionChangeTime / visionChangeDuration);
+        }
+        if (currentVisionTime > 0f) {
+            currentVisionTime -= Time.deltaTime;
+            if (currentVisionTime <= 0f) {
+                currentVisionChangeTime = visionChangeDuration;
+            }
+        }
     }
 
     [ContextMenu("Teleport")]
     public void Teleport() {
+        currentTeleportTime = teleportaDuration;
+        if (tpc != null) tpc.enabled = false;
         GetTeleportPoints();
-
         if (teleportPoints.Count <= 0) return;
         transform.position = teleportPoints[UnityEngine.Random.Range(0, teleportPoints.Count)] + Vector3.up;
     }
@@ -95,6 +123,12 @@ public class GroupBehavior : MonoBehaviour {
             x += Mathf.Abs(topLeft.x - topRight.x) / numberXTeleportPoints;
         }
     }
+
+    public void Vision() {
+        currentVisionTime = visionDuration;
+        currentVisionChangeTime = visionChangeDuration;
+    }
+
 
     public void SaveHero(Hero hero) {
         if (heroes.Any(h => h.Hero == hero)) {
