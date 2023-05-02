@@ -666,9 +666,9 @@ MonoBehaviour:
   sphereSize: 0.5
   sphereColor: {r: 1, g: 0, b: 1, a: 1}
   virtualCamera: {fileID: 0}
-  minMaxLens: {x: 40, y: 50}
+  minMaxLens: {x: 40, y: 55}
   visionChangeDuration: 0.5
-  visionDuration: 5
+  visionDuration: 4
 --- !u!1 &6966995813051493740
 GameObject:
   m_ObjectHideFlags: 0

@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 389580683299063012}
   - component: {fileID: 5284356990209772566}
   m_Layer: 3
-  m_Name: RightWall (1)
+  m_Name: RightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -203,7 +203,7 @@ GameObject:
   - component: {fileID: 7537573096487410064}
   - component: {fileID: 746602347227021474}
   m_Layer: 3
-  m_Name: BackWall (1)
+  m_Name: BackWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -298,7 +298,7 @@ GameObject:
   - component: {fileID: 5092623115775284722}
   - component: {fileID: 6482685821800144531}
   m_Layer: 0
-  m_Name: RoofLeft (1)
+  m_Name: RoofBack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -393,7 +393,7 @@ GameObject:
   - component: {fileID: 2747029088663896476}
   - component: {fileID: 6170368364470572976}
   m_Layer: 3
-  m_Name: FrontRightWall (1)
+  m_Name: FrontRightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -502,7 +502,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5105906338930126394}
   m_LocalRotation: {x: 0, y: 0, z: 0.38268343, w: 0.92387956}
-  m_LocalPosition: {x: 3.12, y: 6.51, z: 0}
+  m_LocalPosition: {x: 3.42, y: 6.81, z: 0}
   m_LocalScale: {x: 0.1, y: 9.585925, z: 13.632}
   m_Children: []
   m_Father: {fileID: 1186086080639007738}
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 7987093574188139182}
   - component: {fileID: 8985243143024186744}
   m_Layer: 0
-  m_Name: RoofRight (1)
+  m_Name: RoofFront
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -674,6 +674,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1186086080639007738}
+  - component: {fileID: 5841179587846473454}
   m_Layer: 0
   m_Name: House
   m_TagString: Untagged
@@ -706,6 +707,52 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5841179587846473454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5996981714149588355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02641b7133c07434084745bd5765f606, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 0}
+  distance: 0
+  minMaxDistanceToHide: {x: 18, y: 22}
+  transparentObjects:
+  - ObjectToHide: {fileID: 5092623115775284722}
+    MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 7987093574188139182}
+    MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 8573162718235732553}
+    MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 2218993793492137699}
+    MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 4036837762081730879}
+    MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 2747029088663896476}
+    MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
+    isMainMaterial: 0
+  - ObjectToHide: {fileID: 3190503715350763075}
+    MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
+    MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
+    isMainMaterial: 0
+  minMaxMaterialTransparency: {x: 0, y: 0.75}
+  transparenceDuration: 0.5
 --- !u!1 &6325923471663401697
 GameObject:
   m_ObjectHideFlags: 0
@@ -966,7 +1013,7 @@ GameObject:
   - component: {fileID: 4036837762081730879}
   - component: {fileID: 2881195250196977352}
   m_Layer: 0
-  m_Name: FrontUpWall (2)
+  m_Name: FrontUpWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
