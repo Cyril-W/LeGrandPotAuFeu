@@ -4266,6 +4266,11 @@ MonoBehaviour:
   closeInteractor: {fileID: 8451241121074232054}
   jailPivot: {fileID: 5680563771517229543}
   rotationDuration: 1
+  lineLength: 1
+  ArrowLength: 0.5
+  ArrowSize: 0.5
+  arrowNumber: 10
+  arrowColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &7487932897543801444
 GameObject:
   m_ObjectHideFlags: 0

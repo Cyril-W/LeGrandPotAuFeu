@@ -12,6 +12,12 @@ public class JailBehavior : MonoBehaviour {
     [SerializeField] GameObject closeInteractor;
     [SerializeField] Transform jailPivot;
     [SerializeField] float rotationDuration = 1f;
+    [Header("Gizmos")]
+    [SerializeField] float lineLength = 1f;
+    [SerializeField] float ArrowLength = 0.5f;
+    [SerializeField] float ArrowSize = 0.5f;
+    [SerializeField] int arrowNumber = 4;
+    [SerializeField] Color arrowColor = Color.red;
 
     bool isOpened = false;
     float rotationY, currentUnlockTime = 0f;
@@ -61,5 +67,18 @@ public class JailBehavior : MonoBehaviour {
         lockInteractor.SetActive(isLocked);
         openInteractor.SetActive(!isLocked && !isOpened);
         closeInteractor.SetActive(!isLocked && isOpened);
+    }
+
+    void OnDrawGizmos() {
+        Gizmos.color = arrowColor;
+        Gizmos.matrix = transform.localToWorldMatrix;
+        var start = new Vector3(0, 1f, 1f);
+        var endPos = start + Vector3.forward * lineLength;
+        Gizmos.DrawLine(start, endPos);
+        var size = new Vector3(1f, 1f, 0f) * ArrowSize;
+        for (int i = 0; i < arrowNumber; i++) {
+            var ratio = Mathf.Clamp01(i / (float)arrowNumber);
+            Gizmos.DrawWireCube(endPos + Vector3.forward * ArrowLength * ratio, size * (1f - ratio));
+        }
     }
 }
