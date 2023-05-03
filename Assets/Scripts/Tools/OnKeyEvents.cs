@@ -9,8 +9,8 @@ public class OnKeyEvents : MonoBehaviour {
     [Header("Events")]
     [SerializeField] KeyCode keyCode;
     [SerializeField] UnityEvent OnKeyDown;
-    [SerializeField] UnityEvent OnKeyUp;
     [SerializeField] UnityEvent OnKeyPressed;
+    [SerializeField] UnityEvent OnKeyUp;
 
     bool isKeyPressed = false;
 

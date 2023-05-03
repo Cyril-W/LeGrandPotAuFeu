@@ -41,6 +41,8 @@ public class GuardBehavior : MonoBehaviour {
     [Header("Movement")]
     [SerializeField] bool canMove = true;
     [SerializeField] float speed = 5f;
+    [SerializeField, Range(0f, 1f)] float spottingSpeedRatio = 0.75f;
+    [SerializeField] float timeAfterSpot = 2f;
     [SerializeField] float distanceToWaypoint = 0.1f;
     [SerializeField] bool moveUp = true;
     [SerializeField] Vector2 minMaxWaitTime = new Vector2(0.3f, 0.6f);
@@ -68,8 +70,8 @@ public class GuardBehavior : MonoBehaviour {
     Mesh viewMesh;
     Material viewMaterial;
     int currentWaypoint = 0;
-    float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime;
-    bool canSeePlayer = false, previousCanMove;
+    float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation;
+    bool playerSpotted = false, previousCanMove;
 
     void OnValidate() {
         previousCanMove = canMove;
@@ -99,8 +101,12 @@ public class GuardBehavior : MonoBehaviour {
         if (canSee) {
             VisionCheck();
         }
-        if (viewMeshRenderer != null) { 
+        if (viewMeshRenderer != null) {
             viewMeshRenderer.enabled = canSee;
+        }
+
+        if (currentTimeAfterSpot > 0f) {
+            GuardPuzzled();
         }
 
         if (canMove) {
@@ -125,25 +131,31 @@ public class GuardBehavior : MonoBehaviour {
     }
 
     void VisionCheck() {
-        canSeePlayer = CanSeePlayer();
-        canMove = canSeePlayer ? false : previousCanMove;
-        if (canSeePlayer) {
+        var newPlayerSpotted = SpotPlayer();
+        if (newPlayerSpotted) {
             currentDetectionTime -= Time.deltaTime;
+            currentTimeAfterSpot = 0f;
+            canMove = previousCanMove;
             if (DestinyManager.Instance != null) DestinyManager.Instance.DestinyTimeScale(this, 1 - (currentDetectionTime / detectionTime));
             if (currentDetectionTime <= 0f) {
                 if (DestinyManager.Instance != null) {
-                    DestinyManager.Instance.DestinyPointLose(this);              
+                    DestinyManager.Instance.DestinyPointLose(this);
                 }
                 gameObject.SetActive(false);
             }
-        } else {
-            currentDetectionTime = detectionTime;
-            if (DestinyManager.Instance != null) DestinyManager.Instance.LostTrack(this);
-        }   
+        }
         if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
+        if (!newPlayerSpotted && newPlayerSpotted != playerSpotted) {
+            currentDetectionTime = detectionTime;
+            currentTimeAfterSpot = timeAfterSpot;
+            lastPuzzledRotation = guardTransform.localRotation.eulerAngles.y;
+            canMove = false;
+            if (DestinyManager.Instance != null) DestinyManager.Instance.LostTrack(this);
+        }
+        playerSpotted = newPlayerSpotted;
     }
 
-    bool CanSeePlayer() {
+    bool SpotPlayer() {
         if (player == null) return false;
         if (Vector3.Distance(guardTransform.position, player.position) <= visionLength) {
             if (Vector3.Angle(guardTransform.forward, (player.position - guardTransform.position).normalized) <= (visionAngle / 2f)) {
@@ -157,8 +169,8 @@ public class GuardBehavior : MonoBehaviour {
 
     void MoveGuard() {
         if (guardTransform == null || guardRigidbody == null) return;
-        target = waypoints[currentWaypoint];
-        guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime));
+        target = playerSpotted ? player.position : waypoints[currentWaypoint];
+        guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime * (playerSpotted ? spottingSpeedRatio : 1f)));
         direction = (target - guardTransform.position).normalized;
         if (direction.magnitude >= 0.1f) {
             targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
@@ -175,6 +187,21 @@ public class GuardBehavior : MonoBehaviour {
                 currentWaitTime = Random.Range(minMaxWaitTime.x, minMaxWaitTime.y);
             }
         }
+    }
+
+    void GuardPuzzled() {
+        currentTimeAfterSpot -= Time.deltaTime;
+        if (currentTimeAfterSpot <= 0f) { canMove = previousCanMove; return; }
+        var timeAfterSpotRatio = Mathf.Clamp01(currentTimeAfterSpot / timeAfterSpot);
+        if (timeAfterSpotRatio <= 0.33f) { 
+            targetAngle = lastPuzzledRotation - 45f;
+        } else if (0.33f < timeAfterSpotRatio && timeAfterSpotRatio <= 0.66f) {
+            targetAngle = lastPuzzledRotation + 45f;
+        } else {
+            targetAngle = lastPuzzledRotation;
+        }
+        angle = Mathf.SmoothDampAngle(guardTransform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+        guardTransform.rotation = Quaternion.Euler(Vector3.up * angle);
     }
 
     void DrawFieldOfView() {
