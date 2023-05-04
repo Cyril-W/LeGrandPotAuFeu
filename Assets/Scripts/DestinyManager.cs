@@ -24,8 +24,11 @@ public class DestinyManager : MonoBehaviour {
     float currentTrackingProgress;
     Vignette vignette;
 
-    void Start() {
+    void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
+    }
+
+    void Start() {        
         destinyPoints = destinyCoins.Length;
         foreach (var destinyCoin in destinyCoins) {
             destinyCoin.color = destinyCoinOnColor;

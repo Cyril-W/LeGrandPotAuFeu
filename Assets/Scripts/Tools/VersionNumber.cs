@@ -5,11 +5,15 @@ public class VersionNumber : MonoBehaviour {
     [SerializeField] TextMeshProUGUI versionText;
 
     void OnValidate() {
-        if (versionText == null) { versionText = GetComponent<TextMeshProUGUI>(); }
+        TryFillNull();
     }
 
     void Start() {
-        if (versionText == null) { versionText = GetComponent<TextMeshProUGUI>(); }
+        TryFillNull();
         if (versionText != null) { versionText.text = Application.version; }
+    }
+
+    void TryFillNull () {
+        if (versionText == null) { versionText = GetComponent<TextMeshProUGUI>(); }
     }
 }

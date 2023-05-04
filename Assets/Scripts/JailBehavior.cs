@@ -70,7 +70,6 @@ public class JailBehavior : MonoBehaviour {
     public void OpenJail() {
         if (isOpened || currentTimeSinceAction > 0f) return;
         currentTimeSinceAction = timeBetweenAction;
-        Debug.Log("Open");
         isOpened = true;
         UpdateInteractors();
         chosenOpenRotation = Random.Range(minMaxOpenAngle.x, minMaxOpenAngle.y);
@@ -81,7 +80,6 @@ public class JailBehavior : MonoBehaviour {
     public void CloseJail() {
         if(!isOpened || currentTimeSinceAction > 0f) return;
         currentTimeSinceAction = timeBetweenAction;
-        Debug.Log("Close");
         isOpened = false;
         UpdateInteractors();
         jailPivot.DOKill();

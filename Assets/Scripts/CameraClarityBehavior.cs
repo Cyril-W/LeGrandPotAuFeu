@@ -26,12 +26,16 @@ public class CameraClarityBehavior : MonoBehaviour {
     static readonly string _transparency = "_Transparency";
 
     void OnValidate() {
-        if (virtualCamera == null) virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        TryFillNull();
         foreach (var transparentObject in transparentObjects) {
             if (transparentObject.ObjectToHide != null) {
                 transparentObject.ObjectName = transparentObject.ObjectToHide.name;
             }
         }
+    }
+
+    void TryFillNull() {
+        if (virtualCamera == null) virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
     }
 
     void OnDestroy() {
@@ -48,8 +52,7 @@ public class CameraClarityBehavior : MonoBehaviour {
     }
 
     void Start() {
-        if (virtualCamera == null) virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
-
+        TryFillNull();
         var materialNames = new List<string>();
         foreach (var transparentObject in transparentObjects) {
             if (/*!(*/!materialNames.Contains(transparentObject.MaterialToHide.name) /*|| materialNames.Contains(transparentObject.MaterialTransparent.name))*/) {

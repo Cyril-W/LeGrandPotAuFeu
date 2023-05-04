@@ -4,11 +4,15 @@ public class FaceCamera : MonoBehaviour
 {
     [SerializeField] Camera cameraToFace;
 
-    private void OnValidate() {
-        if (cameraToFace == null) cameraToFace = Camera.main;
+    void OnValidate() {
+        TryFillNull();
     }
 
     void Start() {
+        TryFillNull();
+    }
+
+    void TryFillNull() {
         if (cameraToFace == null) cameraToFace = Camera.main;
     }
 

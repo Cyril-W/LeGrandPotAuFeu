@@ -5,19 +5,8 @@ public class LevelManager : MonoBehaviour {
     [SerializeField] ThirdPersonController tPC;
     [SerializeField] float minYPlayerPos = -50f;
 
-    Transform player;
-
-    void OnValidate() {
-        if (tPC == null) { tPC = FindObjectOfType<ThirdPersonController>(true); }
-    }
-
-    void Start() {
-        if (tPC == null) { tPC = FindObjectOfType<ThirdPersonController>(true); }
-        if (tPC != null && player == null) { player = tPC.transform; }
-    }
-
     void FixedUpdate() {
-        if (player != null && player.position.y <= minYPlayerPos) {
+        if (GroupManager.Instance != null && GroupManager.Instance.GetPlayerPosition().y <= minYPlayerPos) {
             ReloadScene();
         }
     }

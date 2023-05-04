@@ -3,18 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
-public enum Hero {
-    Ranger,
-    Witch,
-    Elf,
-    Barbarian,
-    Ogre,
-    Thief,
-    Minstrel,
-    Dwarf
-}
-
 public class BarbarianManager : MonoBehaviour {
+    public static BarbarianManager Instance { get; private set; }
+
     [SerializeField] float timerBeforeBarbarian;
     [SerializeField] TextMeshProUGUI textTimer;
     [SerializeField] List<Hero> HeroesToSave = new List<Hero>();
@@ -23,6 +14,10 @@ public class BarbarianManager : MonoBehaviour {
     [SerializeField] UnityEvent OnTimerOver;
 
     float currentTimer;
+
+    void Awake() {
+        if (Instance == null || Instance != this) { Instance = this; }
+    }
 
     void Start() {
         currentTimer = timerBeforeBarbarian;

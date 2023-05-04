@@ -20,6 +20,13 @@ public class SpellBehavior : MonoBehaviour {
     public void OnSpellClick() {
         currentCooldown = cooldown;
         spellButton.interactable = false;
+        if (GroupManager.Instance != null) {
+            GroupManager.Instance.OnSpellClick?.Invoke(hero);
+        }
+    }
+
+    public void SetCurrentCooldown(float newCooldown) {
+        currentCooldown = newCooldown;
     }
 
     void FixedUpdate() {
