@@ -643,6 +643,7 @@ MonoBehaviour:
   characterController: {fileID: 6966995812720158145}
   speed: 6
   turnSmoothTime: 0.1
+  gravityMultiplier: 1
 --- !u!114 &6065856951620042200
 MonoBehaviour:
   m_ObjectHideFlags: 0

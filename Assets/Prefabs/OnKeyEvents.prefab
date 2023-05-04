@@ -46,7 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyCodeUI: {fileID: 4887246323089270567}
-  keyCodetext: {fileID: 2467934158480799996}
+  keyCodeText: {fileID: 2467934158480799996}
+  keyCodeSubstring: -1
+  keyCodeTextUGUI: {fileID: 0}
   keyCode: 101
   OnKeyDown:
     m_PersistentCalls:

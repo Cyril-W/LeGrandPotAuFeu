@@ -48,11 +48,13 @@ public class BarbarianManager : MonoBehaviour {
 
         var recap = "Still to save: ";
         foreach (var hero in HeroesToSave) {
-            recap += "\n - " + hero;
+            recap += "\n - " + hero + " (200 gold)";
         }
         if (HeroesToSave.Count == 0) {
             recap += "\n - no one";
         }
+        recap += "\n-----------------------";
+        recap += "\n<u>Total:</u> " + HeroesToSave.Count * 200 + " gold";
         textRecap.text = recap;
     }
 

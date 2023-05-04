@@ -27,7 +27,10 @@ public class DestinyManager : MonoBehaviour {
     void Start() {
         if (Instance == null || Instance != this) { Instance = this; }
         destinyPoints = destinyCoins.Length;
-        postProcessVolume.profile.TryGet(out vignette);
+        foreach (var destinyCoin in destinyCoins) {
+            destinyCoin.color = destinyCoinOnColor;
+        }
+        if (!postProcessVolume.profile.TryGet(out vignette)) { Debug.LogError("no vignette effect found on the camera"); }
     }
 
     public void DestinyTimeScale(GuardBehavior guard, float trackingProgress) {

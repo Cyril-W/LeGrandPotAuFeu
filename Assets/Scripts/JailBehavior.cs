@@ -63,6 +63,7 @@ public class JailBehavior : MonoBehaviour {
         isOpened = true;
         UpdateInteractors();
         chosenOpenRotation = Random.Range(minMaxOpenAngle.x, minMaxOpenAngle.y);
+        jailPivot.DOKill();
         jailPivot.DORotate(Vector3.up * (rotationY - chosenOpenRotation), rotationDuration);
     }
 
@@ -70,6 +71,7 @@ public class JailBehavior : MonoBehaviour {
         if(!isOpened) return;
         isOpened = false;
         UpdateInteractors();
+        jailPivot.DOKill();
         jailPivot.DORotate(Vector3.up * rotationY, rotationDuration);
     }
 
