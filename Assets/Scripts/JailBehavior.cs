@@ -1,6 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class JailBehavior : MonoBehaviour {
     [SerializeField] bool isLocked;
@@ -12,15 +12,18 @@ public class JailBehavior : MonoBehaviour {
     [SerializeField] GameObject closeInteractor;
     [SerializeField] Transform jailPivot;
     [SerializeField] float rotationDuration = 1f;
+    [SerializeField] Vector2 minMaxOpenAngle = new Vector2(80f, 110f);
     [Header("Gizmos")]
     [SerializeField] float lineLength = 1f;
     [SerializeField] float ArrowLength = 0.5f;
     [SerializeField] float ArrowSize = 0.5f;
     [SerializeField] int arrowNumber = 4;
     [SerializeField] Color arrowColor = Color.red;
+    [Header("Events")]
+    [SerializeField] UnityEvent onLockPickStart;
 
     bool isOpened = false;
-    float rotationY, currentUnlockTime = 0f;
+    float rotationY, currentUnlockTime = 0f, chosenOpenRotation;
     Vector3 progressLocalScale;
 
     void Start() {
@@ -36,15 +39,21 @@ public class JailBehavior : MonoBehaviour {
         unlockProgressBarPivot.localScale = progressLocalScale;
         if (currentUnlockTime > 0f) {
             currentUnlockTime -= Time.deltaTime;
-            if (currentUnlockTime <= 0f) { 
-                isLocked = false;
-                unlockPanel.SetActive(false);
-                OpenJail(); 
+            if (currentUnlockTime <= 0f) {
+                LockPickingBehavior.Instance.jailBehavior = this;
+                onLockPickStart?.Invoke();
             }
         }
     }
 
+    public void LockPicked() {
+        isLocked = false;
+        unlockPanel.SetActive(false);
+        OpenJail();
+    }
+
     public void Unlock(bool isUnlocking) {
+        if (DestinyManager.Instance.AnyTrackingGuard()) { return; }
         unlockPanel.SetActive(isUnlocking);
         currentUnlockTime = isUnlocking ? unlockTime : 0f;
     }
@@ -53,7 +62,8 @@ public class JailBehavior : MonoBehaviour {
         if (isOpened) return;
         isOpened = true;
         UpdateInteractors();
-        jailPivot.DORotate(Vector3.up * (rotationY - 90f), rotationDuration);
+        chosenOpenRotation = Random.Range(minMaxOpenAngle.x, minMaxOpenAngle.y);
+        jailPivot.DORotate(Vector3.up * (rotationY - chosenOpenRotation), rotationDuration);
     }
 
     public void CloseJail() {

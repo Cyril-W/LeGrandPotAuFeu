@@ -4258,7 +4258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isLocked: 1
-  unlockTime: 1
+  unlockTime: 0.5
   unlockPanel: {fileID: 4927379038382705599}
   unlockProgressBarPivot: {fileID: 8438257712614888607}
   lockInteractor: {fileID: 8071267053341920803}
@@ -4266,11 +4266,15 @@ MonoBehaviour:
   closeInteractor: {fileID: 8451241121074232054}
   jailPivot: {fileID: 5680563771517229543}
   rotationDuration: 1
+  minMaxOpenAngle: {x: 70, y: 120}
   lineLength: 1
   ArrowLength: 0.5
   ArrowSize: 0.5
   arrowNumber: 10
   arrowColor: {r: 1, g: 0, b: 0, a: 1}
+  onLockPickStart:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7487932897543801444
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,6 +50,10 @@ public class DestinyManager : MonoBehaviour {
         }
     }
 
+    public bool AnyTrackingGuard() {
+        return trackingGuards.Count > 0;
+    }
+
     [ContextMenu("Gain Destiny Point")]
     public void DestinyPointGain() {
         if (destinyPoints == destinyCoins.Length) return;
