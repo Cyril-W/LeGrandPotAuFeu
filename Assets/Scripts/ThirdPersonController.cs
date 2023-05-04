@@ -14,18 +14,19 @@ public class ThirdPersonController : MonoBehaviour {
         vertical = Input.GetAxisRaw("Vertical");
         direction = new Vector3(horizontal, 0f, vertical).normalized;
 
+        if (direction.magnitude >= 0.1f) {
+            targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        }
+
         if (characterController.isGrounded && velocity < 0f) {
-            velocity = -1f;
+            velocity = 0f;//-1f;
         } else {
             velocity += gravity * gravityMultiplier * Time.deltaTime;
         }
         direction.y = velocity;
 
-        if (direction.magnitude >= 0.1f) {
-            targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
-            characterController.Move(direction * speed * Time.deltaTime);
-        }
+        characterController.Move(direction * speed * Time.deltaTime);
     }
 }
