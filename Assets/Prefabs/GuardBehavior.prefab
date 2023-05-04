@@ -363,6 +363,7 @@ MonoBehaviour:
   canSee: 1
   visionAngle: 75
   visionLength: 15
+  visionProximity: 2
   viewMask:
     serializedVersion: 2
     m_Bits: 8

@@ -66,6 +66,16 @@ public class LockPickingBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Quote)) {
+            Debug.LogWarning("[²] - Lock picking cheat code");
+            onLockPickSuccess?.Invoke();
+            if (jailBehavior != null) {
+                jailBehavior.LockPicked();
+                jailBehavior = null;
+            }
+        }
+#endif
         isPivotKeyPressed = Input.GetMouseButton(0) || Input.GetKey(pivotLockKey);
         RotateLock();     
         RotateCrochet();

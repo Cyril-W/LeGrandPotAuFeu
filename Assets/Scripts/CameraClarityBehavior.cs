@@ -1,24 +1,24 @@
 using Cinemachine;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class TransparentObject {
-    [HideInInspector] public string ObjectName;
-    public MeshRenderer ObjectToHide;
-    public Material MaterialToHide;
-    public Material MaterialTransparent;
-    public bool isMainMaterial = false;
-}
-
 public class CameraClarityBehavior : MonoBehaviour {
+    [System.Serializable]
+    class TransparentObject {
+        [HideInInspector] public string ObjectName;
+        public MeshRenderer ObjectToHide;
+        public Material MaterialToHide;
+        public Material MaterialTransparent;
+        public bool isMainMaterial = false;
+    }
+
     [SerializeField] CinemachineVirtualCamera virtualCamera;
     [SerializeField, ReadOnly] float distance = 0f;
     [SerializeField] Vector2 minMaxDistanceToHide = new Vector2(100f, 150f);
     [SerializeField] TransparentObject[] transparentObjects;
     [SerializeField] Vector2 minMaxMaterialTransparency = new Vector2(0f, 0.5f);
     [SerializeField] float transparenceDuration = 1f;
+    [SerializeField] bool debugVerbose = false;
 
     bool currentHide = false;
     float currentTransparence = 0f;
@@ -37,7 +37,11 @@ public class CameraClarityBehavior : MonoBehaviour {
     void OnDestroy() {
         if (currentHide || (!currentHide && currentTransparence > 0f)) {
             foreach (var transparentObject in transparentObjects) {
-                Debug.LogWarning("Destroying " + transparentObject.ObjectToHide.transform.parent.name + " > " + transparentObject.ObjectToHide.transform.name /*+ " > " + transparentObject.ObjectToHide.material.name*/);
+                if (debugVerbose) {
+                    Debug.LogWarning("Destroying " + transparentObject.ObjectToHide.transform.parent.name + " > " + transparentObject.ObjectToHide.transform.name /*+ " > " + transparentObject.ObjectToHide.material.name*/);
+                } else {
+                    Debug.LogWarning("Destroying instanciated transparent material");
+                }
                 Destroy(transparentObject.ObjectToHide.material);
             }
         }

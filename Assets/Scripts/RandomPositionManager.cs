@@ -44,7 +44,6 @@ public class RandomPositionManager : MonoBehaviour {
             if (transformToPlace == null) { continue; }
             randomTransform = randomTransforms[currentRandomIndex];
             if (randomTransform == null) { continue; }
-            Debug.Log(transformToPlace.name + " going to " + randomTransform.name);
             transformToPlace.position = randomTransform.position + randomObjects[i].objectPositionOffset;
             transformToPlace.rotation = Quaternion.Euler(randomTransform.rotation.eulerAngles + randomObjects[i].objectRotationOffset);            
         }

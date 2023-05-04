@@ -1,20 +1,19 @@
 using UnityEngine;
 using System.Linq;
-using System;
 using System.Collections.Generic;
 using Cinemachine;
 
-[Serializable]
-public class HeroModel {
-    [HideInInspector] public string HeroName;
-    public Hero Hero;
-    public GameObject Model;
-    public SpellBehavior SpellBehavior;
-    public HeroBehavior HeroBehavior;
-    public bool Saved = false;
-}
-
 public class GroupBehavior : MonoBehaviour {
+    [System.Serializable]
+    class HeroModel {
+        [HideInInspector] public string HeroName;
+        public Hero Hero;
+        public GameObject Model;
+        public SpellBehavior SpellBehavior;
+        public HeroBehavior HeroBehavior;
+        public bool Saved = false;
+    }
+
     [SerializeField] HeroModel[] heroes;
     [Header("Witch")]
     [SerializeField] float teleportaDuration = 2f;

@@ -1,36 +1,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct ViewCastInfo {
-    public bool Hit;
-    public Vector3 Point;
-    public float Distance;
-    public float Angle;
-
-    public ViewCastInfo(bool hit, Vector3 point, float distance, float angle) {
-        Hit = hit;
-        Point = point;
-        Distance = distance;
-        Angle = angle;
-    }
-}
-
-public struct EdgeInfo {
-    public Vector3 PointA;
-    public Vector3 PointB;
-
-    public EdgeInfo(Vector3 pointA, Vector3 pointB) {
-        PointA = pointA;
-        PointB = pointB;
-    }
-}
-
 public class GuardBehavior : MonoBehaviour {
+    class ViewCastInfo {
+        public bool Hit;
+        public Vector3 Point;
+        public float Distance;
+        public float Angle;
+
+        public ViewCastInfo(bool hit, Vector3 point, float distance, float angle) {
+            Hit = hit;
+            Point = point;
+            Distance = distance;
+            Angle = angle;
+        }
+
+        public ViewCastInfo() : this(false, Vector3.zero, 0f, 0f) { }
+    }
+
+    class EdgeInfo {
+        public Vector3 PointA;
+        public Vector3 PointB;
+
+        public EdgeInfo(Vector3 pointA, Vector3 pointB) {
+            PointA = pointA;
+            PointB = pointB;
+        }
+    }
+
     [Header("Vision")]
     [Header("Parameters")]
     [SerializeField] bool canSee = true;
     [SerializeField] float visionAngle = 45f;
     [SerializeField] float visionLength = 1f;
+    [SerializeField] float visionProximity = 0.2f;
     [SerializeField] LayerMask viewMask;
     [SerializeField] float detectionTime = 2f;
     [SerializeField] int edgeResolveIterations = 6;
@@ -158,7 +161,7 @@ public class GuardBehavior : MonoBehaviour {
     bool SpotPlayer() {
         if (player == null) return false;
         if (Vector3.Distance(guardTransform.position, player.position) <= visionLength) {
-            if (Vector3.Angle(guardTransform.forward, (player.position - guardTransform.position).normalized) <= (visionAngle / 2f)) {
+            if (Vector3.Distance(guardTransform.position, player.position) <= visionProximity || Vector3.Angle(guardTransform.forward, (player.position - guardTransform.position).normalized) <= (visionAngle / 2f)) {
                 if (!Physics.Linecast(guardTransform.position, player.position, viewMask)) {
                     return true;
                 }
@@ -170,7 +173,9 @@ public class GuardBehavior : MonoBehaviour {
     void MoveGuard() {
         if (guardTransform == null || guardRigidbody == null) return;
         target = playerSpotted ? player.position : waypoints[currentWaypoint];
-        guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime * (playerSpotted ? spottingSpeedRatio : 1f)));
+        if (!playerSpotted || Vector3.Distance(guardTransform.position, player.position) > visionProximity) {
+            guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime * (playerSpotted ? spottingSpeedRatio : 1f)));
+        }
         direction = (target - guardTransform.position).normalized;
         if (direction.magnitude >= 0.1f) {
             targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;

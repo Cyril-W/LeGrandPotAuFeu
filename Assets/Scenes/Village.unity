@@ -1503,6 +1503,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GuardBehavior (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 7204770445929025015, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8626811043197436247, guid: f32437161ea8144449d54c10581e0d32, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -5810,12 +5814,12 @@ MonoBehaviour:
   - objectName: Save_Witch
     currentRandomIndex: -1
     objectTransform: {fileID: 1537638729}
-    objectPositionOffset: {x: 0, y: 1, z: 0}
+    objectPositionOffset: {x: 0, y: 0, z: 0}
     objectRotationOffset: {x: 0, y: 0, z: 0}
   - objectName: Save_Elf
     currentRandomIndex: -1
     objectTransform: {fileID: 1045095571}
-    objectPositionOffset: {x: 0, y: 1, z: 0}
+    objectPositionOffset: {x: 0, y: 0, z: 0}
     objectRotationOffset: {x: 0, y: 0, z: 0}
   deactivateActivateObjects: 1
 --- !u!114 &1365907674 stripped
@@ -8586,6 +8590,10 @@ PrefabInstance:
     - target: {fileID: 7204770445929025015, guid: f32437161ea8144449d54c10581e0d32, type: 3}
       propertyPath: m_Name
       value: GuardBehavior
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204770445929025015, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8626811043197436247, guid: f32437161ea8144449d54c10581e0d32, type: 3}
       propertyPath: m_RootOrder

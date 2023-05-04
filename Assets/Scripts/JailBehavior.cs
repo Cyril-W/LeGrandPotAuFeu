@@ -3,6 +3,7 @@ using DG.Tweening;
 using UnityEngine.Events;
 
 public class JailBehavior : MonoBehaviour {
+    public bool needToLockPick = true;
     [SerializeField] bool isLocked;
     [SerializeField] float unlockTime = 1f;
     [SerializeField] GameObject unlockPanel;
@@ -13,6 +14,7 @@ public class JailBehavior : MonoBehaviour {
     [SerializeField] Transform jailPivot;
     [SerializeField] float rotationDuration = 1f;
     [SerializeField] Vector2 minMaxOpenAngle = new Vector2(80f, 110f);
+    [SerializeField] float timeBetweenAction = 0.5f;
     [Header("Gizmos")]
     [SerializeField] float lineLength = 1f;
     [SerializeField] float ArrowLength = 0.5f;
@@ -23,7 +25,7 @@ public class JailBehavior : MonoBehaviour {
     [SerializeField] UnityEvent onLockPickStart;
 
     bool isOpened = false;
-    float rotationY, currentUnlockTime = 0f, chosenOpenRotation;
+    float rotationY, currentUnlockTime = 0f, chosenOpenRotation, currentTimeSinceAction = 0f;
     Vector3 progressLocalScale;
 
     void Start() {
@@ -40,9 +42,16 @@ public class JailBehavior : MonoBehaviour {
         if (currentUnlockTime > 0f) {
             currentUnlockTime -= Time.deltaTime;
             if (currentUnlockTime <= 0f) {
-                LockPickingBehavior.Instance.jailBehavior = this;
-                onLockPickStart?.Invoke();
+                if (needToLockPick) {
+                    LockPickingBehavior.Instance.jailBehavior = this;
+                    onLockPickStart?.Invoke();
+                } else {
+                    LockPicked();
+                }
             }
+        }
+        if (currentTimeSinceAction > 0f) {
+            currentTimeSinceAction -= Time.deltaTime;
         }
     }
 
@@ -59,7 +68,9 @@ public class JailBehavior : MonoBehaviour {
     }
 
     public void OpenJail() {
-        if (isOpened) return;
+        if (isOpened || currentTimeSinceAction > 0f) return;
+        currentTimeSinceAction = timeBetweenAction;
+        Debug.Log("Open");
         isOpened = true;
         UpdateInteractors();
         chosenOpenRotation = Random.Range(minMaxOpenAngle.x, minMaxOpenAngle.y);
@@ -68,7 +79,9 @@ public class JailBehavior : MonoBehaviour {
     }
 
     public void CloseJail() {
-        if(!isOpened) return;
+        if(!isOpened || currentTimeSinceAction > 0f) return;
+        currentTimeSinceAction = timeBetweenAction;
+        Debug.Log("Close");
         isOpened = false;
         UpdateInteractors();
         jailPivot.DOKill();
