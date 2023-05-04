@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 5311630901037959045}
   - component: {fileID: 5311630901037959044}
   m_Layer: 0
-  m_Name: Handle_Wood
+  m_Name: Handle_Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -91,7 +91,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
+  - {fileID: 2100000, guid: fdd0b6511e1f8d644b3e6d0290d200e2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -254,7 +254,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 39de295c4e44b70409aa18688f74dee0, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -335,7 +335,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -515,21 +515,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pivotCrochet: {fileID: 5311630902422901142}
   crochetShakeParameters:
-    ShakeDuration: 0.25
-    ShakeStrength: {x: 0, y: 0, z: 3}
-    ShakeVibrato: 16
+    Duration: 0.25
+    Strength: {x: 0, y: 0, z: 3}
+    Vibrato: 16
     Randomness: 90
     FadeOut: 1
     ShakeMode: 1
   pivotShaking: {fileID: 5311630900870902365}
-  vibrationShakeParameters:
-    ShakeDuration: 0.5
-    ShakeStrength: {x: 0, y: 0, z: 10}
-    ShakeVibrato: 10
-    Randomness: 135
+  crochetWrongShakeParameters:
+    Duration: 0.1
+    Strength: {x: 0, y: 0, z: 5}
+    Vibrato: 16
+    Randomness: 90
     FadeOut: 1
     ShakeMode: 1
-  vibrationIndicator: {fileID: 5311630902433591616}
+  curveWrongShakeStrength:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2.8048942
+      outSlope: 2.8048942
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.037894726
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   crochetIntact: {fileID: 5311630902249940734}
   crochetBroken: {fileID: 5311630901878113868}
   crochetTurnMouseSpeed: 10
@@ -566,6 +589,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   minMaxRotationLock: {x: 0, y: -90}
+  onInstanceRegistered:
+    m_PersistentCalls:
+      m_Calls: []
+  jailBehavior: {fileID: 0}
   onLockPickSuccess:
     m_PersistentCalls:
       m_Calls: []
@@ -631,7 +658,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 39de295c4e44b70409aa18688f74dee0, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -697,7 +724,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyCodeUI: {fileID: 0}
-  keyCodetext: {fileID: 0}
+  keyCodeText: {fileID: 0}
+  keyCodeSubstring: -1
+  keyCodeTextUGUI: {fileID: 0}
   keyCode: 114
   OnKeyDown:
     m_PersistentCalls:
@@ -779,7 +808,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -861,7 +890,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1091,7 +1120,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1172,7 +1201,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1336,7 +1365,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 39de295c4e44b70409aa18688f74dee0, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1406,7 +1435,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5311630902433591617
 Transform:
   m_ObjectHideFlags: 0
@@ -1513,7 +1542,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 057a68f02aa0cae4b81891a2203c3a14, type: 2}
+  - {fileID: 2100000, guid: 54454fad12f0f8e43a5a16236787de15, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
