@@ -4165,6 +4165,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2961288852587834104}
   - component: {fileID: 951754688241454566}
+  - component: {fileID: 1445216578025072329}
   m_Layer: 0
   m_Name: Jail
   m_TagString: Untagged
@@ -4224,6 +4225,39 @@ MonoBehaviour:
   arrowNumber: 10
   arrowColor: {r: 1, g: 0, b: 0, a: 1}
   onLockPickStart:
+    m_PersistentCalls:
+      m_Calls: []
+  onJailIsOpen:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1445216578025072329}
+        m_TargetAssemblyTypeName: BoolEvent, Assembly-CSharp
+        m_MethodName: SendOnBoolEvent
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1445216578025072329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826669642928407925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29831fd7ba0b2c4e888fb8a5a988f39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onTrueEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  onFalseEvent:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &7487932897543801444

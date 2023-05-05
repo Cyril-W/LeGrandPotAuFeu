@@ -49,7 +49,7 @@ public class ThiefBehavior : HeroBehavior {
     }
 
     void OnDrawGizmos() {
-        if (GroupManager.Instance == null) { return; }
+        if (!isActiveAndEnabled || GroupManager.Instance == null) { return; }
         Gizmos.color = sphereColor;
         Gizmos.DrawWireSphere(GroupManager.Instance.GetPlayerPosition(), minDistanceToJail);
     }

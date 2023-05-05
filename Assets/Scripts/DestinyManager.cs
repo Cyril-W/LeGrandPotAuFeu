@@ -18,6 +18,7 @@ public class DestinyManager : MonoBehaviour {
     [SerializeField] Image[] destinyCoins;
     [SerializeField] Color destinyCoinOnColor;
     [SerializeField] Color destinyCoinOffColor;
+    [SerializeField] UnityEvent OnDestinyPointLose;
     [SerializeField] UnityEvent OnDestinyPointOver;
 
     int destinyPoints;
@@ -73,7 +74,7 @@ public class DestinyManager : MonoBehaviour {
         if (destinyPoints == 0) return;
         destinyCoins[destinyPoints - 1].color = destinyCoinOffColor;
         destinyPoints--;
-
+        OnDestinyPointLose?.Invoke();
         if (destinyPoints == 0) { OnDestinyPointOver?.Invoke(); }
     }
 }

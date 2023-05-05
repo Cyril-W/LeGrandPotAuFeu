@@ -29,13 +29,14 @@ public class LockPickingBehavior : MonoBehaviour {
     [Header("Events")]
     [SerializeField] UnityEvent onInstanceRegistered;
     [ReadOnly] public JailBehavior jailBehavior;
+    [SerializeField] UnityEvent<bool> onPivotPressedChanged;
     [SerializeField] UnityEvent onLockPickSuccess;
     [SerializeField] UnityEvent onLockPickFail;
 
     //Transform vibrationTransform;
     Vector3 initialWrongShakeStrength;
     float currentCrochetRotation = 0f, currentLockRotation = 0f, currentTimeToUnlock = 0f;
-    bool hasShaken = false, isPivotKeyPressed = false, isShakingWrong = false;
+    bool hasShaken = false, isPivotKeyPressed = false, isShakingWrong = false, lastPivotPressed = false;
 
     void Start() {
         if (Instance == null || Instance != this) { Instance = this; onInstanceRegistered?.Invoke(); }
@@ -77,6 +78,10 @@ public class LockPickingBehavior : MonoBehaviour {
         }
 #endif
         isPivotKeyPressed = Input.GetMouseButton(0) || Input.GetKey(pivotLockKey);
+        if (lastPivotPressed != isPivotKeyPressed) {
+            lastPivotPressed = isPivotKeyPressed;
+            onPivotPressedChanged?.Invoke(lastPivotPressed);
+        }
         RotateLock();     
         RotateCrochet();
         CheckLockPick();

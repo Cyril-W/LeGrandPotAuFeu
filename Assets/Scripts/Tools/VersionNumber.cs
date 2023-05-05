@@ -10,7 +10,7 @@ public class VersionNumber : MonoBehaviour {
 
     void Start() {
         TryFillNull();
-        if (versionText != null) { versionText.text = Application.version; }
+        if (versionText != null) { versionText.text = "V" + Application.version; }
     }
 
     void TryFillNull () {

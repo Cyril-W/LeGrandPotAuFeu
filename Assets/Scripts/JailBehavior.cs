@@ -23,6 +23,7 @@ public class JailBehavior : MonoBehaviour {
     [SerializeField] Color arrowColor = Color.red;
     [Header("Events")]
     [SerializeField] UnityEvent onLockPickStart;
+    [SerializeField] UnityEvent<bool> onJailIsOpen;
 
     bool isOpened = false;
     float rotationY, currentUnlockTime = 0f, chosenOpenRotation, currentTimeSinceAction = 0f;
@@ -71,6 +72,7 @@ public class JailBehavior : MonoBehaviour {
         if (isOpened || currentTimeSinceAction > 0f) return;
         currentTimeSinceAction = timeBetweenAction;
         isOpened = true;
+        onJailIsOpen?.Invoke(isOpened);
         UpdateInteractors();
         chosenOpenRotation = Random.Range(minMaxOpenAngle.x, minMaxOpenAngle.y);
         jailPivot.DOKill();
@@ -81,6 +83,7 @@ public class JailBehavior : MonoBehaviour {
         if(!isOpened || currentTimeSinceAction > 0f) return;
         currentTimeSinceAction = timeBetweenAction;
         isOpened = false;
+        onJailIsOpen?.Invoke(isOpened);
         UpdateInteractors();
         jailPivot.DOKill();
         jailPivot.DORotate(Vector3.up * rotationY, rotationDuration);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GuardBehavior : MonoBehaviour {
     class ViewCastInfo {
@@ -63,6 +64,7 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField] Color activeWaypointSphereColor = Color.red;
     [SerializeField] Color inactiveWaypointSphereColor = Color.gray;
     [SerializeField] Color waypointLineColor = Color.yellow;
+    [SerializeField] UnityEvent<bool> OnPlayerSpotted;
 
     List<Vector3> viewPoints = new List<Vector3>();
     Vector3[] waypoints;
@@ -135,7 +137,7 @@ public class GuardBehavior : MonoBehaviour {
 
     void VisionCheck() {
         var newPlayerSpotted = SpotPlayer();
-        if (newPlayerSpotted) {
+        if (newPlayerSpotted) {            
             currentDetectionTime -= Time.deltaTime;
             currentTimeAfterSpot = 0f;
             canMove = previousCanMove;
@@ -148,12 +150,15 @@ public class GuardBehavior : MonoBehaviour {
             }
         }
         if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
-        if (!newPlayerSpotted && newPlayerSpotted != playerSpotted) {
-            currentDetectionTime = detectionTime;
-            currentTimeAfterSpot = timeAfterSpot;
-            lastPuzzledRotation = guardTransform.localRotation.eulerAngles.y;
-            canMove = false;
-            if (DestinyManager.Instance != null) DestinyManager.Instance.LostTrack(this);
+        if (newPlayerSpotted != playerSpotted) {
+            OnPlayerSpotted?.Invoke(newPlayerSpotted);
+            if (!newPlayerSpotted) {
+                currentDetectionTime = detectionTime;
+                currentTimeAfterSpot = timeAfterSpot;
+                lastPuzzledRotation = guardTransform.localRotation.eulerAngles.y;
+                canMove = false;
+                if (DestinyManager.Instance != null) DestinyManager.Instance.LostTrack(this);
+            }
         }
         playerSpotted = newPlayerSpotted;
     }

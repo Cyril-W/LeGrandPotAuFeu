@@ -93,7 +93,7 @@ public class WitchBehavior : HeroBehavior {
         foreach (var teleportPoint in teleportPoints) {
             Gizmos.DrawSphere(teleportPoint, teleportSphereSize);
         }
-        if (GroupManager.Instance == null) { return; }
+        if (!isActiveAndEnabled || GroupManager.Instance == null) { return; }
         Gizmos.color = playerSphereColor;
         Gizmos.DrawWireSphere(GroupManager.Instance.GetPlayerPosition(), distanceToPlayer);
     }

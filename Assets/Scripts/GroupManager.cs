@@ -32,17 +32,13 @@ public class GroupManager : MonoBehaviour {
 
     ThirdPersonController thirdPersonController;
 
-    void OnValidate() {
-        if (Application.isPlaying) {
-            foreach (var h in heroes) {
-                UpdateHero(h);
-                if (BarbarianManager.Instance != null && h.Saved) { BarbarianManager.Instance.SaveHero(h.Hero); }
-            }
-        }
-    }
-
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
+ #if !UNITY_EDITOR
+        foreach (var heroe in heroes) {
+            heroe.Saved = false;
+        }
+#endif
     }
 
     void Start() {
@@ -50,6 +46,7 @@ public class GroupManager : MonoBehaviour {
         UpdateHeroes();
     }
 
+    [ContextMenu("Update Heroes")]
     void UpdateHeroes() {
         foreach (var h in heroes) {
             UpdateHero(h);
