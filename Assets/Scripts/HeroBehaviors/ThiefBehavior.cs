@@ -35,6 +35,7 @@ public class ThiefBehavior : HeroBehavior {
         JailBehavior currentJail = null;
         var currentDistance = 0f;
         foreach (var jail in jails) {
+            if (!jail.GetIsLocked()) { continue; }
             currentDistance = Vector3.Distance(GroupManager.Instance.GetPlayerPosition(), jail.transform.position);
             if (currentDistance <= minDistanceToJail && currentDistance < currentNearestDistance) {
                 currentNearestDistance = currentDistance;

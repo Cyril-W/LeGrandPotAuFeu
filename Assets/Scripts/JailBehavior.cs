@@ -3,7 +3,6 @@ using DG.Tweening;
 using UnityEngine.Events;
 
 public class JailBehavior : MonoBehaviour {
-    public bool needToLockPick = true;
     [SerializeField] bool isLocked;
     [SerializeField] float unlockTime = 1f;
     [SerializeField] GameObject unlockPanel;
@@ -43,12 +42,9 @@ public class JailBehavior : MonoBehaviour {
         if (currentUnlockTime > 0f) {
             currentUnlockTime -= Time.deltaTime;
             if (currentUnlockTime <= 0f) {
-                if (needToLockPick) {
-                    LockPickingBehavior.Instance.jailBehavior = this;
-                    onLockPickStart?.Invoke();
-                } else {
-                    LockPicked();
-                }
+                lockInteractor.SetActive(false);
+                LockPickingBehavior.Instance.jailBehavior = this;
+                onLockPickStart?.Invoke();                
             }
         }
         if (currentTimeSinceAction > 0f) {
@@ -60,6 +56,10 @@ public class JailBehavior : MonoBehaviour {
         isLocked = false;
         unlockPanel.SetActive(false);
         OpenJail();
+    }
+
+    public bool GetIsLocked() {
+        return isLocked;
     }
 
     public void Unlock(bool isUnlocking) {

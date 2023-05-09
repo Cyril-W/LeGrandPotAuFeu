@@ -13,15 +13,16 @@ public class BarbarianManager : MonoBehaviour {
 
     [SerializeField] UnityEvent OnTimerOver;
 
+    string recapIfTimesUp = "";
     float currentTimer;
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
+        recapIfTimesUp = CreateRecap();
     }
 
     void Start() {
         currentTimer = timerBeforeBarbarian;
-        UpdateRecap();
     }
 
     void FixedUpdate() {
@@ -33,14 +34,18 @@ public class BarbarianManager : MonoBehaviour {
         }
         if (currentTimer <= 0f) {
             textTimer.text = "XX : XX";
+            UpdateRecap(recapIfTimesUp);
             OnTimerOver?.Invoke();
             enabled = false;
         }
     }
 
-    void UpdateRecap() {
+    void UpdateRecap(string overrideRecap = "") {
         if (textRecap == null) return;
+        textRecap.text = overrideRecap.Length > 0 ? overrideRecap : CreateRecap();
+    }
 
+    string CreateRecap () {
         var recap = "Still to save: ";
         foreach (var hero in HeroesToSave) {
             recap += "\n - " + hero + " (200 gold)";
@@ -50,7 +55,7 @@ public class BarbarianManager : MonoBehaviour {
         }
         recap += "\n-----------------------";
         recap += "\n<u>Total:</u> " + HeroesToSave.Count * 200 + " gold";
-        textRecap.text = recap;
+        return recap;
     }
 
     public void SaveHero(Hero hero) {

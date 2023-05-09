@@ -10,8 +10,6 @@ public class LockPickingBehavior : MonoBehaviour {
     [SerializeField] Transform pivotShaking;
     [SerializeField] DoShakeRotationParameters crochetWrongShakeParameters = new DoShakeRotationParameters(0.5f, Vector3.forward * 5f, 16);
     [SerializeField] AnimationCurve curveWrongShakeStrength;
-    //[SerializeField] DoShakeRotationParameters vibrationShakeParameters = new DoShakeRotationParameters(0.5f, Vector3.forward * 10f, 10, 135f);
-    //[SerializeField] GameObject vibrationIndicator;
     [SerializeField] GameObject crochetIntact;
     [SerializeField] GameObject crochetBroken;
     [SerializeField] float crochetTurnMouseSpeed = 10f;
@@ -30,17 +28,16 @@ public class LockPickingBehavior : MonoBehaviour {
     [SerializeField] UnityEvent onInstanceRegistered;
     [ReadOnly] public JailBehavior jailBehavior;
     [SerializeField] UnityEvent<bool> onPivotPressedChanged;
+    [SerializeField] UnityEvent onCrochetShake;
     [SerializeField] UnityEvent onLockPickSuccess;
     [SerializeField] UnityEvent onLockPickFail;
 
-    //Transform vibrationTransform;
     Vector3 initialWrongShakeStrength;
     float currentCrochetRotation = 0f, currentLockRotation = 0f, currentTimeToUnlock = 0f;
     bool hasShaken = false, isPivotKeyPressed = false, isShakingWrong = false, lastPivotPressed = false;
 
     void Start() {
         if (Instance == null || Instance != this) { Instance = this; onInstanceRegistered?.Invoke(); }
-        //if (vibrationIndicator != null && vibrationTransform == null) { vibrationTransform = vibrationIndicator.transform; }
         if (crochetWrongShakeParameters != null) { 
             initialWrongShakeStrength = crochetWrongShakeParameters.Strength;
             crochetWrongShakeParameters.OnComplete += SetFalseIsShakingWrong;
@@ -58,7 +55,6 @@ public class LockPickingBehavior : MonoBehaviour {
         Cursor.lockState = CursorLockMode.Confined;
         correctCrochetRotation = Random.Range(minMaxRotationCrochet.x, minMaxRotationCrochet.y);
         UpdateCrochetState(true);
-        //vibrationIndicator.SetActive(false);
     }
 
     void OnDisable() {
@@ -109,14 +105,11 @@ public class LockPickingBehavior : MonoBehaviour {
         var goodRotation = Mathf.Abs(currentCrochetRotation - correctCrochetRotation) <= crochetRotationMargin;
         if (!hasShaken && goodRotation) {
             hasShaken = true;
-            /*if (vibrationIndicator != null) {
-                vibrationIndicator.SetActive(!isPivotKeyPressed);
+            if (pivotShaking != null) { 
+                crochetShakeParameters.DoShakeRotation(pivotShaking);
+                onCrochetShake?.Invoke();
+
             }
-            if (vibrationTransform != null) {
-                vibrationTransform.DOScale(1.25f, .5f).OnComplete(() => vibrationTransform.localScale = Vector3.one);
-                vibrationShakeParameters.DoShakeRotation(vibrationTransform);
-            }*/
-            if (pivotShaking != null) { crochetShakeParameters.DoShakeRotation(pivotShaking); }
         } else if (!goodRotation && hasShaken) {
             hasShaken = false;
         }     
@@ -131,7 +124,6 @@ public class LockPickingBehavior : MonoBehaviour {
                 onLockPickFail?.Invoke();
                 UpdateCrochetState(false);
             }
-            //vibrationIndicator.SetActive(false);
             currentTimeToUnlock = 0f;
             enabled = false;
         } else if (isPivotKeyPressed && !goodRotation && !isShakingWrong) {
