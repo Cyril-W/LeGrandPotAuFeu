@@ -41,7 +41,10 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField] float edgeDistanceThreshold = .5f;
     [SerializeField, Range(0f, 1f)] float meshResolution = .5f;
     [SerializeField] MeshFilter viewMeshFilter;
-    [SerializeField] Gradient visionGradient;
+    //[SerializeField] Gradient visionGradient;
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] Vector2 minMaxVolume = new Vector2(0f, 0.5f);
+    [SerializeField] AnimationCurve volumeCurve;
     [Header("Movement")]
     [SerializeField] bool canMove = true;
     [SerializeField] float speed = 5f;
@@ -71,9 +74,9 @@ public class GuardBehavior : MonoBehaviour {
     Vector3 direction, target;
     Transform player;
     Rigidbody guardRigidbody;
-    MeshRenderer viewMeshRenderer;
+    //MeshRenderer viewMeshRenderer;
     Mesh viewMesh;
-    Material viewMaterial;
+    //Material viewMaterial;
     int currentWaypoint = 0;
     float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation;
     bool playerSpotted = false, previousCanMove;
@@ -93,9 +96,10 @@ public class GuardBehavior : MonoBehaviour {
         viewMesh = new Mesh();
         viewMesh.name = "View Mesh";
         if (viewMeshFilter != null) viewMeshFilter.mesh = viewMesh;
-        viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>();
-        if (viewMeshRenderer != null) viewMaterial = viewMeshRenderer.material;
+        //viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>();
+        //if (viewMeshRenderer != null) viewMaterial = viewMeshRenderer.material;
         previousCanMove = canMove;
+        audioSource.enabled = false;
     }
 
     void FixedUpdate() {
@@ -106,9 +110,9 @@ public class GuardBehavior : MonoBehaviour {
         if (canSee) {
             VisionCheck();
         }
-        if (viewMeshRenderer != null) {
+        /*if (viewMeshRenderer != null) {
             viewMeshRenderer.enabled = canSee;
-        }
+        }*/
 
         if (currentTimeAfterSpot > 0f) {
             GuardPuzzled();
@@ -139,6 +143,7 @@ public class GuardBehavior : MonoBehaviour {
         var newPlayerSpotted = SpotPlayer();
         if (newPlayerSpotted) {            
             currentDetectionTime -= Time.deltaTime;
+            audioSource.volume = Mathf.Lerp(minMaxVolume.x, minMaxVolume.y, volumeCurve.Evaluate(Mathf.Clamp01(1f - (currentDetectionTime / detectionTime))));
             currentTimeAfterSpot = 0f;
             canMove = previousCanMove;
             if (DestinyManager.Instance != null) DestinyManager.Instance.DestinyTimeScale(this, 1 - (currentDetectionTime / detectionTime));
@@ -149,9 +154,10 @@ public class GuardBehavior : MonoBehaviour {
                 gameObject.SetActive(false);
             }
         }
-        if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
+        //if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
         if (newPlayerSpotted != playerSpotted) {
             OnPlayerSpotted?.Invoke(newPlayerSpotted);
+            audioSource.enabled = newPlayerSpotted;
             if (!newPlayerSpotted) {
                 currentDetectionTime = detectionTime;
                 currentTimeAfterSpot = timeAfterSpot;

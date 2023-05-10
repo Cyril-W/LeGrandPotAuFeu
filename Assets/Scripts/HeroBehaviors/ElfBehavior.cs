@@ -33,10 +33,8 @@ public class ElfBehavior : HeroBehavior {
         }
     }
 
-    protected override void DoSpell(Hero hero) {
-        if (hero == GetHero()) {
-            Vision();
-        }
+    protected override void OverrideDoSpell() {
+        Vision();
     }
 
     [ContextMenu("Vision")]

@@ -39,10 +39,8 @@ public class WitchBehavior : HeroBehavior {
         }
     }
 
-    protected override void DoSpell(Hero hero) {
-        if (hero == GetHero()) {
-            Teleport();
-        }
+    protected override void OverrideDoSpell() {
+        Teleport();
     }
 
     [ContextMenu("Teleport")]

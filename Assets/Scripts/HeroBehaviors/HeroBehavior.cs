@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public abstract class HeroBehavior : MonoBehaviour {
     [SerializeField] Hero hero;
+    [SerializeField] UnityEvent OnSpellClicked;
 
     protected virtual void OnEnable() {
         if (GroupManager.Instance != null) {
@@ -15,7 +17,14 @@ public abstract class HeroBehavior : MonoBehaviour {
         }
     }
 
-    protected abstract void DoSpell(Hero hero);
+    void DoSpell(Hero hero) {
+        if (hero == GetHero()) {
+            OnSpellClicked?.Invoke();
+            OverrideDoSpell();
+        }
+    }
+
+    protected abstract void OverrideDoSpell();
 
     public Hero GetHero() {
         return hero;

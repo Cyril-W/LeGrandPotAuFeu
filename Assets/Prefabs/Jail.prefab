@@ -484,7 +484,19 @@ MonoBehaviour:
         m_CallState: 2
   OnTriggerStayEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3027182162717255817}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   OnTriggerExitEvent:
     m_PersistentCalls:
       m_Calls:
@@ -4207,7 +4219,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50f2b1711f186f749b0cfcc0a0cdf79f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  needToLockPick: 1
   isLocked: 1
   unlockTime: 0.5
   unlockPanel: {fileID: 4927379038382705599}
@@ -4217,6 +4228,7 @@ MonoBehaviour:
   closeInteractor: {fileID: 8451241121074232054}
   jailPivot: {fileID: 5680563771517229543}
   rotationDuration: 1
+  minMaxClosedAngle: {x: 10, y: 15}
   minMaxOpenAngle: {x: 70, y: 120}
   timeBetweenAction: 0.5
   lineLength: 1
@@ -4744,7 +4756,19 @@ MonoBehaviour:
         m_CallState: 2
   OnTriggerStayEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3426974026588945208}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   OnTriggerExitEvent:
     m_PersistentCalls:
       m_Calls:
@@ -5083,7 +5107,19 @@ MonoBehaviour:
         m_CallState: 2
   OnTriggerStayEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 28356255242177349}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   OnTriggerExitEvent:
     m_PersistentCalls:
       m_Calls:

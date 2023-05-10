@@ -22,10 +22,8 @@ public class ThiefBehavior : HeroBehavior {
             if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
     }
 
-    protected override void DoSpell(Hero hero) {
-        if (hero == GetHero()) {
-            LockPick();
-        }
+    protected override void OverrideDoSpell() {        
+        LockPick();
     }
 
     [ContextMenu("Lock Pick")]

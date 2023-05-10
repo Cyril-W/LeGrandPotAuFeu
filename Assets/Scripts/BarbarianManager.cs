@@ -21,7 +21,7 @@ public class BarbarianManager : MonoBehaviour {
         recapIfTimesUp = CreateRecap();
     }
 
-    void Start() {
+    void OnEnable() {
         currentTimer = timerBeforeBarbarian;
     }
 
