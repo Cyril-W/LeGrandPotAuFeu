@@ -16,4 +16,4 @@ MonoBehaviour:
   Volume: 1
   Pitch: 1
   IsLooping: 0
-  MinMaxRandomPitch: {x: 0, y: 0}
+  MinMaxRandomPitch: {x: -0.1, y: 0.1}

@@ -64,6 +64,7 @@ public class CameraClarityBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (virtualCamera == null) { return; }
         distance = Vector3.Distance(virtualCamera.transform.position, transform.position);
         bool hide;
         if (!currentHide) {

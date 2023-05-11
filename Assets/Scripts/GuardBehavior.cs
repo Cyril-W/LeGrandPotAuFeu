@@ -32,8 +32,8 @@ public class GuardBehavior : MonoBehaviour {
     [Header("Vision")]
     [Header("Parameters")]
     [SerializeField] bool canSee = true;
-    [SerializeField] float visionAngle = 45f;
-    [SerializeField] float visionLength = 1f;
+    [SerializeField, Range(0.1f, 360f)] float visionAngle = 45f;
+    [SerializeField, Range(0.1f, 100f)] float visionLength = 1f;
     [SerializeField] float visionProximity = 0.2f;
     [SerializeField] LayerMask viewMask;
     [SerializeField] float detectionTime = 2f;
@@ -45,6 +45,8 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField] AudioSource audioSource;
     [SerializeField] Vector2 minMaxVolume = new Vector2(0f, 0.5f);
     [SerializeField] AnimationCurve volumeCurve;
+    [SerializeField] LineRenderer lineRenderer;
+    [SerializeField] float lineWidth = 0.5f;
     [Header("Movement")]
     [SerializeField] bool canMove = true;
     [SerializeField] float speed = 5f;
@@ -68,38 +70,71 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField] Color inactiveWaypointSphereColor = Color.gray;
     [SerializeField] Color waypointLineColor = Color.yellow;
     [SerializeField] UnityEvent<bool> OnPlayerSpotted;
+    [Header("Other")]
+    [SerializeField, ReadOnly] Transform player;
+    [SerializeField, ReadOnly] Rigidbody guardRigidbody;
+    [SerializeField, ReadOnly] MeshRenderer viewMeshRenderer;
 
     List<Vector3> viewPoints = new List<Vector3>();
     Vector3[] waypoints;
-    Vector3 direction, target;
-    Transform player;
-    Rigidbody guardRigidbody;
-    //MeshRenderer viewMeshRenderer;
+    Vector3 direction, target; 
     Mesh viewMesh;
-    //Material viewMaterial;
+    Material viewMaterial;
     int currentWaypoint = 0;
     float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation;
     bool playerSpotted = false, previousCanMove;
 
+    static readonly string MATERIAL_FLOAT_FILL = "_Fill";
+    static readonly string MATERIAL_FLOAT_VISIONLENGTH = "_VisionLength";
+
     void OnValidate() {
+        TryFillNull();        
         previousCanMove = canMove;
+        if (lineRenderer != null) {
+            lineRenderer.startWidth = lineRenderer.endWidth = lineWidth;
+        }
+        if (viewMaterial != null) {
+            viewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f);
+        }
+    }
+
+    void OnDestroy() {
+        Debug.LogWarning("Destroying instanciated view material");
+        Destroy(viewMaterial);
     }
 
     void Start() {
+        TryFillNull();
         waypoints = new Vector3[waypointsHolder.childCount];
         PopulateWaypoints();
         currentWaitTime = Random.Range(minMaxWaitTime.x, minMaxWaitTime.y);
         currentDetectionTime = detectionTime;
-        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (guardRigidbody == null) guardRigidbody = guardTransform.GetComponent<Rigidbody>();
-        if (viewMeshFilter == null) viewMeshFilter = GetComponent<MeshFilter>();
-        viewMesh = new Mesh();
-        viewMesh.name = "View Mesh";
-        if (viewMeshFilter != null) viewMeshFilter.mesh = viewMesh;
-        //viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>();
-        //if (viewMeshRenderer != null) viewMaterial = viewMeshRenderer.material;
+        //if (player == null) { player = GameObject.FindGameObjectWithTag("Player")?.transform; }
+        //if (guardRigidbody == null) { guardRigidbody = guardTransform.GetComponent<Rigidbody>(); }
+        //if (viewMeshFilter == null) { viewMeshFilter = GetComponent<MeshFilter>(); }       
+        if (viewMeshFilter != null) {
+            viewMesh = new Mesh();
+            viewMesh.name = "View Mesh";
+            viewMeshFilter.mesh = viewMesh;
+        }
+        //if (viewMeshRenderer == null) { viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>(); }
+        if (viewMeshRenderer != null) { viewMaterial = viewMeshRenderer.material; }
+        if (viewMaterial != null) { viewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f); }
         previousCanMove = canMove;
-        audioSource.enabled = false;
+        if (audioSource != null) audioSource.enabled = false;
+        //if (lineRenderer == null) lineRenderer = GetComponentInChildren<LineRenderer>();
+        if (lineRenderer != null) {
+            lineRenderer.startWidth = lineRenderer.endWidth = lineWidth;
+        }
+    }
+
+    void TryFillNull() {
+        if (player == null) { player = GameObject.FindGameObjectWithTag("Player")?.transform; }
+        if (guardRigidbody == null) { guardRigidbody = guardTransform.GetComponent<Rigidbody>(); }
+        if (viewMeshFilter == null) { viewMeshFilter = GetComponent<MeshFilter>(); }
+        if (viewMeshRenderer == null) { viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>(); }
+        if (lineRenderer == null) { lineRenderer = GetComponentInChildren<LineRenderer>(); }
+        if (audioSource == null) { audioSource = GetComponentInChildren<AudioSource>(); }
     }
 
     void FixedUpdate() {
@@ -110,9 +145,12 @@ public class GuardBehavior : MonoBehaviour {
         if (canSee) {
             VisionCheck();
         }
-        /*if (viewMeshRenderer != null) {
+        if (viewMeshRenderer != null) {
             viewMeshRenderer.enabled = canSee;
-        }*/
+        }
+        if (lineRenderer != null) {
+            lineRenderer.enabled = canSee;
+        }
 
         if (currentTimeAfterSpot > 0f) {
             GuardPuzzled();
@@ -130,7 +168,7 @@ public class GuardBehavior : MonoBehaviour {
     void PopulateWaypoints() {
         if (waypointsHolder == null || waypointsHolder.childCount <= 0) return;
 
-        if (waypointsHolder.childCount == waypoints.Length) {
+        if (waypointsHolder.childCount != waypoints.Length) {
             waypoints = new Vector3[waypointsHolder.childCount];
         }
 
@@ -154,7 +192,7 @@ public class GuardBehavior : MonoBehaviour {
                 gameObject.SetActive(false);
             }
         }
-        //if (viewMaterial != null) viewMaterial.color = visionGradient.Evaluate(1 - Mathf.Clamp01(currentDetectionTime / detectionTime));
+        if (viewMaterial != null) viewMaterial.SetFloat(MATERIAL_FLOAT_FILL, 1f - Mathf.Clamp01(currentDetectionTime / detectionTime));
         if (newPlayerSpotted != playerSpotted) {
             OnPlayerSpotted?.Invoke(newPlayerSpotted);
             audioSource.enabled = newPlayerSpotted;
@@ -247,13 +285,20 @@ public class GuardBehavior : MonoBehaviour {
         var vertices = new Vector3[vertexCount];
         var triangles = new int[(vertexCount - 2) * 3];
         vertices[0] = Vector3.zero;
+        if (lineRenderer != null) {
+            lineRenderer.positionCount = vertexCount + 1;
+            lineRenderer.SetPosition(0, vertices[0]);
+            lineRenderer.SetPosition(vertexCount, vertices[0]);
+        }
         for (int i = 0; i < vertexCount - 1; i++) {
             vertices[i + 1] = guardTransform.InverseTransformPoint(viewPoints[i]);
-
             if (i < vertexCount - 2) {
-                triangles[i * 3] = 0;
+                triangles[i * 3] = i + 2;
                 triangles[i * 3 + 1] = i + 1;
-                triangles[i * 3 + 2] = i + 2;
+                triangles[i * 3 + 2] = 0;
+            }
+            if (lineRenderer != null) {
+                lineRenderer.SetPosition(i + 1, vertices[i + 1]);
             }
         }
         viewMesh.Clear();

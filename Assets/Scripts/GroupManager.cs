@@ -31,13 +31,15 @@ public class GroupManager : MonoBehaviour {
     public Action<Hero> OnSpellClick;
 
     ThirdPersonController thirdPersonController;
+    int numberHeroSaved = 0;
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
- #if !UNITY_EDITOR
+#if !UNITY_EDITOR
         foreach (var heroe in heroes) {
             heroe.Saved = false;
         }
+        numberHeroSaved = 0;
 #endif
     }
 
@@ -48,9 +50,13 @@ public class GroupManager : MonoBehaviour {
 
     [ContextMenu("Update Heroes")]
     void UpdateHeroes() {
+        numberHeroSaved = 0;
         foreach (var h in heroes) {
             UpdateHero(h);
-            if (BarbarianManager.Instance != null && h.Saved) { BarbarianManager.Instance.SaveHero(h.Hero); }
+            if (h.Saved) {
+                if (BarbarianManager.Instance != null) { BarbarianManager.Instance.SaveHero(h.Hero); }
+                numberHeroSaved++;
+            }
         }
     }
 
@@ -84,7 +90,12 @@ public class GroupManager : MonoBehaviour {
 
     void UpdateHero(HeroModel hero, bool saved) {
         hero.Saved = saved;
+        numberHeroSaved += hero.Saved ? 1 : -1;
         UpdateHero(hero);
+    }
+
+    public int GetNumberHeroSaved() {
+        return numberHeroSaved;
     }
 
     [ContextMenu("Fill Hero Models")]

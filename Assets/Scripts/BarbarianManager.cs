@@ -19,9 +19,10 @@ public class BarbarianManager : MonoBehaviour {
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
         recapIfTimesUp = CreateRecap();
+        currentTimer = timerBeforeBarbarian;
     }
 
-    void OnEnable() {
+    void OnValidate() {
         currentTimer = timerBeforeBarbarian;
     }
 
