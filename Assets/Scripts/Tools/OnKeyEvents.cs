@@ -23,6 +23,7 @@ public class OnKeyEvents : MonoBehaviour {
     void OnEnable() {
         UpdateKeyCodeTexts();
         if (keyCodeUI) { keyCodeUI.SetActive(true); }
+        isKeyPressed = Input.GetKey(keyCode);
     }
 
     void OnDisable() {

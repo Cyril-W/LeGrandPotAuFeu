@@ -60,6 +60,7 @@ public class LockPickingBehavior : MonoBehaviour {
     void OnDisable() {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        if (jailBehavior != null) { jailBehavior.LockPickAbort(); jailBehavior = null; }
     }
 
     void FixedUpdate() {

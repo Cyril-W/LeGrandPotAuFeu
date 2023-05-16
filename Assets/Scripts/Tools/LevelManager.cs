@@ -12,10 +12,12 @@ public class LevelManager : MonoBehaviour {
     }
 
     public void ApplicationQuit() {
+        Debug.Log("Exiting the game");
         Application.Quit();
     }
 
     public void ReloadScene() {
+        Debug.Log("Reloading the scene");
         var scene = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }

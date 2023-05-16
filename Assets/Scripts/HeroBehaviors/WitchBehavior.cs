@@ -2,34 +2,68 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class WitchBehavior : HeroBehavior {
-    [SerializeField] float teleportationDuration = 2f;
-    [SerializeField, Layer] int layer = 3;
+    [SerializeField] float teleportationDuration = 1f;
+    [SerializeField] Collider[] collidersToAvoid;
+    [SerializeField, Layer] int obstacleLayer = 3;
     [SerializeField] BoxCollider teleportArea;
     [SerializeField, Range(0, 100)] int numberXTeleportPoints = 20;
     [SerializeField, Range(0, 100)] int numberZTeleportPoints = 20;
     [SerializeField] float distanceToObstacles = 2f;
     [SerializeField] float distanceToPlayer = 20f;
+    [SerializeField] GuardBehavior[] guards;
+    [SerializeField, Layer] int defaultLayer = 0;
+    [SerializeField, Layer] int enemiLayer = 6;
     [Header("Gizmos")]
     [SerializeField] Color playerSphereColor = Color.red;
     [SerializeField] float teleportSphereSize = 0.1f;
     [SerializeField] Color teleportSphereColor = Color.magenta;
 
-    List<Collider> collidersToAvoid = new List<Collider>();
     List<Vector3> teleportPoints = new List<Vector3>();
     float currentTeleportTime = 0f;
 
+    void Awake() {
+        TryFillVoid(false);
+    }
+
     protected override void OnEnable() {
         base.OnEnable();
-        collidersToAvoid.Clear();
-        var boxColliders = FindObjectsOfType<BoxCollider>();
-        foreach (var coll in boxColliders) {
-            if (coll.enabled && coll.gameObject.layer == layer) collidersToAvoid.Add(coll);
-        }
-        var sphereColliders = FindObjectsOfType<SphereCollider>();
-        foreach (var coll in sphereColliders) {
-            if (coll.enabled && coll.gameObject.layer == layer) collidersToAvoid.Add(coll);
-        }
+        TryFillVoid(false);
         GetTeleportPoints();
+        SetGuardLayer(true);
+    }
+
+    protected override void OnDisable() {
+        base.OnDisable();
+        SetGuardLayer(false);
+    }
+
+    void TryFillVoid(bool force = true) {
+        if (force || guards.Length <= 0) {
+            guards = FindObjectsOfType<GuardBehavior>();
+        }
+        if (force || collidersToAvoid.Length <= 0) {
+            var allCollidersToAvoid = new List<Collider>();
+            var boxColliders = FindObjectsOfType<BoxCollider>();
+            foreach (var coll in boxColliders) {
+                if (coll.enabled && coll.gameObject.layer == obstacleLayer) allCollidersToAvoid.Add(coll);
+            }
+            var sphereColliders = FindObjectsOfType<SphereCollider>();
+            foreach (var coll in sphereColliders) {
+                if (coll.enabled && coll.gameObject.layer == obstacleLayer) allCollidersToAvoid.Add(coll);
+            }
+            collidersToAvoid = allCollidersToAvoid.ToArray();
+        }
+    }
+
+    [ContextMenu("Try Fill arrays")]
+    void ContextTryFillVoid() {
+        TryFillVoid();
+    }
+
+    void SetGuardLayer(bool isActive) {
+        foreach (var guard in guards) {
+            guard.SetGuardLayer(isActive ? enemiLayer : defaultLayer);
+        }
     }
 
     void FixedUpdate() {

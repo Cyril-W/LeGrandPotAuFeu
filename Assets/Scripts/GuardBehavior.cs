@@ -35,12 +35,14 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField, Range(0.1f, 360f)] float visionAngle = 45f;
     [SerializeField, Range(0.1f, 100f)] float visionLength = 1f;
     [SerializeField] float visionProximity = 0.2f;
+    [SerializeField] float visionOffset = 1f;
     [SerializeField] LayerMask viewMask;
     [SerializeField] float detectionTime = 2f;
     [SerializeField] int edgeResolveIterations = 6;
     [SerializeField] float edgeDistanceThreshold = .5f;
     [SerializeField, Range(0f, 1f)] float meshResolution = .5f;
-    [SerializeField] MeshFilter viewMeshFilter;
+    [SerializeField] MeshFilter coneViewMeshFilter;
+    [SerializeField] MeshRenderer circleViewMeshRenderer;
     //[SerializeField] Gradient visionGradient;
     [SerializeField] AudioSource audioSource;
     [SerializeField] Vector2 minMaxVolume = new Vector2(0f, 0.5f);
@@ -73,13 +75,13 @@ public class GuardBehavior : MonoBehaviour {
     [Header("Other")]
     [SerializeField, ReadOnly] Transform player;
     [SerializeField, ReadOnly] Rigidbody guardRigidbody;
-    [SerializeField, ReadOnly] MeshRenderer viewMeshRenderer;
+    [SerializeField, ReadOnly] MeshRenderer coneViewMeshRenderer;
 
     List<Vector3> viewPoints = new List<Vector3>();
     Vector3[] waypoints;
-    Vector3 direction, target; 
+    Vector3 direction, target, offsetGuardPosition, offsetPlayerPosition; 
     Mesh viewMesh;
-    Material viewMaterial;
+    Material coneViewMaterial, circleViewMaterial;
     int currentWaypoint = 0;
     float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation;
     bool playerSpotted = false, previousCanMove;
@@ -93,14 +95,16 @@ public class GuardBehavior : MonoBehaviour {
         if (lineRenderer != null) {
             lineRenderer.startWidth = lineRenderer.endWidth = lineWidth;
         }
-        if (viewMaterial != null) {
-            viewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f);
-        }
     }
 
     void OnDestroy() {
         Debug.LogWarning("Destroying instanciated view material");
-        Destroy(viewMaterial);
+        if (coneViewMaterial != null) {
+            Destroy(coneViewMaterial);
+        }
+        if (circleViewMaterial != null) {
+            Destroy(circleViewMaterial);
+        }
     }
 
     void Start() {
@@ -108,21 +112,21 @@ public class GuardBehavior : MonoBehaviour {
         waypoints = new Vector3[waypointsHolder.childCount];
         PopulateWaypoints();
         currentWaitTime = Random.Range(minMaxWaitTime.x, minMaxWaitTime.y);
-        currentDetectionTime = detectionTime;
-        //if (player == null) { player = GameObject.FindGameObjectWithTag("Player")?.transform; }
-        //if (guardRigidbody == null) { guardRigidbody = guardTransform.GetComponent<Rigidbody>(); }
-        //if (viewMeshFilter == null) { viewMeshFilter = GetComponent<MeshFilter>(); }       
-        if (viewMeshFilter != null) {
+        currentDetectionTime = detectionTime;     
+        if (coneViewMeshFilter != null) {
             viewMesh = new Mesh();
             viewMesh.name = "View Mesh";
-            viewMeshFilter.mesh = viewMesh;
+            coneViewMeshFilter.mesh = viewMesh;
         }
-        //if (viewMeshRenderer == null) { viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>(); }
-        if (viewMeshRenderer != null) { viewMaterial = viewMeshRenderer.material; }
-        if (viewMaterial != null) { viewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f); }
+        if (coneViewMeshRenderer != null) { coneViewMaterial = coneViewMeshRenderer.material; }
+        if (coneViewMaterial != null) { coneViewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f); }
+        if (circleViewMeshRenderer != null) { 
+            circleViewMaterial = circleViewMeshRenderer.material;
+            circleViewMeshRenderer.transform.localScale = new Vector3(visionProximity * 2f, 0.01f, visionProximity * 2f);
+        }
+        if (circleViewMaterial != null) { circleViewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionProximity * 2f * 0.55f); }
         previousCanMove = canMove;
         if (audioSource != null) audioSource.enabled = false;
-        //if (lineRenderer == null) lineRenderer = GetComponentInChildren<LineRenderer>();
         if (lineRenderer != null) {
             lineRenderer.startWidth = lineRenderer.endWidth = lineWidth;
         }
@@ -131,8 +135,8 @@ public class GuardBehavior : MonoBehaviour {
     void TryFillNull() {
         if (player == null) { player = GameObject.FindGameObjectWithTag("Player")?.transform; }
         if (guardRigidbody == null) { guardRigidbody = guardTransform.GetComponent<Rigidbody>(); }
-        if (viewMeshFilter == null) { viewMeshFilter = GetComponent<MeshFilter>(); }
-        if (viewMeshRenderer == null) { viewMeshRenderer = viewMeshFilter.GetComponent<MeshRenderer>(); }
+        //if (coneViewMeshFilter == null) { coneViewMeshFilter = GetComponent<MeshFilter>(); }
+        if (coneViewMeshRenderer == null && coneViewMeshFilter != null) { coneViewMeshRenderer = coneViewMeshFilter.GetComponent<MeshRenderer>(); }
         if (lineRenderer == null) { lineRenderer = GetComponentInChildren<LineRenderer>(); }
         if (audioSource == null) { audioSource = GetComponentInChildren<AudioSource>(); }
     }
@@ -145,8 +149,8 @@ public class GuardBehavior : MonoBehaviour {
         if (canSee) {
             VisionCheck();
         }
-        if (viewMeshRenderer != null) {
-            viewMeshRenderer.enabled = canSee;
+        if (coneViewMeshRenderer != null) {
+            coneViewMeshRenderer.enabled = canSee;
         }
         if (lineRenderer != null) {
             lineRenderer.enabled = canSee;
@@ -163,6 +167,13 @@ public class GuardBehavior : MonoBehaviour {
 
     void LateUpdate() {
         DrawFieldOfView();
+    }
+
+    public void SetGuardLayer(int layer) {
+        if (guardTransform == null || guardTransform.GetChild(0) == null) { return; }
+        foreach (Transform child in guardTransform.GetChild(0)) {
+            child.gameObject.layer = layer;
+        }
     }
 
     void PopulateWaypoints() {
@@ -192,7 +203,7 @@ public class GuardBehavior : MonoBehaviour {
                 gameObject.SetActive(false);
             }
         }
-        if (viewMaterial != null) viewMaterial.SetFloat(MATERIAL_FLOAT_FILL, 1f - Mathf.Clamp01(currentDetectionTime / detectionTime));
+        if (coneViewMaterial != null) coneViewMaterial.SetFloat(MATERIAL_FLOAT_FILL, 1f - Mathf.Clamp01(currentDetectionTime / detectionTime));
         if (newPlayerSpotted != playerSpotted) {
             OnPlayerSpotted?.Invoke(newPlayerSpotted);
             audioSource.enabled = newPlayerSpotted;
@@ -209,9 +220,12 @@ public class GuardBehavior : MonoBehaviour {
 
     bool SpotPlayer() {
         if (player == null) return false;
-        if (Vector3.Distance(guardTransform.position, player.position) <= visionLength) {
-            if (Vector3.Distance(guardTransform.position, player.position) <= visionProximity || Vector3.Angle(guardTransform.forward, (player.position - guardTransform.position).normalized) <= (visionAngle / 2f)) {
-                if (!Physics.Linecast(guardTransform.position, player.position, viewMask)) {
+        offsetGuardPosition = guardTransform.position + Vector3.up * visionOffset;
+        offsetPlayerPosition = player.position + Vector3.up * visionOffset;
+        if (Vector3.Distance(offsetGuardPosition, offsetPlayerPosition) <= visionLength) {
+            if (Vector3.Distance(offsetGuardPosition, offsetPlayerPosition) <= visionProximity || Vector3.Angle(guardTransform.forward, (offsetPlayerPosition - offsetGuardPosition).normalized) <= (visionAngle / 2f)) {
+                if (!Physics.Linecast(offsetGuardPosition, offsetPlayerPosition, viewMask)) {
+                    Debug.DrawLine(offsetGuardPosition, offsetPlayerPosition, Color.red);
                     return true;
                 }
             }
@@ -222,7 +236,7 @@ public class GuardBehavior : MonoBehaviour {
     void MoveGuard() {
         if (guardTransform == null || guardRigidbody == null) return;
         target = playerSpotted ? player.position : waypoints[currentWaypoint];
-        if (!playerSpotted || Vector3.Distance(guardTransform.position, player.position) > visionProximity) {
+        if (!playerSpotted || Vector3.Distance(guardTransform.position, player.position) > 0.5f) {
             guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime * (playerSpotted ? spottingSpeedRatio : 1f)));
         }
         direction = (target - guardTransform.position).normalized;
@@ -329,9 +343,8 @@ public class GuardBehavior : MonoBehaviour {
 
     ViewCastInfo ViewCast(float angle) {
         RaycastHit hit;
-        var guardPosition = guardTransform.position/* + Vector3.up * 1.5f*/;
-        var targetPos = guardPosition + GetCartesianFromPolar(visionLength, angle);
-        if (Physics.Linecast(guardPosition, targetPos, out hit, viewMask)) {
+        var targetPos = offsetGuardPosition + GetCartesianFromPolar(visionLength, angle);
+        if (Physics.Linecast(offsetGuardPosition, targetPos, out hit, viewMask)) {
             return new ViewCastInfo(true, hit.point, hit.distance, angle);
         } else {
             return new ViewCastInfo(false,  targetPos, visionLength, angle);
@@ -345,17 +358,18 @@ public class GuardBehavior : MonoBehaviour {
 
     void OnDrawGizmos() {   
         if (showVisionGizmos && canSee && guardTransform != null) {
+            var guardPos = Application.isPlaying ? offsetGuardPosition : guardTransform.position + Vector3.up * visionOffset;
             Gizmos.color = viewPointsSphereColor;
+            Gizmos.DrawWireSphere(guardPos, visionProximity);
             foreach (var viewPoint in viewPoints) {
                 Gizmos.DrawSphere(viewPoint, gizmosSphereSize);
-            }
-            var guardPosition = guardTransform.position + Vector3.up * 1.5f;
+            }            
             Gizmos.color = targetLineColor;
-            if (rayNumber == 0 || rayNumber == 1) Gizmos.DrawLine(guardPosition, guardPosition + GetCartesianFromPolar(visionLength, 0f));
+            if (rayNumber == 0 || rayNumber == 1) Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar(visionLength, 0f));
             else {
                 for (int i = 0; i < rayNumber; i++) {
                     var angle = (-visionAngle / 2f) + i * (visionAngle / (rayNumber - 1));
-                    Gizmos.DrawLine(guardPosition, guardPosition + GetCartesianFromPolar(visionLength, angle));
+                    Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar(visionLength, angle));
                 }
             }
         }

@@ -62,6 +62,11 @@ public class JailBehavior : MonoBehaviour {
         }
     }
 
+    public void LockPickAbort() {
+        lockInteractor.SetActive(true);
+        Unlock(false);
+    }
+
     public void LockPicked() {
         isLocked = false;
         unlockPanel.SetActive(false);
