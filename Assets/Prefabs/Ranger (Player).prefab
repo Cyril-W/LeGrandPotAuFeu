@@ -220,7 +220,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1748481472}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.48, y: 0, z: -1.286}
+  m_LocalPosition: {x: -0.48, y: 1, z: -1.286}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1447544277}
@@ -333,7 +333,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1680165402224276819}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.622, y: 0, z: -1.25}
+  m_LocalPosition: {x: 0.622, y: 1, z: -1.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3518846456700479246}
@@ -527,7 +527,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5253439849470122899}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.122, y: 0, z: -2.257}
+  m_LocalPosition: {x: 0.122, y: 1, z: -2.257}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 9219301343230033805}
@@ -756,6 +756,7 @@ GameObject:
   - component: {fileID: 6966995812720158147}
   - component: {fileID: 6065856951620042200}
   - component: {fileID: 7100605137328279087}
+  - component: {fileID: 1874146188332196386}
   m_Layer: 0
   m_Name: Ranger (Player)
   m_TagString: Player
@@ -811,6 +812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterController: {fileID: 6966995812720158145}
   speed: 6
+  crouchSpeedRatio: 0.5
   turnSmoothTime: 0.1
   gravityMultiplier: 1
   timeBetweenSteps: 0.4
@@ -841,7 +843,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a305ecfd609d5234ebc3170e1ecd34e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rangerTransform: {fileID: 1179028777073978688}
+  timeToCrouch: 0.5
+  crouchStandPositionOffset: {x: -1, y: 0}
   heroes: []
+  onHeroLost:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7100605137328279087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -888,6 +896,56 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   lastIntGenerated: 0
+--- !u!114 &1874146188332196386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6966995812720158144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08a4726faacd2d547be06fb4fe1972c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyCodeUI: {fileID: 0}
+  keyCodeText: {fileID: 0}
+  keyCodeSubstring: -1
+  keyCodeTextUGUI: {fileID: 0}
+  keyCode: 306
+  OnKeyDown:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6065856951620042200}
+        m_TargetAssemblyTypeName: GroupManager, Assembly-CSharp
+        m_MethodName: Crouch
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  OnKeyPressed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnKeyUp:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6065856951620042200}
+        m_TargetAssemblyTypeName: GroupManager, Assembly-CSharp
+        m_MethodName: Crouch
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6966995813051493740
 GameObject:
   m_ObjectHideFlags: 0

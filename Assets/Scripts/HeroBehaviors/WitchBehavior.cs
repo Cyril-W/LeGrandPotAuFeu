@@ -10,7 +10,6 @@ public class WitchBehavior : HeroBehavior {
     [SerializeField, Range(0, 100)] int numberZTeleportPoints = 20;
     [SerializeField] float distanceToObstacles = 2f;
     [SerializeField] float distanceToPlayer = 20f;
-    [SerializeField] GuardBehavior[] guards;
     [SerializeField, Layer] int defaultLayer = 0;
     [SerializeField, Layer] int enemiLayer = 6;
     [Header("Gizmos")]
@@ -38,9 +37,6 @@ public class WitchBehavior : HeroBehavior {
     }
 
     void TryFillVoid(bool force = true) {
-        if (force || guards.Length <= 0) {
-            guards = FindObjectsOfType<GuardBehavior>();
-        }
         if (force || collidersToAvoid.Length <= 0) {
             var allCollidersToAvoid = new List<Collider>();
             var boxColliders = FindObjectsOfType<BoxCollider>();
@@ -61,9 +57,7 @@ public class WitchBehavior : HeroBehavior {
     }
 
     void SetGuardLayer(bool isActive) {
-        foreach (var guard in guards) {
-            guard.SetGuardLayer(isActive ? enemiLayer : defaultLayer);
-        }
+        if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsLayer(isActive ? enemiLayer : defaultLayer); }
     }
 
     void FixedUpdate() {

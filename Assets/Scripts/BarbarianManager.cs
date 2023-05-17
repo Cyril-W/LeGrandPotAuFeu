@@ -8,17 +8,22 @@ public class BarbarianManager : MonoBehaviour {
 
     [SerializeField] float timerBeforeBarbarian;
     [SerializeField] TextMeshProUGUI textTimer;
-    [SerializeField] List<Hero> HeroesToSave = new List<Hero>();
     [SerializeField] TextMeshProUGUI textRecap;
+    [Space()]
+    [SerializeField] UnityEvent onTimerOver;
 
-    [SerializeField] UnityEvent OnTimerOver;
-
+    List<Hero> heroesToSave = new List<Hero>();
     string recapIfTimesUp = "";
     float currentTimer;
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
+    }
+
+    void Start() { 
+        if (GroupManager.Instance != null) { heroesToSave = GroupManager.Instance.GetHeroList(); }
         recapIfTimesUp = CreateRecap();
+        UpdateRecap(recapIfTimesUp);
         currentTimer = timerBeforeBarbarian;
     }
 
@@ -36,7 +41,7 @@ public class BarbarianManager : MonoBehaviour {
         if (currentTimer <= 0f) {
             textTimer.text = "XX : XX";
             UpdateRecap(recapIfTimesUp);
-            OnTimerOver?.Invoke();
+            onTimerOver?.Invoke();
             enabled = false;
         }
     }
@@ -48,20 +53,22 @@ public class BarbarianManager : MonoBehaviour {
 
     string CreateRecap () {
         var recap = "Still to save: ";
-        foreach (var hero in HeroesToSave) {
-            recap += "\n - " + hero + " (200 gold)";
-        }
-        if (HeroesToSave.Count == 0) {
+        if (heroesToSave.Count == 0) {
             recap += "\n - no one";
+        } else {
+            foreach (var hero in heroesToSave) {
+                recap += "\n - " + hero + " (200 gold)";
+            }
+            recap += "\n - " + Hero.Ranger + " (200 gold)";
         }
         recap += "\n-----------------------";
-        recap += "\n<u>Total:</u> " + HeroesToSave.Count * 200 + " gold";
+        recap += "\n<u>Total:</u> " + heroesToSave.Count * 200 + " gold";
         return recap;
     }
 
     public void SaveHero(Hero hero) {
-        if (HeroesToSave.Contains(hero)) {
-            HeroesToSave.Remove(hero);
+        if (heroesToSave.Contains(hero)) {
+            heroesToSave.Remove(hero);
             UpdateRecap();
         } else {
             Debug.LogError("Hero is not declared : " + hero);
@@ -69,8 +76,8 @@ public class BarbarianManager : MonoBehaviour {
     }
 
     public void LoseHero(Hero hero) {
-        if (!HeroesToSave.Contains(hero)) {
-            HeroesToSave.Add(hero);
+        if (!heroesToSave.Contains(hero)) {
+            heroesToSave.Add(hero);
             UpdateRecap();
         } else {
             Debug.LogError("Hero is already declared : " + hero);

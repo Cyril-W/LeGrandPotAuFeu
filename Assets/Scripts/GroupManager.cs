@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Linq;
 using System;
+using UnityEngine.Events;
+using System.Collections.Generic;
 
 public enum Hero {
     Ranger,
@@ -26,11 +28,17 @@ public class GroupManager : MonoBehaviour {
 
     public static GroupManager Instance { get; private set; }
 
+    [SerializeField] Transform rangerTransform;
+    [SerializeField] float timeToCrouch = 0.5f;
+    [SerializeField] Vector2 crouchStandPositionOffset = new Vector2(-0.5f, 0f);
     [SerializeField] HeroModel[] heroes;
+    [SerializeField] UnityEvent onHeroLost;
 
     public Action<Hero> OnSpellClick;
 
     ThirdPersonController thirdPersonController;
+    Vector3 initialRangerPos;
+    float currentCrouchTime = 0;
     int numberHeroSaved = 0;
 
     void Awake() {
@@ -45,7 +53,20 @@ public class GroupManager : MonoBehaviour {
 
     void Start() {
         if (thirdPersonController == null) { thirdPersonController = GetComponent<ThirdPersonController>(); }
+        if (rangerTransform != null) { initialRangerPos = rangerTransform.position; }
         UpdateHeroes();
+    }
+
+    void FixedUpdate() {
+        if (DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) { Crouch(false); return; }
+        if (currentCrouchTime > 0f) {            
+            currentCrouchTime -= Time.deltaTime;
+            var positionOffset = Mathf.Lerp(crouchStandPositionOffset.x, crouchStandPositionOffset.y, Mathf.Clamp01(currentCrouchTime / timeToCrouch));
+            if (rangerTransform != null) { rangerTransform.position = new Vector3(rangerTransform.position.x, initialRangerPos.y + positionOffset, rangerTransform.position.z); }
+            if (currentCrouchTime <= 0f) {
+                if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsVisionOffset(true); }
+            }
+        }
     }
 
     [ContextMenu("Update Heroes")]
@@ -58,6 +79,27 @@ public class GroupManager : MonoBehaviour {
                 numberHeroSaved++;
             }
         }
+    }
+
+    public void Crouch(bool isCrouched) {
+        if (rangerTransform == null) { return; }
+        if (isCrouched) {
+            currentCrouchTime = timeToCrouch;
+        } else {
+            currentCrouchTime = 0f;
+            if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsVisionOffset(false); }
+            if (rangerTransform != null) { rangerTransform.position = new Vector3(rangerTransform.position.x, initialRangerPos.y, rangerTransform.position.z); }
+        }
+        if (thirdPersonController == null) { return; }
+        thirdPersonController.SetIsCrouched(isCrouched);
+    }
+
+    public List<Hero> GetHeroList() {
+        var heroList = new List<Hero>();
+        foreach (var hero in heroes) {
+            heroList.Add(hero.Hero);
+        }
+        return heroList;
     }
 
     public Vector3 GetPlayerPosition() {
@@ -77,6 +119,18 @@ public class GroupManager : MonoBehaviour {
             var savedHero = heroes.Where(h => h.Hero == hero).FirstOrDefault();
             if (savedHero != null) { UpdateHero(savedHero, true); }
         }
+    }
+
+    public bool LoseRandomMember() {
+        var savedHeroes = heroes.Where(h => h.Saved);
+        if (savedHeroes == null || savedHeroes.Count() <= 0) { return false;}
+        var lostHero = savedHeroes.ElementAt(UnityEngine.Random.Range(0, savedHeroes.Count()));
+        if (lostHero != null) { 
+            lostHero.Saved = false;
+            UpdateHero(lostHero);
+            onHeroLost?.Invoke();
+            return true;
+        } else { return false; }
     }
 
     void UpdateHero(HeroModel hero) {

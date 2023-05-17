@@ -36,8 +36,11 @@ public class LockPickingBehavior : MonoBehaviour {
     float currentCrochetRotation = 0f, currentLockRotation = 0f, currentTimeToUnlock = 0f;
     bool hasShaken = false, isPivotKeyPressed = false, isShakingWrong = false, lastPivotPressed = false;
 
-    void Start() {
+    void Awake() {
         if (Instance == null || Instance != this) { Instance = this; onInstanceRegistered?.Invoke(); }
+    }
+
+    void Start() {
         if (crochetWrongShakeParameters != null) { 
             initialWrongShakeStrength = crochetWrongShakeParameters.Strength;
             crochetWrongShakeParameters.OnComplete += SetFalseIsShakingWrong;
@@ -59,7 +62,10 @@ public class LockPickingBehavior : MonoBehaviour {
 
     void OnDisable() {
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None;        
+    }
+
+    public void LockPickAbort() {
         if (jailBehavior != null) { jailBehavior.LockPickAbort(); jailBehavior = null; }
     }
 

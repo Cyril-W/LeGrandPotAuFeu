@@ -4,14 +4,16 @@ using UnityEngine.Events;
 public class ThirdPersonController : MonoBehaviour {
     [SerializeField] CharacterController characterController;
     [SerializeField] float speed = 6f;
+    [SerializeField, Range(0f, 1f)] float crouchSpeedRatio = 0.5f;
     [SerializeField] float turnSmoothTime = 0.1f;
     [SerializeField] float gravityMultiplier = 1f;
-    [SerializeField] float timeBetweenSteps = 0.25f;
+    [SerializeField] float timeBetweenSteps = 0.4f;
     [SerializeField] UnityEvent onFootStep;
 
     Vector3 direction;
     float turnSmoothVelocity, targetAngle, angle, horizontal, vertical, velocity, gravity = -9.81f, currentTimeBetweenSteps = 0f;
-    
+    bool isCrouched = false;
+
     void FixedUpdate() {
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
@@ -26,7 +28,7 @@ public class ThirdPersonController : MonoBehaviour {
                 currentTimeBetweenSteps -= Time.deltaTime;
             }
             if (currentTimeBetweenSteps <= 0) {
-                currentTimeBetweenSteps = timeBetweenSteps;
+                currentTimeBetweenSteps = timeBetweenSteps / (isCrouched ? crouchSpeedRatio : 1f);
                 onFootStep?.Invoke();
                 if (GroupManager.Instance != null) {
                     for (int i = 0; i < GroupManager.Instance.GetNumberHeroSaved(); i++) {
@@ -43,6 +45,10 @@ public class ThirdPersonController : MonoBehaviour {
         }
         direction.y = velocity;
 
-        characterController.Move(direction * speed * Time.deltaTime);
+        characterController.Move(direction * speed * (isCrouched ? crouchSpeedRatio : 1f) * Time.deltaTime);;
+    }
+
+    public void SetIsCrouched(bool newIsCrouched) {
+        isCrouched = newIsCrouched;
     }
 }

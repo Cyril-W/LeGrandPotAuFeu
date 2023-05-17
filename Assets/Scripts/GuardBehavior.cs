@@ -34,10 +34,11 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField] bool canSee = true;
     [SerializeField, Range(0.1f, 360f)] float visionAngle = 45f;
     [SerializeField, Range(0.1f, 100f)] float visionLength = 1f;
-    [SerializeField] float visionProximity = 0.2f;
+    [SerializeField] float visionProximity = 0.3f;
     [SerializeField] float visionOffset = 1f;
     [SerializeField] LayerMask viewMask;
     [SerializeField] float detectionTime = 2f;
+    [SerializeField] float detectionDistance = 0.5f;
     [SerializeField] int edgeResolveIterations = 6;
     [SerializeField] float edgeDistanceThreshold = .5f;
     [SerializeField, Range(0f, 1f)] float meshResolution = .5f;
@@ -52,7 +53,7 @@ public class GuardBehavior : MonoBehaviour {
     [Header("Movement")]
     [SerializeField] bool canMove = true;
     [SerializeField] float speed = 5f;
-    [SerializeField, Range(0f, 1f)] float spottingSpeedRatio = 0.75f;
+    [SerializeField, Range(0f, 2f)] float spottingSpeedRatio = 0.75f;
     [SerializeField] float timeAfterSpot = 2f;
     [SerializeField] float distanceToWaypoint = 0.1f;
     [SerializeField] bool moveUp = true;
@@ -83,7 +84,7 @@ public class GuardBehavior : MonoBehaviour {
     Mesh viewMesh;
     Material coneViewMaterial, circleViewMaterial;
     int currentWaypoint = 0;
-    float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation;
+    float currentWaitTime = 0f, turnSmoothVelocity, targetAngle, angle, currentDetectionTime, currentTimeAfterSpot = 0f, lastPuzzledRotation, currentDistance;
     bool playerSpotted = false, previousCanMove;
 
     static readonly string MATERIAL_FLOAT_FILL = "_Fill";
@@ -130,6 +131,7 @@ public class GuardBehavior : MonoBehaviour {
         if (lineRenderer != null) {
             lineRenderer.startWidth = lineRenderer.endWidth = lineWidth;
         }
+        currentDistance = float.PositiveInfinity;
     }
 
     void TryFillNull() {
@@ -146,15 +148,13 @@ public class GuardBehavior : MonoBehaviour {
             PopulateWaypoints();
         }
 
+        if (guardTransform == null) { return; }
+
         if (canSee) {
             VisionCheck();
         }
-        if (coneViewMeshRenderer != null) {
-            coneViewMeshRenderer.enabled = canSee;
-        }
-        if (lineRenderer != null) {
-            lineRenderer.enabled = canSee;
-        }
+        if (coneViewMeshRenderer != null) { coneViewMeshRenderer.enabled = canSee; }
+        if (lineRenderer != null) {lineRenderer.enabled = canSee; }
 
         if (currentTimeAfterSpot > 0f) {
             GuardPuzzled();
@@ -166,6 +166,7 @@ public class GuardBehavior : MonoBehaviour {
     }
 
     void LateUpdate() {
+        if (guardTransform == null) { return; }
         DrawFieldOfView();
     }
 
@@ -174,6 +175,10 @@ public class GuardBehavior : MonoBehaviour {
         foreach (Transform child in guardTransform.GetChild(0)) {
             child.gameObject.layer = layer;
         }
+    }
+
+    public void SetGuardOffsetVision(float newVisionOffset) {
+        visionOffset = newVisionOffset;
     }
 
     void PopulateWaypoints() {
@@ -195,12 +200,8 @@ public class GuardBehavior : MonoBehaviour {
             audioSource.volume = Mathf.Lerp(minMaxVolume.x, minMaxVolume.y, volumeCurve.Evaluate(Mathf.Clamp01(1f - (currentDetectionTime / detectionTime))));
             currentTimeAfterSpot = 0f;
             canMove = previousCanMove;
-            if (DestinyManager.Instance != null) DestinyManager.Instance.DestinyTimeScale(this, 1 - (currentDetectionTime / detectionTime));
             if (currentDetectionTime <= 0f) {
-                if (DestinyManager.Instance != null) {
-                    DestinyManager.Instance.DestinyPointLose(this);
-                }
-                gameObject.SetActive(false);
+                // Former Catch
             }
         }
         if (coneViewMaterial != null) coneViewMaterial.SetFloat(MATERIAL_FLOAT_FILL, 1f - Mathf.Clamp01(currentDetectionTime / detectionTime));
@@ -235,8 +236,21 @@ public class GuardBehavior : MonoBehaviour {
 
     void MoveGuard() {
         if (guardTransform == null || guardRigidbody == null) return;
+        currentDistance = Vector3.Distance(offsetGuardPosition, offsetPlayerPosition);
+        if (playerSpotted) {
+            if (DestinyManager.Instance != null) { DestinyManager.Instance.DestinyTimeScale(this, 1f - Mathf.Clamp01(currentDistance / (visionLength - detectionDistance))); }
+            if (currentDistance <= detectionDistance) {
+                if (GroupManager.Instance != null && !GroupManager.Instance.LoseRandomMember()) {
+                    if (DestinyManager.Instance != null) { DestinyManager.Instance.DestinyPointLose(this); }
+                } else {
+                    if (DestinyManager.Instance != null) { DestinyManager.Instance.LostTrack(this); }
+                }
+                gameObject.SetActive(false);
+                return;
+            }
+        }
         target = playerSpotted ? player.position : waypoints[currentWaypoint];
-        if (!playerSpotted || Vector3.Distance(guardTransform.position, player.position) > 0.5f) {
+        if (!playerSpotted || currentDistance >= detectionDistance) {
             guardRigidbody.MovePosition(Vector3.MoveTowards(guardTransform.position, target, speed * Time.deltaTime * (playerSpotted ? spottingSpeedRatio : 1f)));
         }
         direction = (target - guardTransform.position).normalized;
@@ -298,14 +312,14 @@ public class GuardBehavior : MonoBehaviour {
         var vertexCount = viewPoints.Count + 1;
         var vertices = new Vector3[vertexCount];
         var triangles = new int[(vertexCount - 2) * 3];
-        vertices[0] = Vector3.zero;
+        vertices[0] = Vector3.zero; //+ Vector3.up * visionOffset;
         if (lineRenderer != null) {
             lineRenderer.positionCount = vertexCount + 1;
             lineRenderer.SetPosition(0, vertices[0]);
             lineRenderer.SetPosition(vertexCount, vertices[0]);
         }
         for (int i = 0; i < vertexCount - 1; i++) {
-            vertices[i + 1] = guardTransform.InverseTransformPoint(viewPoints[i]);
+            vertices[i + 1] = guardTransform.InverseTransformPoint(new Vector3(viewPoints[i].x, 0f, viewPoints[i].z)/*viewPoints[i]*/);
             if (i < vertexCount - 2) {
                 triangles[i * 3] = i + 2;
                 triangles[i * 3 + 1] = i + 1;
@@ -359,6 +373,8 @@ public class GuardBehavior : MonoBehaviour {
     void OnDrawGizmos() {   
         if (showVisionGizmos && canSee && guardTransform != null) {
             var guardPos = Application.isPlaying ? offsetGuardPosition : guardTransform.position + Vector3.up * visionOffset;
+            Gizmos.color = activeWaypointSphereColor;
+            Gizmos.DrawWireSphere(guardPos, detectionDistance);
             Gizmos.color = viewPointsSphereColor;
             Gizmos.DrawWireSphere(guardPos, visionProximity);
             foreach (var viewPoint in viewPoints) {

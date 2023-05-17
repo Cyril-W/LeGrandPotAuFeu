@@ -113,7 +113,7 @@ Material:
     - _SrcBlend: 5
     - _Step: 7.9
     - _Surface: 1
-    - _VisionLength: 1.98
+    - _VisionLength: 4
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:

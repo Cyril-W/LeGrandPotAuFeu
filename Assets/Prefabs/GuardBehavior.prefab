@@ -360,7 +360,7 @@ Transform:
   m_GameObject: {fileID: 2870409906935530356}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.05, z: 0}
-  m_LocalScale: {x: 3, y: 0.01, z: 3}
+  m_LocalScale: {x: 6, y: 0.01, z: 6}
   m_Children: []
   m_Father: {fileID: 7411250873673723209}
   m_RootOrder: 3
@@ -592,11 +592,12 @@ MonoBehaviour:
   visionAngle: 75
   visionLength: 15
   visionProximity: 3
-  visionOffset: 0.25
+  visionOffset: 1.25
   viewMask:
     serializedVersion: 2
     m_Bits: 8
   detectionTime: 2
+  detectionDistance: 1.25
   edgeResolveIterations: 6
   edgeDistanceThreshold: 0.5
   meshResolution: 0.5
@@ -632,7 +633,7 @@ MonoBehaviour:
   lineWidth: 0.5
   canMove: 1
   speed: 3
-  spottingSpeedRatio: 0.75
+  spottingSpeedRatio: 2
   timeAfterSpot: 3
   distanceToWaypoint: 0.1
   moveUp: 1
