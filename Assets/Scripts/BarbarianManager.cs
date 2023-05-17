@@ -18,10 +18,10 @@ public class BarbarianManager : MonoBehaviour {
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
+        if (GroupManager.Instance != null) { heroesToSave = GroupManager.Instance.GetHeroList(); }
     }
 
-    void Start() { 
-        if (GroupManager.Instance != null) { heroesToSave = GroupManager.Instance.GetHeroList(); }
+    void Start() {         
         recapIfTimesUp = CreateRecap();
         UpdateRecap(recapIfTimesUp);
         currentTimer = timerBeforeBarbarian;
@@ -62,7 +62,7 @@ public class BarbarianManager : MonoBehaviour {
             recap += "\n - " + Hero.Ranger + " (200 gold)";
         }
         recap += "\n-----------------------";
-        recap += "\n<u>Total:</u> " + heroesToSave.Count * 200 + " gold";
+        recap += "\n<u>Total:</u> " + (heroesToSave.Count > 0 ? (heroesToSave.Count + 1) * 200 : 0) + " gold";
         return recap;
     }
 

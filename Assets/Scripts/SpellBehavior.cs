@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class SpellBehavior : MonoBehaviour {
     [SerializeField] Hero hero;
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
-
+    [SerializeField] DoPunchScaleParameters punchScaleParameters = new DoPunchScaleParameters(Vector3.one * 1.1f, 0.25f);
     float currentCooldown = 0f;
 
     public Hero GetHero() {
@@ -15,6 +16,10 @@ public class SpellBehavior : MonoBehaviour {
 
     void Start() {
         spellCooldown.fillAmount = Mathf.Clamp01(currentCooldown / cooldown);
+    }
+
+    void OnEnable() {
+        punchScaleParameters.DoPunchScale(transform);
     }
 
     public void OnSpellClick() {

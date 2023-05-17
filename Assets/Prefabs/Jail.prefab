@@ -6200,6 +6200,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: OnKeyPressedUnlock
       objectReference: {fileID: 0}
+    - target: {fileID: 2756720405173478096, guid: 097a717fab267d141bc65c934d6ade68, type: 3}
+      propertyPath: m_Color.b
+      value: 0.268441
+      objectReference: {fileID: 0}
+    - target: {fileID: 2756720405173478096, guid: 097a717fab267d141bc65c934d6ade68, type: 3}
+      propertyPath: m_Color.g
+      value: 0.5754717
+      objectReference: {fileID: 0}
+    - target: {fileID: 2756720405173478096, guid: 097a717fab267d141bc65c934d6ade68, type: 3}
+      propertyPath: m_Color.r
+      value: 0.15472588
+      objectReference: {fileID: 0}
     - target: {fileID: 7788662354438453056, guid: 097a717fab267d141bc65c934d6ade68, type: 3}
       propertyPath: m_RootOrder
       value: 0

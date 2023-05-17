@@ -845,7 +845,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rangerTransform: {fileID: 1179028777073978688}
   timeToCrouch: 0.5
-  crouchStandPositionOffset: {x: -1, y: 0}
+  crouchStandScale: {x: 0.75, y: 1}
   heroes: []
   onHeroLost:
     m_PersistentCalls:

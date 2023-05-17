@@ -9,14 +9,25 @@ using System.Linq;
 public class SwitchShortcutsProfileOnPlay {
 #if UNITY_EDITOR
     private const string PlayingProfileId = "Playing";
+    private const string DefaultProfileId = "Default";
     private static string _activeProfileId;
-    private static bool _switched;
+    //private static bool _switched;
 
     static SwitchShortcutsProfileOnPlay() {
         EditorApplication.playModeStateChanged += DetectPlayModeState;
     }
 
     private static void SetActiveProfile(string profileId) {
+        _activeProfileId = ShortcutManager.instance.activeProfileId;
+        if (_activeProfileId.Equals(profileId)) {
+            Debug.Log("Same as active");
+            return; 
+        } 
+        var allProfiles = ShortcutManager.instance.GetAvailableProfileIds().ToList();
+        if (!allProfiles.Contains(PlayingProfileId)) {
+            Debug.LogError("Couldn't find profile named: " + profileId);
+            return; 
+        }
         Debug.Log($"Activating Shortcut profile \"{profileId}\"");
         ShortcutManager.instance.activeProfileId = profileId;
     }
@@ -33,24 +44,13 @@ public class SwitchShortcutsProfileOnPlay {
     }
 
     private static void OnExitingPlayMode() {
-        if (!_switched)
-            return;
-
-        _switched = false;
-        SetActiveProfile(_activeProfileId);
+        //if (!_switched) { return; }
+        //_switched = false;
+        SetActiveProfile(DefaultProfileId);
     }
 
-    private static void OnEnteredPlayMode() {
-        _activeProfileId = ShortcutManager.instance.activeProfileId;
-        if (_activeProfileId.Equals(PlayingProfileId))
-            return; // Same as active
-
-        var allProfiles = ShortcutManager.instance.GetAvailableProfileIds().ToList();
-
-        if (!allProfiles.Contains(PlayingProfileId))
-            return; // Couldn't find PlayingProfileId
-
-        _switched = true;
+    private static void OnEnteredPlayMode() {  
+        //_switched = true;
         SetActiveProfile(PlayingProfileId);
     }
 #endif

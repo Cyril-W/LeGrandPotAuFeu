@@ -77,7 +77,7 @@ public class WitchBehavior : HeroBehavior {
         SetThirdPersonControllerEnabled(false);
         GetTeleportPoints();
         if (teleportPoints.Count <= 0 || GroupManager.Instance == null) return;
-        GroupManager.Instance.MovePlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)] + Vector3.up);
+        GroupManager.Instance.MovePlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
     }
 
     void SetThirdPersonControllerEnabled(bool b) {

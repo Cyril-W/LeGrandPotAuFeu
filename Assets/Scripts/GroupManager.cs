@@ -30,14 +30,13 @@ public class GroupManager : MonoBehaviour {
 
     [SerializeField] Transform rangerTransform;
     [SerializeField] float timeToCrouch = 0.5f;
-    [SerializeField] Vector2 crouchStandPositionOffset = new Vector2(-0.5f, 0f);
+    [SerializeField] Vector2 crouchStandScale = new Vector2(0.75f, 1f);
     [SerializeField] HeroModel[] heroes;
     [SerializeField] UnityEvent onHeroLost;
 
     public Action<Hero> OnSpellClick;
 
     ThirdPersonController thirdPersonController;
-    Vector3 initialRangerPos;
     float currentCrouchTime = 0;
     int numberHeroSaved = 0;
 
@@ -53,7 +52,6 @@ public class GroupManager : MonoBehaviour {
 
     void Start() {
         if (thirdPersonController == null) { thirdPersonController = GetComponent<ThirdPersonController>(); }
-        if (rangerTransform != null) { initialRangerPos = rangerTransform.position; }
         UpdateHeroes();
     }
 
@@ -61,8 +59,8 @@ public class GroupManager : MonoBehaviour {
         if (DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) { Crouch(false); return; }
         if (currentCrouchTime > 0f) {            
             currentCrouchTime -= Time.deltaTime;
-            var positionOffset = Mathf.Lerp(crouchStandPositionOffset.x, crouchStandPositionOffset.y, Mathf.Clamp01(currentCrouchTime / timeToCrouch));
-            if (rangerTransform != null) { rangerTransform.position = new Vector3(rangerTransform.position.x, initialRangerPos.y + positionOffset, rangerTransform.position.z); }
+            var newScale = Mathf.Lerp(crouchStandScale.x, crouchStandScale.y, Mathf.Clamp01(currentCrouchTime / timeToCrouch));
+            if (rangerTransform != null) { rangerTransform.localScale = new Vector3(crouchStandScale.y, newScale, crouchStandScale.y); }
             if (currentCrouchTime <= 0f) {
                 if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsVisionOffset(true); }
             }
@@ -88,7 +86,7 @@ public class GroupManager : MonoBehaviour {
         } else {
             currentCrouchTime = 0f;
             if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsVisionOffset(false); }
-            if (rangerTransform != null) { rangerTransform.position = new Vector3(rangerTransform.position.x, initialRangerPos.y, rangerTransform.position.z); }
+            if (rangerTransform != null) { rangerTransform.localScale = Vector3.one * crouchStandScale.y; }
         }
         if (thirdPersonController == null) { return; }
         thirdPersonController.SetIsCrouched(isCrouched);
