@@ -99,13 +99,10 @@ public class GuardBehavior : MonoBehaviour {
     }
 
     void OnDestroy() {
-        Debug.LogWarning("Destroying instanciated view material");
-        if (coneViewMaterial != null) {
-            Destroy(coneViewMaterial);
-        }
-        if (circleViewMaterial != null) {
-            Destroy(circleViewMaterial);
-        }
+        Debug.LogWarning("Destroying instanciated view material and mesh");
+        if (coneViewMaterial != null) { Destroy(coneViewMaterial); }
+        if (circleViewMaterial != null) { Destroy(circleViewMaterial); }
+        if (viewMesh != null) { Destroy(viewMesh); }
     }
 
     void Start() {
@@ -287,6 +284,7 @@ public class GuardBehavior : MonoBehaviour {
     }
 
     void DrawFieldOfView() {
+        if (viewMesh == null) { return; }
         var stepCount = Mathf.RoundToInt(visionAngle * meshResolution);
         var stepAngleSize = visionAngle / stepCount;
         viewPoints.Clear();

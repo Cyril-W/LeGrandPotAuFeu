@@ -15,13 +15,19 @@ public class BarbarianManager : MonoBehaviour {
     List<Hero> heroesToSave = new List<Hero>();
     string recapIfTimesUp = "";
     float currentTimer;
+    bool isInitialized = false;
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
-        if (GroupManager.Instance != null) { heroesToSave = GroupManager.Instance.GetHeroList(); }
+        TryInitialize();
     }
 
-    void Start() {         
+    void OnEnable() {
+        TryInitialize();
+    }
+
+    void Start() {
+        TryInitialize();
         recapIfTimesUp = CreateRecap();
         UpdateRecap(recapIfTimesUp);
         currentTimer = timerBeforeBarbarian;
@@ -32,6 +38,7 @@ public class BarbarianManager : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (!TryInitialize()) { return; }
         currentTimer -= Time.deltaTime;
         if (textTimer != null && currentTimer >= 0f) {
             var minutes = Mathf.Floor(currentTimer / 60).ToString("00");
@@ -46,12 +53,21 @@ public class BarbarianManager : MonoBehaviour {
         }
     }
 
+    bool TryInitialize() {
+        if (!isInitialized && GroupManager.Instance != null) {
+            heroesToSave = GroupManager.Instance.GetHeroList();
+            isInitialized = true;
+        }
+        return isInitialized;
+    }
+
     void UpdateRecap(string overrideRecap = "") {
         if (textRecap == null) return;
         textRecap.text = overrideRecap.Length > 0 ? overrideRecap : CreateRecap();
     }
 
     string CreateRecap () {
+        if (!TryInitialize()) { return "Not initialized"; }
         var recap = "Still to save: ";
         if (heroesToSave.Count == 0) {
             recap += "\n - no one";
@@ -67,6 +83,7 @@ public class BarbarianManager : MonoBehaviour {
     }
 
     public void SaveHero(Hero hero) {
+        if (!TryInitialize()) { return; }
         if (heroesToSave.Contains(hero)) {
             heroesToSave.Remove(hero);
             UpdateRecap();
@@ -76,6 +93,7 @@ public class BarbarianManager : MonoBehaviour {
     }
 
     public void LoseHero(Hero hero) {
+        if (!TryInitialize()) { return; }
         if (!heroesToSave.Contains(hero)) {
             heroesToSave.Add(hero);
             UpdateRecap();
