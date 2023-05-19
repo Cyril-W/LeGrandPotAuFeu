@@ -5,12 +5,13 @@ using UnityEngine;
 public class ClothTearingBehavior : MonoBehaviour {
     [System.Serializable]
     class Point {
-        public Vector2 Position, LastPosition;
+        public Vector2 Position, LastPosition;//, StartPosition;
         public bool Locked;
         public bool IsActive = true;
         public Point(Vector2 position, bool locked = false, bool isActive = true) {
             Position = position;
             LastPosition = Position;
+            //StartPosition = Position;
             Locked = locked;
             IsActive = isActive;
         }
@@ -33,7 +34,9 @@ public class ClothTearingBehavior : MonoBehaviour {
         }
     }
 
-    [SerializeField] float gravity = 9.81f;
+    [SerializeField] float gravity = 9.81f;//-0.24f;
+    //[SerializeField] float friction = 0.99f;
+    [SerializeField, Range(0.5f, 10f)] float distanceToTear = 1.5f;
     [SerializeField, Range(1, 10)] int maxIterations = 3;
     [SerializeField] float minPointHeight = -75f;
     [SerializeField] Point[] points;
@@ -43,7 +46,7 @@ public class ClothTearingBehavior : MonoBehaviour {
     //[SerializeField] Transform pointToInstantiate;
     //[SerializeField] Transform parentInstantiated;
     [SerializeField, Range(0.1f, 2f)] float distanceToCut = 0.5f;
-    [SerializeField] Stick[] sticks;
+    [SerializeField, HideInInspector] Stick[] sticks;
     [SerializeField] MeshFilter clothMeshFilter;
     [SerializeField] LayerMask layerToHit;
     [SerializeField] LineRenderer lineRenderer;
@@ -57,9 +60,8 @@ public class ClothTearingBehavior : MonoBehaviour {
     [SerializeField] Color mouseSphereColor = Color.white;
 
     //Vector2 offset = Vector2.zero;
-    int vertexCount;
     Vector3[] vertices;
-    int[] triangles;
+    //int[] triangles;
     Mesh clothMesh;
     System.Random random;
     Vector3 mousePosition;
@@ -70,7 +72,7 @@ public class ClothTearingBehavior : MonoBehaviour {
         if (clothMeshFilter == null) { clothMeshFilter = GetComponentInChildren<MeshFilter>(); }
         if (lineRenderer == null) { lineRenderer = GetComponentInChildren<LineRenderer>(true); }
         if (lineRenderer != null) { lineRenderer.gameObject.SetActive(false); }
-        if (lockPointIndexes == null) { return; }
+        if (lockPointIndexes == null || Application.isPlaying) { return; }
         var maxIndex = colNumber * rowNumber;
         for (int i = 0; i < lockPointIndexes.Length; i++) {
             var lockPointIndex = lockPointIndexes[i];
@@ -114,10 +116,7 @@ public class ClothTearingBehavior : MonoBehaviour {
             lineRenderer.gameObject.SetActive(false);            
         }
         GenerateMesh();
-        vertexCount = points.Length;
-        vertices = new Vector3[vertexCount];
-        var triangleNumber = (colNumber - 1) * (rowNumber - 1) * 2 * 3;
-        triangles = new int[triangleNumber];
+        vertices = new Vector3[points.Length];
         random = new System.Random();
     }
 
@@ -186,16 +185,20 @@ public class ClothTearingBehavior : MonoBehaviour {
                 if (i < colNumber - 1 && pointIndex + 1 < points.Length) {
                     newStick = new Stick(points[pointIndex], points[pointIndex + 1]);
                     newSticks.Add(newStick);
-                    if (lineRenderer != null && parentLineRenderers != null) {
-                        newLineRenderers.Add(Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers));
+                    if (Application.isPlaying && lineRenderer != null && parentLineRenderers != null) {
+                        var newLineRenderer = Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers);
+                        newLineRenderer.name = "Line " + stickIndex + " [" + pointIndex + "," + (pointIndex + 1) + "]";
+                        newLineRenderers.Add(newLineRenderer);
                     }
                     sticksIndex[0] = stickIndex++;
                 }
                 if (pointIndex + colNumber < points.Length) {
                     newStick = new Stick(points[pointIndex], points[pointIndex + colNumber]);
                     newSticks.Add(newStick);
-                    if (lineRenderer != null && parentLineRenderers != null) {
-                        newLineRenderers.Add(Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers));
+                    if (Application.isPlaying && lineRenderer != null && parentLineRenderers != null) {
+                        var newLineRenderer = Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers);
+                        newLineRenderer.name = "Line " + stickIndex + " [" + pointIndex + "," + (pointIndex + colNumber) + "]";
+                        newLineRenderers.Add(newLineRenderer);
                     }
                     sticksIndex[1] = stickIndex++;
                 }
@@ -207,8 +210,11 @@ public class ClothTearingBehavior : MonoBehaviour {
         sticks = newSticks.ToArray();
     }
 
-    void FixedUpdate() {
+    void LateUpdate() {
         HandleMouse();
+    }
+
+    void FixedUpdate() {        
         Simulate();
         DrawCloth();
     }
@@ -234,68 +240,83 @@ public class ClothTearingBehavior : MonoBehaviour {
         var pointsToEvaluate = points.OrderBy(o => random.Next()).ToArray();
         //points.Shuffle();
         Vector2 positionBeforeUpdate;
+        //Vector2 velocity;
         foreach (var point in pointsToEvaluate) {
-            if (!point.Locked && point.IsActive) {
-                positionBeforeUpdate = point.Position;
-                point.Position += point.Position - point.LastPosition;
-                point.Position += Vector2.down * gravity * Time.deltaTime * Time.deltaTime;
-                point.LastPosition = positionBeforeUpdate;
-                if (point.Position.y <= minPointHeight) {
-                    point.IsActive = false;
+            if (point.IsActive) {
+                if (point.Locked) {
+                    //point.Position = point.StartPosition; 
+                    //point.LastPosition = point.StartPosition;
+                } else {
+                    positionBeforeUpdate = point.Position;
+                    point.Position += point.Position - point.LastPosition;
+                    //velocity = (point.Position - point.LastPosition) * friction;
+                    point.LastPosition = positionBeforeUpdate;
+                    //point.Position += velocity;
+                    point.Position += Vector2.down * gravity * Time.deltaTime * Time.deltaTime;
+                    if (point.Position.y <= minPointHeight) {
+                        point.IsActive = false;
+                    }
                 }
             }
         }
+        var sticksToEvaluate = sticks.OrderBy(o => random.Next()).ToArray();
         Vector2 stickCenter, stickDirection;
-        for (int i = 0; i < maxIterations; i++) {       
-            foreach (var stick in sticks) {
+        for (int i = 0; i < maxIterations; i++) {
+            /*var startDistance = 1f;
+            var changeDirection = Vector2.zero;*/
+            foreach (var stick in sticksToEvaluate) {
                 if (stick.IsActive && !(stick.PointA.IsActive & stick.PointB.IsActive)) { stick.IsActive = false; }
+                if (stick.IsActive && Vector3.Distance(stick.PointA.Position, stick.PointB.Position) >= distanceToTear) { stick.IsActive = false; }
                 if (!stick.IsActive) { continue; }
                 stickCenter = (stick.PointA.Position + stick.PointB.Position) / 2f;
                 stickDirection = (stick.PointA.Position - stick.PointB.Position).normalized;
-                if (!stick.PointA.Locked) {
-                    stick.PointA.Position = stickCenter + stickDirection * stick.Length / 2f;
+                if (!stick.PointA.Locked) { stick.PointA.Position = stickCenter + stickDirection * stick.Length / 2f; }
+                if (!stick.PointB.Locked) { stick.PointB.Position = stickCenter - stickDirection * stick.Length / 2f; }
+                /*var dist = (stick.PointA.Position - stick.PointB.Position).magnitude;
+                var error = Mathf.Abs(dist - startDistance);
+                if (dist > startDistance) {
+                    changeDirection = (stick.PointA.Position - stick.PointB.Position).normalized;
+                } else if (dist < startDistance) {
+                    changeDirection = (stick.PointB.Position - stick.PointA.Position).normalized;
                 }
-                if (!stick.PointB.Locked) {
-                    stick.PointB.Position = stickCenter - stickDirection * stick.Length / 2f;
-                }
+                var changeAmount = changeDirection * error;*/
+                //if (true/*!stick.PointA.Locked*/) { stick.PointA.Position -= changeAmount * 0.5f; }
+                //if (true/*!stick.PointB.Locked*/) { stick.PointB.Position += changeAmount * 0.5f; }
             }
         }
     }
 
     void DrawCloth() {
         if (clothMesh == null) { return; }
-        for (int i = 0; i < vertexCount; i++) {
+        for (int i = 0; i < points.Length; i++) {
             vertices[i] = points[i].Position;
         }
-        var triangleIndex = -1;
-        //var pointIndex = 0;
+        //var triangleNumber = (colNumber - 1) * (rowNumber - 1) * 2 * 3;
+        //triangles = new int[triangleNumber];
+        var trianglesList = new List<int>();
         for (int j = 0; j < rowNumber - 1; j++) {
             for (int i = 0; i < colNumber - 1; i++) {
                 var pointIndex = i + j * colNumber;
                 bool isQuad = true;
                 var firstStickIndex = sticksPerPoint[pointIndex][0];
-                if (CheckStickIndex(firstStickIndex)) { // check stick right of pointIndex
-                    isQuad = false;
-                }
+                if (CheckStickIndex(firstStickIndex)) { isQuad = false; } // check stick right of pointIndex
                 var secondStickIndex = sticksPerPoint[pointIndex][1];
-                if (CheckStickIndex(secondStickIndex)) { // check stick bottom of pointIndex
-                    isQuad = false;
-                }
+                if (CheckStickIndex(secondStickIndex)) { isQuad = false; } // check stick bottom of pointIndex
                 var thirdStickIndex = sticksPerPoint[pointIndex + 1][1]; 
-                if (CheckStickIndex(thirdStickIndex)) { // check stick bottom of point right of pointIndex
-                    isQuad = false;
-                }
+                if (CheckStickIndex(thirdStickIndex)) { isQuad = false; } // check stick bottom of point right of pointIndex
                 var fourthStickIndex = sticksPerPoint[pointIndex + colNumber][0];
-                if (CheckStickIndex(fourthStickIndex)) { // check stick right of point bottom of pointIndex
-                    isQuad = false;
-                }
+                if (CheckStickIndex(fourthStickIndex)) {  isQuad = false; } // check stick right of point bottom of pointIndex
+                if(!points[pointIndex].IsActive || !points[pointIndex + 1].IsActive || !points[pointIndex + 1 + colNumber].IsActive || !points[pointIndex + colNumber].IsActive) { isQuad = false; }
                 if (isQuad) {
-                    triangles[++triangleIndex] = pointIndex;
-                    triangles[++triangleIndex] = pointIndex + 1;
-                    triangles[++triangleIndex] = pointIndex + 1 + colNumber;
-                    triangles[++triangleIndex] = pointIndex + 1 + colNumber;
-                    triangles[++triangleIndex] = pointIndex + colNumber;
-                    triangles[++triangleIndex] = pointIndex;
+                    // Upper triangle
+                    trianglesList.Add(pointIndex);
+                    trianglesList.Add(pointIndex + 1);
+                    trianglesList.Add(pointIndex + 1 + colNumber);
+                    // Lower triangle
+                    trianglesList.Add(pointIndex + 1 + colNumber);
+                    trianglesList.Add(pointIndex + colNumber);
+                    trianglesList.Add(pointIndex);
+                    /*triangles[++triangleIndex]*/
                 } else {
                     SetLineRenderPosition(firstStickIndex);
                     SetLineRenderPosition(secondStickIndex);
@@ -307,7 +328,7 @@ public class ClothTearingBehavior : MonoBehaviour {
         }
         clothMesh.Clear();
         clothMesh.vertices = vertices;
-        clothMesh.triangles = triangles;
+        clothMesh.triangles = trianglesList.ToArray();
         clothMesh.RecalculateNormals();
     }
 
@@ -315,8 +336,10 @@ public class ClothTearingBehavior : MonoBehaviour {
         if (lineRenderers.Length > 0) {
             var currentLineRender = lineRenderers[stickIndex];
             if (sticks[stickIndex].IsActive) {
-                currentLineRender.SetPosition(0, sticks[stickIndex].PointA.Position);
-                currentLineRender.SetPosition(1, sticks[stickIndex].PointB.Position);
+                var posA = sticks[stickIndex].PointA.Position;
+                currentLineRender.SetPosition(0, new Vector3(posA.x, posA.y, 0.1f));
+                var posB = sticks[stickIndex].PointB.Position;
+                currentLineRender.SetPosition(1, new Vector3(posB.x, posB.y, 0.1f));
             }
             currentLineRender.gameObject.SetActive(sticks[stickIndex].IsActive);
         }
