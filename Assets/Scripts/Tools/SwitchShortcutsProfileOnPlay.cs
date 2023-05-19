@@ -20,7 +20,7 @@ public class SwitchShortcutsProfileOnPlay {
     private static void SetActiveProfile(string profileId) {
         _activeProfileId = ShortcutManager.instance.activeProfileId;
         if (_activeProfileId.Equals(profileId)) {
-            Debug.Log("Same as active");
+            //Debug.Log("Same as active");
             return; 
         } 
         var allProfiles = ShortcutManager.instance.GetAvailableProfileIds().ToList();
@@ -28,7 +28,7 @@ public class SwitchShortcutsProfileOnPlay {
             Debug.LogError("Couldn't find profile named: " + profileId);
             return; 
         }
-        Debug.Log($"Activating Shortcut profile \"{profileId}\"");
+        //Debug.Log($"Activating Shortcut profile \"{profileId}\"");
         ShortcutManager.instance.activeProfileId = profileId;
     }
 

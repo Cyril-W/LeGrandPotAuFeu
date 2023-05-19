@@ -8,10 +8,10 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Obstacles
+  - 
   - Water
   - UI
-  - Enemies
+  - Obstacles
   - Cloth
   - 
   - 
@@ -36,7 +36,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Enemies
   m_SortingLayers:
   - name: Default
     uniqueID: 0

@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 3286338739920556553}
   - component: {fileID: 389580683299063012}
   - component: {fileID: 5284356990209772566}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: RightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,7 +202,7 @@ GameObject:
   - component: {fileID: 1852928886125819847}
   - component: {fileID: 7537573096487410064}
   - component: {fileID: 746602347227021474}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: BackWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -392,7 +392,7 @@ GameObject:
   - component: {fileID: 2256990223981657687}
   - component: {fileID: 2747029088663896476}
   - component: {fileID: 6170368364470572976}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: FrontRightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -723,36 +723,44 @@ MonoBehaviour:
   distance: 0
   minMaxDistanceToHide: {x: 18, y: 22}
   transparentObjects:
-  - ObjectToHide: {fileID: 5092623115775284722}
+  - ObjectName: RoofBack
+    ObjectToHide: {fileID: 5092623115775284722}
     MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 7987093574188139182}
+  - ObjectName: RoofFront
+    ObjectToHide: {fileID: 7987093574188139182}
     MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 8573162718235732553}
+  - ObjectName: RoofLeft
+    ObjectToHide: {fileID: 8573162718235732553}
     MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 2218993793492137699}
+  - ObjectName: RoofRight
+    ObjectToHide: {fileID: 2218993793492137699}
     MaterialToHide: {fileID: 2100000, guid: 3aa2d4e8821e2074d996c8f3cc9a199a, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: 80fd3764033f25a448dcc150d12572b7, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 4036837762081730879}
+  - ObjectName: FrontUpWall
+    ObjectToHide: {fileID: 4036837762081730879}
     MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 2747029088663896476}
+  - ObjectName: FrontRightWall
+    ObjectToHide: {fileID: 2747029088663896476}
     MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
     isMainMaterial: 0
-  - ObjectToHide: {fileID: 3190503715350763075}
+  - ObjectName: FrontLeftWall
+    ObjectToHide: {fileID: 3190503715350763075}
     MaterialToHide: {fileID: 2100000, guid: 2339be86fd9d2e449b6802132671e4b6, type: 2}
     MaterialTransparent: {fileID: 2100000, guid: af4739964e0f4784e9ef4a746ae715ab, type: 2}
     isMainMaterial: 0
   minMaxMaterialTransparency: {x: 0, y: 0.75}
   transparenceDuration: 0.5
+  debugVerbose: 0
 --- !u!1 &6325923471663401697
 GameObject:
   m_ObjectHideFlags: 0
@@ -765,7 +773,7 @@ GameObject:
   - component: {fileID: 1764772722716945987}
   - component: {fileID: 4001353376080746045}
   - component: {fileID: 2474759649005278504}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: LeftWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -917,7 +925,7 @@ GameObject:
   - component: {fileID: 4623564495586162886}
   - component: {fileID: 3190503715350763075}
   - component: {fileID: 3578963472353334763}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: FrontLeftWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -48,7 +48,7 @@ public class ClothTearingBehavior : MonoBehaviour {
     [SerializeField, Range(0.1f, 2f)] float distanceToCut = 0.5f;
     [SerializeField, HideInInspector] Stick[] sticks;
     [SerializeField] MeshFilter clothMeshFilter;
-    [SerializeField] LayerMask layerToHit;
+    [SerializeField] MeshCollider clothMeshCollider;
     [SerializeField] LineRenderer lineRenderer;
     [SerializeField] Transform parentLineRenderers;
     [SerializeField] Vector2 startEndWidth = new Vector2(0.1f, 0f);
@@ -64,12 +64,13 @@ public class ClothTearingBehavior : MonoBehaviour {
     //int[] triangles;
     Mesh clothMesh;
     System.Random random;
-    Vector3 mousePosition;
+    Vector3 currentMousePosition;
     int[][] sticksPerPoint;
     LineRenderer[] lineRenderers;
 
     void OnValidate() {
         if (clothMeshFilter == null) { clothMeshFilter = GetComponentInChildren<MeshFilter>(); }
+        if (clothMeshCollider == null) { clothMeshCollider = GetComponentInChildren<MeshCollider>(); }
         if (lineRenderer == null) { lineRenderer = GetComponentInChildren<LineRenderer>(true); }
         if (lineRenderer != null) { lineRenderer.gameObject.SetActive(false); }
         if (lockPointIndexes == null || Application.isPlaying) { return; }
@@ -101,6 +102,9 @@ public class ClothTearingBehavior : MonoBehaviour {
             clothMesh = new Mesh();
             clothMesh.name = "Cloth Mesh";
             clothMeshFilter.mesh = clothMesh;
+        }
+        if (clothMeshCollider != null) {
+            clothMeshCollider.sharedMesh = clothMesh;
         }
     }
 
@@ -210,29 +214,19 @@ public class ClothTearingBehavior : MonoBehaviour {
         sticks = newSticks.ToArray();
     }
 
-    void LateUpdate() {
-        HandleMouse();
-    }
-
     void FixedUpdate() {        
         Simulate();
         DrawCloth();
     }
     
-    void HandleMouse() {        
-        if (Input.GetMouseButton(0)) {
-            var screenPosition = Input.mousePosition;
-            var ray = Camera.main.ScreenPointToRay(screenPosition);
-            if (Physics.Raycast(ray, out var hitData)) {
-                mousePosition = hitData.point;
-                foreach (var stick in sticks) {
-                    var stickCenter = (stick.PointA.Position + stick.PointB.Position) / 2f;
-                    float dist = Vector3.Distance(mousePosition, stickCenter);
-                    if (dist <= distanceToCut) {
-                        stick.IsActive = false;
-                    }
-                }
-            }                        
+    public void HandleMouseCut(Vector3 mousePosition) {
+        currentMousePosition = mousePosition;
+        foreach (var stick in sticks) {
+            var stickCenter = (stick.PointA.Position + stick.PointB.Position) / 2f;
+            float dist = Vector3.Distance(mousePosition, stickCenter);
+            if (dist <= distanceToCut) {
+                stick.IsActive = false;
+            }
         }
     }
 
@@ -330,6 +324,8 @@ public class ClothTearingBehavior : MonoBehaviour {
         clothMesh.vertices = vertices;
         clothMesh.triangles = trianglesList.ToArray();
         clothMesh.RecalculateNormals();
+        clothMeshCollider.sharedMesh = null;
+        clothMeshCollider.sharedMesh = clothMesh;
     }
 
     void SetLineRenderPosition(int stickIndex) {
@@ -366,6 +362,6 @@ public class ClothTearingBehavior : MonoBehaviour {
             }
         }
         Gizmos.color = mouseSphereColor;
-        Gizmos.DrawSphere(mousePosition, distanceToCut);
+        Gizmos.DrawSphere(currentMousePosition, distanceToCut);
     }
 }

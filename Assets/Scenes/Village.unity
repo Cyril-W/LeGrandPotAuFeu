@@ -1575,7 +1575,7 @@ GameObject:
   - component: {fileID: 208017596}
   - component: {fileID: 208017595}
   - component: {fileID: 208017594}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1785,14 +1785,14 @@ MonoBehaviour:
   - {fileID: 239571024}
   - {fileID: 621721179}
   - {fileID: 1933117564}
-  obstacleLayer: 3
+  obstacleLayer: 6
   teleportArea: {fileID: 15423963}
   numberXTeleportPoints: 20
   numberZTeleportPoints: 20
   distanceToObstacles: 2
   distanceToPlayer: 20
   defaultLayer: 0
-  enemiLayer: 6
+  enemiLayer: 31
   playerSphereColor: {r: 1, g: 0, b: 0, a: 1}
   teleportSphereSize: 0.1
   teleportSphereColor: {r: 1, g: 0, b: 1, a: 1}
@@ -1834,7 +1834,7 @@ GameObject:
   - component: {fileID: 239571025}
   - component: {fileID: 239571024}
   - component: {fileID: 239571023}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3931,7 +3931,7 @@ GameObject:
   - component: {fileID: 621721180}
   - component: {fileID: 621721179}
   - component: {fileID: 621721182}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9759,7 +9759,7 @@ GameObject:
   - component: {fileID: 1933117565}
   - component: {fileID: 1933117564}
   - component: {fileID: 1933117563}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11142,6 +11142,10 @@ PrefabInstance:
       propertyPath: onFalseEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: SoundEffectData, Assembly-CSharp
       objectReference: {fileID: 0}
+    - target: {fileID: 6785620622949239430, guid: f32437161ea8144449d54c10581e0d32, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 800693762}
     - target: {fileID: 7204770445929025015, guid: f32437161ea8144449d54c10581e0d32, type: 3}
       propertyPath: m_Name
       value: GuardBehavior

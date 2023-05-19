@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 public class ColliderEvents : MonoBehaviour {
     [Header("Parameters")]
-    [TagSelector, SerializeField] string ColliderTag;
+    [SerializeField, TagSelector] string ColliderTag;
     [SerializeField] Color BoxWireColor = Color.green;
     [SerializeField] Color BoxColor = Color.clear;
     [Header("Events")]
