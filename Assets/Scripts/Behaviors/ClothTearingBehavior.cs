@@ -6,13 +6,15 @@ public class ClothTearingBehavior : MonoBehaviour {
     [System.Serializable]
     class Point {
         public Vector2 Position, LastPosition;
-        public bool Locked;        
-        public Point(Vector2 position, bool locked = false) {
+        public bool Locked;
+        public bool IsActive = true;
+        public Point(Vector2 position, bool locked = false, bool isActive = true) {
             Position = position;
             LastPosition = Position;
             Locked = locked;
+            IsActive = isActive;
         }
-        public Point(float x, float y, bool locked = false) : this(new Vector2(x, y), locked) { }
+        public Point(float x, float y, bool locked = false, bool isActive = true) : this(new Vector2(x, y), locked, isActive) { }
     }
     [System.Serializable]
     class Stick {
@@ -32,23 +34,26 @@ public class ClothTearingBehavior : MonoBehaviour {
     }
 
     [SerializeField] float gravity = 9.81f;
-    [SerializeField] int maxIterations = 10;
+    [SerializeField, Range(1, 10)] int maxIterations = 3;
+    [SerializeField] float minPointHeight = -75f;
     [SerializeField] Point[] points;
     [SerializeField, Range(0, 50)] int colNumber = 31;
     [SerializeField, Range(0, 50)] int rowNumber = 15;
     [SerializeField] int[] lockPointIndexes;
-    [SerializeField] Transform pointToInstantiate;
-    [SerializeField] Transform parentInstantiated;
+    //[SerializeField] Transform pointToInstantiate;
+    //[SerializeField] Transform parentInstantiated;
     [SerializeField, Range(0.1f, 2f)] float distanceToCut = 0.5f;
     [SerializeField] Stick[] sticks;
     [SerializeField] MeshFilter clothMeshFilter;
     [SerializeField] LayerMask layerToHit;
+    [SerializeField] LineRenderer lineRenderer;
+    [SerializeField] Transform parentLineRenderers;
+    [SerializeField] Vector2 startEndWidth = new Vector2(0.1f, 0f);
     [Header("Gizmos")]
     [SerializeField] float pointSphereRadius = 0.1f;
     [SerializeField] Color pointSphereColor = Color.blue;
     [SerializeField] Color pointLockedSphereColor = Color.red;
     [SerializeField] Color stickLineColor = Color.green;
-    [SerializeField] float mouseSphereRadius = 0.1f;
     [SerializeField] Color mouseSphereColor = Color.white;
 
     //Vector2 offset = Vector2.zero;
@@ -58,9 +63,13 @@ public class ClothTearingBehavior : MonoBehaviour {
     Mesh clothMesh;
     System.Random random;
     Vector3 mousePosition;
+    int[][] sticksPerPoint;
+    LineRenderer[] lineRenderers;
 
     void OnValidate() {
         if (clothMeshFilter == null) { clothMeshFilter = GetComponentInChildren<MeshFilter>(); }
+        if (lineRenderer == null) { lineRenderer = GetComponentInChildren<LineRenderer>(true); }
+        if (lineRenderer != null) { lineRenderer.gameObject.SetActive(false); }
         if (lockPointIndexes == null) { return; }
         var maxIndex = colNumber * rowNumber;
         for (int i = 0; i < lockPointIndexes.Length; i++) {
@@ -98,7 +107,12 @@ public class ClothTearingBehavior : MonoBehaviour {
         if (clothMesh != null) { Destroy(clothMesh); }
     }
 
-    void OnEnable() {
+    void OnEnable() {      
+        if (lineRenderer != null && parentLineRenderers != null) {
+            lineRenderer.startWidth = startEndWidth.x;
+            lineRenderer.endWidth = startEndWidth.y;
+            lineRenderer.gameObject.SetActive(false);            
+        }
         GenerateMesh();
         vertexCount = points.Length;
         vertices = new Vector3[vertexCount];
@@ -110,15 +124,33 @@ public class ClothTearingBehavior : MonoBehaviour {
     [ContextMenu("Generate Mesh")]
     void GenerateMesh() {
         //offset = new Vector2(transform.position.x, transform.position.y);
-        if (parentInstantiated != null) {
-            for (int i = parentInstantiated.childCount; i > 0; --i) {
-                var gameObjectToDestroy = parentInstantiated.GetChild(0).gameObject;
-                if (Application.isEditor && !Application.isPlaying) { DestroyImmediate(gameObjectToDestroy); } 
-                else { Destroy(gameObjectToDestroy); }
-            }
-        }
+        DestroyInstantiated();
         GeneratePoints();
         GenerateSticks();
+    }
+
+    [ContextMenu("Destroy Instantiated")]
+    void DestroyInstantiated() {
+        /*if (parentInstantiated != null) {
+           for (int i = parentInstantiated.childCount; i > 0; --i) {
+               var gameObjectToDestroy = parentInstantiated.GetChild(0).gameObject;
+               if (Application.isEditor && !Application.isPlaying) { DestroyImmediate(gameObjectToDestroy); } 
+               else { Destroy(gameObjectToDestroy); }
+           }
+        }*/
+        lineRenderers = null;
+        if (parentLineRenderers != null) {
+            for (int i = parentLineRenderers.childCount; i > 0; --i) {
+                var gameObjectToDestroy = parentLineRenderers.GetChild(0).gameObject;
+                //if (Application.isEditor && !Application.isPlaying) {
+                    //Debug.Log("Destroy immediate");
+                    DestroyImmediate(gameObjectToDestroy); 
+                /*} else {
+                    Debug.Log("Detroy " + gameObjectToDestroy.name);
+                    Destroy(gameObjectToDestroy);
+                }*/
+            }
+        }
     }
 
     void GeneratePoints() {
@@ -130,10 +162,10 @@ public class ClothTearingBehavior : MonoBehaviour {
                 var isLocked = lockPointIndexes.Contains(pointIndex);// Where(p => Vector2.Distance(p, pointPosition) <= 0.1f).Count() > 0;
                 var newPoint = new Point(pointPosition, isLocked);
                 newPoints.Add(newPoint);
-                if (pointToInstantiate != null && parentInstantiated != null) {
-                    var point = Instantiate(pointToInstantiate, new Vector3(/*offset.x + */i, /*offset.y*/ - j, 0f), Quaternion.identity, parentInstantiated);
-                    point.name = "Point " + pointIndex + " [" + i + "," + -j + "]";
-                }
+                //if (pointToInstantiate != null && parentInstantiated != null) {
+                    //var point = Instantiate(pointToInstantiate, new Vector3(/*offset.x + */i, /*offset.y*/ - j, 0f), Quaternion.identity, parentInstantiated);
+                    //point.name = "Point " + pointIndex + " [" + i + "," + -j + "]";
+                //}
                 pointIndex++;
             }
         }
@@ -142,21 +174,36 @@ public class ClothTearingBehavior : MonoBehaviour {
 
     void GenerateSticks() {
         var newSticks = new List<Stick>();
-        var pointIndex = 0;
+        //var pointIndex = 0;
+        var stickIndex = 0;
+        sticksPerPoint = new int[points.Length][];
+        var newLineRenderers = new List<LineRenderer>();
         for (int j = 0; j < rowNumber; j++) {
             for (int i = 0; i < colNumber; i++) {
+                var pointIndex = i + j * colNumber;
                 Stick newStick;
+                var sticksIndex = new int[2] { -1, -1 };
                 if (i < colNumber - 1 && pointIndex + 1 < points.Length) {
                     newStick = new Stick(points[pointIndex], points[pointIndex + 1]);
                     newSticks.Add(newStick);
+                    if (lineRenderer != null && parentLineRenderers != null) {
+                        newLineRenderers.Add(Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers));
+                    }
+                    sticksIndex[0] = stickIndex++;
                 }
                 if (pointIndex + colNumber < points.Length) {
                     newStick = new Stick(points[pointIndex], points[pointIndex + colNumber]);
                     newSticks.Add(newStick);
+                    if (lineRenderer != null && parentLineRenderers != null) {
+                        newLineRenderers.Add(Instantiate(lineRenderer, points[pointIndex].Position, Quaternion.identity, parentLineRenderers));
+                    }
+                    sticksIndex[1] = stickIndex++;
                 }
-                pointIndex++;
+                sticksPerPoint[pointIndex] = sticksIndex;
+                //pointIndex++;
             }
         }
+        lineRenderers = newLineRenderers.ToArray();
         sticks = newSticks.ToArray();
     }
 
@@ -188,16 +235,20 @@ public class ClothTearingBehavior : MonoBehaviour {
         //points.Shuffle();
         Vector2 positionBeforeUpdate;
         foreach (var point in pointsToEvaluate) {
-            if (!point.Locked) {
+            if (!point.Locked && point.IsActive) {
                 positionBeforeUpdate = point.Position;
                 point.Position += point.Position - point.LastPosition;
                 point.Position += Vector2.down * gravity * Time.deltaTime * Time.deltaTime;
                 point.LastPosition = positionBeforeUpdate;
+                if (point.Position.y <= minPointHeight) {
+                    point.IsActive = false;
+                }
             }
         }
         Vector2 stickCenter, stickDirection;
         for (int i = 0; i < maxIterations; i++) {       
             foreach (var stick in sticks) {
+                if (stick.IsActive && !(stick.PointA.IsActive & stick.PointB.IsActive)) { stick.IsActive = false; }
                 if (!stick.IsActive) { continue; }
                 stickCenter = (stick.PointA.Position + stick.PointB.Position) / 2f;
                 stickDirection = (stick.PointA.Position - stick.PointB.Position).normalized;
@@ -221,12 +272,36 @@ public class ClothTearingBehavior : MonoBehaviour {
         for (int j = 0; j < rowNumber - 1; j++) {
             for (int i = 0; i < colNumber - 1; i++) {
                 var pointIndex = i + j * colNumber;
-                triangles[++triangleIndex] = pointIndex;
-                triangles[++triangleIndex] = pointIndex + 1;
-                triangles[++triangleIndex] = pointIndex + 1 + colNumber;
-                triangles[++triangleIndex] = pointIndex + 1 + colNumber;
-                triangles[++triangleIndex] = pointIndex + colNumber;
-                triangles[++triangleIndex] = pointIndex;
+                bool isQuad = true;
+                var firstStickIndex = sticksPerPoint[pointIndex][0];
+                if (CheckStickIndex(firstStickIndex)) { // check stick right of pointIndex
+                    isQuad = false;
+                }
+                var secondStickIndex = sticksPerPoint[pointIndex][1];
+                if (CheckStickIndex(secondStickIndex)) { // check stick bottom of pointIndex
+                    isQuad = false;
+                }
+                var thirdStickIndex = sticksPerPoint[pointIndex + 1][1]; 
+                if (CheckStickIndex(thirdStickIndex)) { // check stick bottom of point right of pointIndex
+                    isQuad = false;
+                }
+                var fourthStickIndex = sticksPerPoint[pointIndex + colNumber][0];
+                if (CheckStickIndex(fourthStickIndex)) { // check stick right of point bottom of pointIndex
+                    isQuad = false;
+                }
+                if (isQuad) {
+                    triangles[++triangleIndex] = pointIndex;
+                    triangles[++triangleIndex] = pointIndex + 1;
+                    triangles[++triangleIndex] = pointIndex + 1 + colNumber;
+                    triangles[++triangleIndex] = pointIndex + 1 + colNumber;
+                    triangles[++triangleIndex] = pointIndex + colNumber;
+                    triangles[++triangleIndex] = pointIndex;
+                } else {
+                    SetLineRenderPosition(firstStickIndex);
+                    SetLineRenderPosition(secondStickIndex);
+                    SetLineRenderPosition(thirdStickIndex);
+                    SetLineRenderPosition(fourthStickIndex);
+                }
                 //pointIndex++;
             }
         }
@@ -236,12 +311,29 @@ public class ClothTearingBehavior : MonoBehaviour {
         clothMesh.RecalculateNormals();
     }
 
+    void SetLineRenderPosition(int stickIndex) {
+        if (lineRenderers.Length > 0) {
+            var currentLineRender = lineRenderers[stickIndex];
+            if (sticks[stickIndex].IsActive) {
+                currentLineRender.SetPosition(0, sticks[stickIndex].PointA.Position);
+                currentLineRender.SetPosition(1, sticks[stickIndex].PointB.Position);
+            }
+            currentLineRender.gameObject.SetActive(sticks[stickIndex].IsActive);
+        }
+    }
+
+    bool CheckStickIndex(int stickIndex) {
+        return stickIndex < 0 || !sticks[stickIndex].IsActive;
+    }
+
     void OnDrawGizmos() {
         Gizmos.matrix = transform.localToWorldMatrix;
         if (points != null) {
             foreach (var point in points) {
-                Gizmos.color = point.Locked ? pointLockedSphereColor : pointSphereColor;
-                Gizmos.DrawSphere(point.Position, pointSphereRadius);
+                if (point.IsActive) {
+                    Gizmos.color = point.Locked ? pointLockedSphereColor : pointSphereColor;
+                    Gizmos.DrawSphere(point.Position, pointSphereRadius);
+                }
             }
         }
         if (sticks != null) {
@@ -251,6 +343,6 @@ public class ClothTearingBehavior : MonoBehaviour {
             }
         }
         Gizmos.color = mouseSphereColor;
-        Gizmos.DrawSphere(mousePosition, mouseSphereRadius);
+        Gizmos.DrawSphere(mousePosition, distanceToCut);
     }
 }
