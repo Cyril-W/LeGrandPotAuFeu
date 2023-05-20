@@ -13,6 +13,10 @@ public class CameraRaycasterEvents : MonoBehaviour {
     [SerializeField] UnityEvent onRaycastHit;
     [SerializeField] UnityEvent onRaycastHitClickInside;
     [SerializeField] UnityEvent onRaycastMissed;
+    [Header("Gizmos")]
+    [SerializeField] bool debugRay = false;
+    [SerializeField] Color rayHitColor = Color.green;
+    [SerializeField] Color rayMissColor = Color.red;
 
     Vector3 screenPosition;
     Ray ray;
@@ -37,16 +41,20 @@ public class CameraRaycasterEvents : MonoBehaviour {
                     isHitting = true;
                     onRaycastHit?.Invoke();
                 }
-                if (Input.GetMouseButtonDown(0)) {
-                    Debug.Log("Clicked inside");
-                    onRaycastHitClickInside?.Invoke();
-                }
+                if (Input.GetMouseButtonDown(0)) { onRaycastHitClickInside?.Invoke(); }
             }
         } else {
             if (isHitting) {
                 isHitting = false;
                 onRaycastMissed?.Invoke();
             }
+        }
+    }
+
+    void OnDrawGizmos() {
+        if (debugRay) {
+            Gizmos.color = isHitting ? rayHitColor : rayMissColor;
+            Gizmos.DrawRay(ray.origin, ray.direction * maxDistance);
         }
     }
 }

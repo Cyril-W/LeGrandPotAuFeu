@@ -39,7 +39,7 @@ public class ClothTearingBehavior : MonoBehaviour {
     [SerializeField, Range(0.5f, 10f)] float distanceToTear = 1.5f;
     [SerializeField, Range(1, 10)] int maxIterations = 3;
     [SerializeField] float minPointHeight = -75f;
-    [SerializeField] Point[] points;
+    [SerializeField, HideInInspector] Point[] points;
     [SerializeField, Range(0, 50)] int colNumber = 31;
     [SerializeField, Range(0, 50)] int rowNumber = 15;
     [SerializeField] int[] lockPointIndexes;
@@ -49,6 +49,7 @@ public class ClothTearingBehavior : MonoBehaviour {
     [SerializeField, HideInInspector] Stick[] sticks;
     [SerializeField] MeshFilter clothMeshFilter;
     [SerializeField] MeshCollider clothMeshCollider;
+    [SerializeField] Vector3 normalVector = Vector3.back;
     [SerializeField] LineRenderer lineRenderer;
     [SerializeField] Transform parentLineRenderers;
     [SerializeField] Vector2 startEndWidth = new Vector2(0.1f, 0f);
