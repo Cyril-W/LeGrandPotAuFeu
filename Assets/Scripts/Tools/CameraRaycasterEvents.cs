@@ -20,11 +20,12 @@ public class CameraRaycasterEvents : MonoBehaviour {
 
     Vector3 screenPosition;
     Ray ray;
-    bool isHitting = false;
+    bool isHitting = false, lastInputMouse;
 
     void FixedUpdate() {
         if (Camera.main == null) { return; }
         if (raycastOnlyOnClick && !Input.GetMouseButton(0)) {
+            lastInputMouse = false;
             if (isHitting) {
                 isHitting = false;
                 onRaycastMissed?.Invoke();
@@ -41,7 +42,10 @@ public class CameraRaycasterEvents : MonoBehaviour {
                     isHitting = true;
                     onRaycastHit?.Invoke();
                 }
-                if (Input.GetMouseButtonDown(0)) { onRaycastHitClickInside?.Invoke(); }
+                if (!lastInputMouse) {
+                    lastInputMouse = true;
+                    onRaycastHitClickInside?.Invoke(); 
+                }
             }
         } else {
             if (isHitting) {

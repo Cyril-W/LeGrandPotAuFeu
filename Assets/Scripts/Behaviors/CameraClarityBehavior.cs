@@ -1,4 +1,4 @@
-using Cinemachine;
+//using Cinemachine;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,8 +12,8 @@ public class CameraClarityBehavior : MonoBehaviour {
         public bool isMainMaterial = false;
     }
 
-    [SerializeField] CinemachineVirtualCamera virtualCamera;
-    [SerializeField, ReadOnly] float distance = 0f;
+    //[SerializeField] CinemachineVirtualCamera virtualCamera;
+    //[SerializeField, ReadOnly] float distance = 0f;
     [SerializeField] Vector2 minMaxDistanceToHide = new Vector2(100f, 150f);
     [SerializeField] TransparentObject[] transparentObjects;
     [SerializeField] Vector2 minMaxMaterialTransparency = new Vector2(0f, 0.5f);
@@ -26,7 +26,7 @@ public class CameraClarityBehavior : MonoBehaviour {
     static readonly string _transparency = "_Transparency";
 
     void OnValidate() {
-        TryFillNull();
+        //TryFillNull();
         foreach (var transparentObject in transparentObjects) {
             if (transparentObject.ObjectToHide != null) {
                 transparentObject.ObjectName = transparentObject.ObjectToHide.name;
@@ -34,9 +34,9 @@ public class CameraClarityBehavior : MonoBehaviour {
         }
     }
 
-    void TryFillNull() {
+    /*void TryFillNull() {
         if (virtualCamera == null) virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
-    }
+    }*/
 
     void OnDestroy() {
         if (currentHide || (!currentHide && currentTransparence > 0f)) {
@@ -52,7 +52,7 @@ public class CameraClarityBehavior : MonoBehaviour {
     }
 
     void Start() {
-        TryFillNull();
+        //TryFillNull();
         var materialNames = new List<string>();
         foreach (var transparentObject in transparentObjects) {
             if (/*!(*/!materialNames.Contains(transparentObject.MaterialToHide.name) /*|| materialNames.Contains(transparentObject.MaterialTransparent.name))*/) {
@@ -64,7 +64,7 @@ public class CameraClarityBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (virtualCamera == null) { return; }
+        /*if (virtualCamera == null) { return; }
         distance = Vector3.Distance(virtualCamera.transform.position, transform.position);
         bool hide;
         if (!currentHide) {
@@ -72,16 +72,7 @@ public class CameraClarityBehavior : MonoBehaviour {
         } else {
             hide = distance <= minMaxDistanceToHide.y;
         }
-        if (currentHide != hide) {
-            currentHide = hide;
-            currentTransparence = transparenceDuration;
-            foreach (var transparentObject in transparentObjects) {
-                transparentObject.ObjectToHide.shadowCastingMode = currentHide ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On; 
-                if (currentHide) {
-                    transparentObject.ObjectToHide.material = transparentObject.MaterialTransparent;
-                }
-            }
-        }
+        SetHide(hide);*/
         if (currentTransparence > 0f) {
             currentTransparence -= Time.deltaTime;
             HideObject();
@@ -89,6 +80,19 @@ public class CameraClarityBehavior : MonoBehaviour {
                 foreach (var transparentObject in transparentObjects) {
                     Destroy(transparentObject.ObjectToHide.material, 0.5f);
                     transparentObject.ObjectToHide.material = transparentObject.MaterialToHide;
+                }
+            }
+        }
+    }
+
+    public void SetHide(bool newHide) {
+        if (currentHide != newHide) {
+            currentHide = newHide;
+            currentTransparence = transparenceDuration;
+            foreach (var transparentObject in transparentObjects) {
+                transparentObject.ObjectToHide.shadowCastingMode = currentHide ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On;
+                if (currentHide) {
+                    transparentObject.ObjectToHide.material = transparentObject.MaterialTransparent;
                 }
             }
         }

@@ -4,6 +4,9 @@ using UnityEngine.EventSystems;
 
 public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     [SerializeField] Hero hero;
+    [SerializeField] string heroName;
+    [SerializeField] string spellName;
+    [SerializeField, TextArea] string spellDescription;
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
@@ -41,11 +44,12 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     string GetToolTip() {
         var cooldownValue = cooldown - currentCooldown;
-        return hero + "\n(" + cooldownValue.ToString("0.0") + " / " + cooldown.ToString("0.0") + ")";
+        var s = "<u>" + heroName + "</u> : " + spellName + " <i>(" + cooldownValue.ToString("0") + " / " + cooldown.ToString("0") + ")</i>\n" + spellDescription;
+        return s;
     }
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData) {
-        if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.ShowTooltip(GetToolTip); }
+        if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.ShowTooltip("<u>" + heroName + "</u>: " + spellName, GetToolTip); }
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData) {

@@ -10,6 +10,7 @@ public class DestinyManager : MonoBehaviour {
 
     [Header("Destiny Time")]
     [SerializeField, ReadOnly] List<GuardBehavior> trackingGuards = new List<GuardBehavior>();
+    [SerializeField] bool changeTimeScale = false;
     [SerializeField] AnimationCurve timeScaleCurve;
     [SerializeField] Volume postProcessVolume;
     [SerializeField] AnimationCurve vignetteIntensityCurve;
@@ -29,7 +30,9 @@ public class DestinyManager : MonoBehaviour {
         if (Instance == null || Instance != this) { Instance = this; }
     }
 
-    void Start() {        
+    void Start() {
+        currentTimeScale = 1f;
+        Time.timeScale = currentTimeScale;
         destinyPoints = destinyCoins.Length;
         foreach (var destinyCoin in destinyCoins) {
             destinyCoin.color = destinyCoinOnColor;
@@ -40,7 +43,7 @@ public class DestinyManager : MonoBehaviour {
     public void DestinyTimeScale(GuardBehavior guard, float trackingProgress) {
         if (!trackingGuards.Contains(guard)) trackingGuards.Add(guard);
         trackingProgress = Mathf.Clamp01(trackingProgress);
-        if (trackingProgress <= currentTrackingProgress) return;
+        if (!changeTimeScale || trackingProgress <= currentTrackingProgress) return;
         currentTrackingProgress = trackingProgress;
         currentTimeScale = timeScaleCurve.Evaluate(trackingProgress);
         Time.timeScale = currentTimeScale;
@@ -51,7 +54,7 @@ public class DestinyManager : MonoBehaviour {
         currentTrackingProgress = 0f;
         if (trackingGuards.Contains(guard)) trackingGuards.Remove(guard);
         if (trackingGuards.Count <= 0) {
-            currentTimeScale = timeScaleCurve.Evaluate(0f);
+            currentTimeScale = 1f;//timeScaleCurve.Evaluate(0f);
             Time.timeScale = currentTimeScale;
             vignette.intensity.value = vignetteIntensityCurve.Evaluate(0f);
         }

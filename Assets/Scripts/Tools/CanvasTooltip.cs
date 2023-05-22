@@ -5,12 +5,15 @@ public class CanvasTooltip : MonoBehaviour {
     public static CanvasTooltip Instance { get; private set; }
 
     [SerializeField] Vector2 padding = new Vector2(8, 8);
+    [SerializeField] float timeBeforeLongTooltip = 2f;
     [SerializeField, ReadOnly] RectTransform canvasRectTransform;
     [SerializeField, ReadOnly] RectTransform rectTransform;
     [SerializeField, ReadOnly] RectTransform backgroundRectTransform;
     [SerializeField, ReadOnly] TextMeshProUGUI textMeshPro;
 
     System.Func<string> toolTipFunc;
+    string shortTooltip, longTooltip;
+    float currentTime = 0;
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this;}
@@ -41,31 +44,57 @@ public class CanvasTooltip : MonoBehaviour {
             anchoredPosition.y = canvasRectTransform.rect.height - backgroundRectTransform.rect.height;
         }
         rectTransform.anchoredPosition = anchoredPosition;
-        if (toolTipFunc != null) { Debug.Log("func not null"); SetText(toolTipFunc()); }
+        if (currentTime > 0f) {
+            currentTime -= Time.deltaTime;
+            if (currentTime < 0f &&toolTipFunc == null) { 
+                SetText(longTooltip);
+            }
+        } else if (toolTipFunc != null) { 
+            SetText(toolTipFunc(), true);
+        }
     }
 
-    public void ShowTooltip(System.Func<string> newToolTipFunc) {
+    public void ShowTooltip(string newShortTooltop, System.Func<string> newToolTipFunc) {
         toolTipFunc = newToolTipFunc;
-        SetText(toolTipFunc());
-        gameObject.SetActive(true);
+        SetTooltip(newShortTooltop);
     }
 
-    public void ShowTooltip(string toolTipText) {
+    public void ShowTooltip(string newShortTooltip, string newLongTooltip) {        
         toolTipFunc = null;
-        SetText(toolTipText);
+        SetTooltip(newShortTooltip, newLongTooltip);
+    }
+
+    void SetTooltip(string newShortTooltip, string newLongTooltip = "") {
         gameObject.SetActive(true);
+        currentTime = timeBeforeLongTooltip;
+        shortTooltip = ReplaceChars(newShortTooltip);
+        longTooltip = ReplaceChars(newLongTooltip);
+        SetText(shortTooltip);
     }
 
     public void HideTooltip() {
-        toolTipFunc = null;
         gameObject.SetActive(false);
+        toolTipFunc = null;
+        currentTime = 0f;
     }
 
-    void SetText(string tooltipText) {
+    void SetText(string tooltipText, bool needReplace = false) {
+        if (needReplace) {
+            tooltipText = ReplaceChars(tooltipText);
+        }
         textMeshPro.SetText(tooltipText);
         textMeshPro.ForceMeshUpdate();
-        var textSize = textMeshPro.GetRenderedValues(false);
+        var textSize = textMeshPro.GetRenderedValues();
         backgroundRectTransform.sizeDelta = textSize + padding;
+    }
+
+    string ReplaceChars(string s) {
+        s = s.Replace('é', 'e');
+        s = s.Replace('è', 'e');
+        s = s.Replace('ê', 'e');
+        s = s.Replace('à', 'a');
+        s = s.Replace('ç', 'c');
+        return s;
     }
 
     [ContextMenu("Test Tooltip")]

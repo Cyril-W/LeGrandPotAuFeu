@@ -167,6 +167,10 @@ public class GuardBehavior : MonoBehaviour {
         DrawFieldOfView();
     }
 
+    public Vector3 GetGuardPosition() {
+        return guardTransform.position;
+    }
+
     public void SetGuardLayer(int layer) {
         if (guardTransform == null || guardTransform.GetChild(0) == null) { return; }
         foreach (Transform child in guardTransform.GetChild(0)) {

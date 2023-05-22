@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GuardsManager : MonoBehaviour {
@@ -40,5 +41,13 @@ public class GuardsManager : MonoBehaviour {
         foreach (var guard in guards) {
             guard.SetGuardLayer(layer);
         }
+    }
+
+    public Vector3[] GetGuardsPositions() {
+        var positions = new List<Vector3>();
+        foreach (var guard in guards) {
+            positions.Add(guard.GetGuardPosition());
+        }
+        return positions.ToArray();
     }
 }

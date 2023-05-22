@@ -766,7 +766,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2211397381063159177}
   - component: {fileID: 8408822086728157035}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2072,7 +2072,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6152979502828582521}
   - component: {fileID: 3667267683928027553}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2783,7 +2783,7 @@ GameObject:
   - component: {fileID: 5603614941246038436}
   - component: {fileID: 482042461875678032}
   - component: {fileID: 4387871128180675491}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Reference_Jail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3388,7 +3388,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1330533040711467092}
   - component: {fileID: 1489585174542773710}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5794,7 +5794,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5041224891723486363}
   - component: {fileID: 4663746382961107708}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -104,6 +104,12 @@ public class WitchBehavior : HeroBehavior {
                             break;
                         }
                     }
+                    foreach (var guardPosition in GuardsManager.Instance.GetGuardsPositions()) {
+                        if (Vector3.Distance(guardPosition, point) <= distanceToObstacles) {
+                            isToAvoid = true;
+                            break;
+                        }
+                    }
                     if (!isToAvoid) {
                         teleportPoints.Add(point);
                     }

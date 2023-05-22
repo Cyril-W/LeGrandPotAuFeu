@@ -126,6 +126,7 @@ public class GroupManager : MonoBehaviour {
         if (lostHero != null) { 
             lostHero.Saved = false;
             UpdateHero(lostHero);
+            if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.HideTooltip(); }
             onHeroLost?.Invoke();
             return true;
         } else { return false; }

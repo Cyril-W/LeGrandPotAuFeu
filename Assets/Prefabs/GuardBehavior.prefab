@@ -595,7 +595,7 @@ MonoBehaviour:
   visionOffset: 1.25
   viewMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 64
   detectionTime: 2
   detectionDistance: 1.25
   edgeResolveIterations: 6
