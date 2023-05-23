@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Audio;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -17,6 +18,17 @@ public class AudioManager : MonoBehaviour {
 
     [SerializeField] Audio[] audios;
     [SerializeField] AudioSource soundPrefab;
+    [Header("Audio Mixer Groups")]
+    [SerializeField] AudioMixerGroup audioMixerGroupMusic;
+    [SerializeField] AudioMixerGroup audioMixerGroupAmbiance;
+    [SerializeField] AudioMixerGroup audioMixerGroupSoundEffect;
+    [SerializeField] AudioMixerGroup audioMixerGroupVoiceEffect;
+    [Header("Audio Mixer Snpashot")]
+    [SerializeField] float snapshotTransitionDuration = 0.1f;
+    [SerializeField] AudioMixerSnapshot paused;
+    [SerializeField] AudioMixerSnapshot unpaused;
+    [SerializeField] AudioMixerSnapshot crochet;
+    [Header("Debug")]
     [SerializeField, ReadOnly] string lastSoundEffectPlayed;
     [SerializeField, ReadOnly] string lastMusicPlayed;
 
@@ -42,15 +54,25 @@ public class AudioManager : MonoBehaviour {
         }        
         if (audios == null) { return; }
         foreach (var audio in audios) {
-            var sP = Instantiate(soundPrefab, transform);
-            sP.enabled = false;
-            sP.name = audio.AudioName;
+            var audioSource = Instantiate(soundPrefab, transform);
+            switch (audio.AudioData) {
+                case SoundEffectData s:
+                    audioSource.outputAudioMixerGroup = s.isVoiceEffect ? audioMixerGroupVoiceEffect : audioMixerGroupSoundEffect;
+                    break;
+                case MusicData m:
+                    audioSource.outputAudioMixerGroup = m.isAmbiance ? audioMixerGroupAmbiance : audioMixerGroupMusic;
+                    break;
+                default:
+                    break;
+            }
+            audioSource.enabled = false;
+            audioSource.name = audio.AudioName;
             var sound = audio.AudioData;
-            sP.clip = sound.AudioClip;
-            sP.volume = sound.Volume;
-            sP.pitch = sound.Pitch;
-            sP.loop = sound.IsLooping;
-            audio.AudioSource = sP;
+            audioSource.clip = sound.AudioClip;
+            audioSource.volume = sound.Volume;
+            audioSource.pitch = sound.Pitch;
+            audioSource.loop = sound.IsLooping;
+            audio.AudioSource = audioSource;
         }
     }
 
@@ -75,6 +97,18 @@ public class AudioManager : MonoBehaviour {
         audios = newAudios.ToArray();
     }
 #endif
+
+    public void SetSnapshotPaused(bool isPaused) {
+        if (paused == null || unpaused == null) { return; }
+        if (isPaused) { paused.TransitionTo(snapshotTransitionDuration); }
+        else { unpaused.TransitionTo(snapshotTransitionDuration); }
+    }
+
+    public void SetSnapshotCrochet(bool isCrochet) {
+        if (crochet == null) { return; }
+        if (isCrochet) { crochet.TransitionTo(snapshotTransitionDuration); }
+        else { SetSnapshotPaused(false); }
+    }
 
     public void PlayMusic(MusicData music) {
         var audio = FindAudio(music);

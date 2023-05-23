@@ -10,7 +10,7 @@ public class RandomIntGenerator : MonoBehaviour {
         public UnityEvent OnIntEvent;
     }
 
-    [SerializeField] bool checkIntEvents = false;
+    [SerializeField] bool randomOnStart = false;
     [SerializeField] Vector2 minMaxInt = Vector2.zero;
     [SerializeField] UnityEvent<int> onIntGenerated;
     [SerializeField] IntEvent[] onIntGeneratedEvents;
@@ -19,23 +19,35 @@ public class RandomIntGenerator : MonoBehaviour {
     List<int> indexNoEvent = new List<int>();
 
     void OnValidate() {
-        checkIntEvents = false;
         var min = Mathf.RoundToInt(minMaxInt.x);
         minMaxInt.x = min;
         var max = Mathf.RoundToInt(minMaxInt.y);
         minMaxInt.y = max;
-        if (onIntGeneratedEvents == null) { Debug.LogError("onIntGeneratedEvents is null"); return; }
+    }
+
+    [ContextMenu("Check for events")]
+    void CheckIndexNoEvent() {
+        var min = Mathf.RoundToInt(minMaxInt.x);
+        minMaxInt.x = min;
+        var max = Mathf.RoundToInt(minMaxInt.y);
+        minMaxInt.y = max;
         indexNoEvent.Clear();
         for (int i = min; i <= max; i++) {
             indexNoEvent.Add(i);
         }
+        if (onIntGeneratedEvents == null) { Debug.LogError("onIntGeneratedEvents is null"); return; }
         foreach (var e in onIntGeneratedEvents) {
             e.IntEventName = "Event[" + e.IntParameter + "]";
             if (indexNoEvent.Contains(e.IntParameter)) {
                 indexNoEvent.Remove(e.IntParameter);
             }
         }
-        if (indexNoEvent.Count > 0) { Debug.LogError("Not enough UnityEvent to match possible randoms. Still " + indexNoEvent.Count + " conflicts"); }
+        if (indexNoEvent.Count > 0) { Debug.LogError("Int Generated Events: not enough UnityEvent to match possible randoms. Still " + indexNoEvent.Count + " conflicts"); }
+        else { Debug.Log("Int Generated Events: ok"); }
+    }
+
+    void Start() {
+        if (randomOnStart) { GenerateInt(); }
     }
 
     public void GenerateInt() {

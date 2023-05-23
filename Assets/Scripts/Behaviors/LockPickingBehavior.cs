@@ -26,7 +26,7 @@ public class LockPickingBehavior : MonoBehaviour {
     [SerializeField] Vector2 minMaxRotationLock = new Vector2(0f, -90f);
     [Header("Events")]
     [SerializeField] UnityEvent onInstanceRegistered;
-    [ReadOnly] public JailBehavior jailBehavior;
+    [ReadOnly] public LockedObjectBehavior jailBehavior;
     [SerializeField] UnityEvent<bool> onPivotPressedChanged;
     [SerializeField] UnityEvent onCrochetShake;
     [SerializeField] UnityEvent onLockPickSuccess;
@@ -75,7 +75,7 @@ public class LockPickingBehavior : MonoBehaviour {
             Debug.LogWarning("[²] - Lock picking cheat code");
             onLockPickSuccess?.Invoke();
             if (jailBehavior != null) {
-                jailBehavior.LockPicked();
+                jailBehavior.LockPickSuccess();
                 jailBehavior = null;
             }
         }
@@ -124,7 +124,7 @@ public class LockPickingBehavior : MonoBehaviour {
             if (goodRotation) {
                 onLockPickSuccess?.Invoke();
                 if (jailBehavior != null) { 
-                    jailBehavior.LockPicked();
+                    jailBehavior.LockPickSuccess();
                     jailBehavior = null;
                 }
             } else {

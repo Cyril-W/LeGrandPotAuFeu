@@ -17,9 +17,17 @@ public class TransformTweener : MonoBehaviour {
     [SerializeField] Vector2 startEndDurationScale = new Vector2(0.1f, 1f);
     [SerializeField] UnityEvent onScaleFinished;
 
-    private void Start() {
+    void Start() {
         if (tweenOnStart) { Tween(); }
     }
+
+    public void Reset() {
+        if (tweenTransform == null || startTransform == null) { return; }
+        if (tweenPosition) { tweenTransform.position = startTransform.position; }
+        if (tweenRotation) { tweenTransform.rotation = startTransform.rotation; }
+        if (tweenScale) { tweenTransform.localScale = startTransform.localScale; }
+    }
+
     public void Tween() {
         if (tweenTransform == null || startTransform == null || endTransform == null) { return; }
         if (tweenPosition) {

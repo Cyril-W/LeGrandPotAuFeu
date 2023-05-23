@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1753fca9445143428453363060d84e2, type: 3}
-  m_Name: CrochetBreaking
+  m_Name: SFX_Hero_Elf
   m_EditorClassIdentifier: 
-  AudioClip: {fileID: 8300000, guid: f503f441b9619aa4cb4136076952c00e, type: 3}
+  AudioClip: {fileID: 8300000, guid: 0de634229b3e08f45b892d49c9188f82, type: 3}
   Volume: 1
   Pitch: 1
   IsLooping: 0

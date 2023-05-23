@@ -1,14 +1,15 @@
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class OnKeyEvents : MonoBehaviour {
-    [Header("UI")]
-    [SerializeField] GameObject keyCodeUI;
-    [SerializeField] TextMeshPro keyCodeText;
+    //[Header("UI")]
+    //[SerializeField] GameObject keyCodeUI;
+    //[SerializeField] TextMeshPro keyCodeText;
     [SerializeField] int keyCodeSubstring = -1;
-    [SerializeField] TextMeshProUGUI keyCodeTextUGUI;
-    [Header("Events")]
+    [SerializeField] bool onChangeUpdateTextUI = false;
+    //[SerializeField] TextMeshProUGUI keyCodeTextUGUI;
+    //[Header("Events")]
     [SerializeField] KeyCode keyCode;
     [SerializeField] UnityEvent OnKeyDown;
     [SerializeField] UnityEvent OnKeyPressed;
@@ -22,12 +23,12 @@ public class OnKeyEvents : MonoBehaviour {
 
     void OnEnable() {
         UpdateKeyCodeTexts();
-        if (keyCodeUI) { keyCodeUI.SetActive(true); }
+        //if (keyCodeUI) { keyCodeUI.SetActive(true); }
         isKeyPressed = Input.GetKey(keyCode);
     }
 
     void OnDisable() {
-        if (keyCodeUI) { keyCodeUI.SetActive(false); }
+        //if (keyCodeUI) { keyCodeUI.SetActive(false); }
     }
 
     void FixedUpdate() {
@@ -45,10 +46,12 @@ public class OnKeyEvents : MonoBehaviour {
         }
     }
     void UpdateKeyCodeTexts() {
+        if (!onChangeUpdateTextUI) { return; }
         var keyCodeName = keyCode.ToString();
         if (keyCodeSubstring > 0 && keyCodeName.Length >= keyCodeSubstring) { keyCodeName = keyCodeName.Substring(0, keyCodeSubstring); }
-        if (keyCodeText) { keyCodeText.text = keyCodeName; }
-        if (keyCodeTextUGUI) { keyCodeTextUGUI.text = keyCodeName; }
+        if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetText(keyCodeName); }
+        /*if (keyCodeText) { keyCodeText.text = keyCodeName; }
+        if (keyCodeTextUGUI) { keyCodeTextUGUI.text = keyCodeName; }*/
     }
 
 }

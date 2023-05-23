@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1753fca9445143428453363060d84e2, type: 3}
-  m_Name: Ennemy_PlayerSpotted
+  m_Name: SFX_CrochetGoodPosition
   m_EditorClassIdentifier: 
-  AudioClip: {fileID: 8300000, guid: 96ad03cca1d70854fbaf7c745aa34ce1, type: 3}
-  Volume: 0.5
+  AudioClip: {fileID: 8300000, guid: 3d690708a8390e14e9c60e7f4bce5d77, type: 3}
+  Volume: 1
   Pitch: 1
   IsLooping: 0
   MinMaxRandomPitch: {x: -0.1, y: 0.1}

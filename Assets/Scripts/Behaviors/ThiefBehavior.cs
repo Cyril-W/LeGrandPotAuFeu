@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 
 public class ThiefBehavior : HeroBehavior {
-    [SerializeField] JailBehavior[] jails;
+    [SerializeField] LockedObjectBehavior[] jails;
     [SerializeField] float minDistanceToJail = 4f;
     [SerializeField] SpellBehavior spellBehavior;
     [SerializeField] float coolDownOnMiss = 1f;
@@ -18,7 +18,7 @@ public class ThiefBehavior : HeroBehavior {
     }
 
     void TryFillNull() {
-            if (jails == null || jails.Length <= 0) { jails = FindObjectsOfType<JailBehavior>(); }
+            if (jails == null || jails.Length <= 0) { jails = FindObjectsOfType<LockedObjectBehavior>(); }
             if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
     }
 
@@ -30,7 +30,7 @@ public class ThiefBehavior : HeroBehavior {
     void LockPick() {
         if (GroupManager.Instance == null) { return; }
         var currentNearestDistance = Mathf.Infinity;
-        JailBehavior currentJail = null;
+        LockedObjectBehavior currentJail = null;
         var currentDistance = 0f;
         foreach (var jail in jails) {
             if (!jail.GetIsLocked()) { continue; }
@@ -41,7 +41,7 @@ public class ThiefBehavior : HeroBehavior {
             }
         }
         if (currentJail != null) {
-            currentJail.LockPicked();
+            currentJail.LockPickSuccess();
         } else { 
             spellBehavior.SetCurrentCooldown(coolDownOnMiss);
         }

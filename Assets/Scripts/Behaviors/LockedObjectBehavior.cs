@@ -2,11 +2,11 @@ using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Events;
 
-public class JailBehavior : MonoBehaviour {
+public class LockedObjectBehavior : MonoBehaviour {
     [SerializeField] bool isLocked;
     [SerializeField] float unlockTime = 1f;
-    [SerializeField] GameObject unlockPanel;
-    [SerializeField] Transform unlockProgressBarPivot;
+    //[SerializeField] GameObject unlockPanel;
+    //[SerializeField] Transform unlockProgressBarPivot;
     [SerializeField] GameObject lockInteractor;
     [SerializeField] GameObject openInteractor;
     [SerializeField] GameObject closeInteractor;
@@ -27,12 +27,12 @@ public class JailBehavior : MonoBehaviour {
 
     bool isOpened = false;
     float rotationY, currentUnlockTime = 0f, randomClosedRotation, randomOpenRotation, currentTimeSinceAction = 0f;
-    Vector3 progressLocalScale;
+    //Vector3 progressLocalScale;
 
     void Awake() {
         isOpened = false;
         rotationY = jailPivot.rotation.eulerAngles.y;    
-        unlockPanel.SetActive(false);
+        //unlockPanel.SetActive(false);
         UpdateInteractors();
     }
 
@@ -46,15 +46,18 @@ public class JailBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        progressLocalScale = unlockProgressBarPivot.localScale;
+        /*progressLocalScale = unlockProgressBarPivot.localScale;
         progressLocalScale.x = 1f - Mathf.Clamp01(currentUnlockTime / unlockTime);
-        unlockProgressBarPivot.localScale = progressLocalScale;
+        unlockProgressBarPivot.localScale = progressLocalScale;*/
         if (currentUnlockTime > 0f) {
-            currentUnlockTime -= Time.deltaTime;
+            currentUnlockTime -= Time.deltaTime;            
             if (currentUnlockTime <= 0f) {
+                if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(0f); }
                 lockInteractor.SetActive(false);
                 LockPickingBehavior.Instance.jailBehavior = this;
                 onLockPickStart?.Invoke();                
+            } else {
+                if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(1f - Mathf.Clamp01(currentUnlockTime / unlockTime)); }
             }
         }
         if (currentTimeSinceAction > 0f) {
@@ -67,9 +70,9 @@ public class JailBehavior : MonoBehaviour {
         Unlock(false);
     }
 
-    public void LockPicked() {
+    public void LockPickSuccess() {
         isLocked = false;
-        unlockPanel.SetActive(false);
+        //unlockPanel.SetActive(false);
         OpenJail();
     }
 
@@ -79,8 +82,9 @@ public class JailBehavior : MonoBehaviour {
 
     public void Unlock(bool isUnlocking) {
         if (DestinyManager.Instance.AnyTrackingGuard()) { return; }
-        unlockPanel.SetActive(isUnlocking);
+        //unlockPanel.SetActive(isUnlocking);
         currentUnlockTime = isUnlocking ? unlockTime : 0f;
+        if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(0f); }
     }
 
     public void OpenJail() {

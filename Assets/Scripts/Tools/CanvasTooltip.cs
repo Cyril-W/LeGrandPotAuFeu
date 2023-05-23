@@ -37,8 +37,8 @@ public class CanvasTooltip : MonoBehaviour {
 
     void FixedUpdate() {
         var anchoredPosition = Input.mousePosition / canvasRectTransform.localScale.x;
-        if (anchoredPosition.x + backgroundRectTransform.rect.width > canvasRectTransform.rect.width) {
-            anchoredPosition.x = canvasRectTransform.rect.width - backgroundRectTransform.rect.width;
+        if (anchoredPosition.x - backgroundRectTransform.rect.width < 0) {
+            anchoredPosition.x = backgroundRectTransform.rect.width;
         }
         if (anchoredPosition.y + backgroundRectTransform.rect.height > canvasRectTransform.rect.height) {
             anchoredPosition.y = canvasRectTransform.rect.height - backgroundRectTransform.rect.height;
@@ -86,6 +86,7 @@ public class CanvasTooltip : MonoBehaviour {
         textMeshPro.ForceMeshUpdate();
         var textSize = textMeshPro.GetRenderedValues();
         backgroundRectTransform.sizeDelta = textSize + padding;
+        textMeshPro.rectTransform.sizeDelta = textSize + padding;
     }
 
     string ReplaceChars(string s) {

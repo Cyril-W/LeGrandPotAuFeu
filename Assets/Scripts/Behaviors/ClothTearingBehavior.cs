@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ClothTearingBehavior : MonoBehaviour {
+    public static ClothTearingBehavior Instance { get; private set; }
+
     [System.Serializable]
     class Point {
         public Vector2 Position, LastPosition;//, StartPosition;
@@ -49,10 +52,12 @@ public class ClothTearingBehavior : MonoBehaviour {
     [SerializeField, HideInInspector] Stick[] sticks;
     [SerializeField] MeshFilter clothMeshFilter;
     [SerializeField] MeshCollider clothMeshCollider;
-    [SerializeField] Vector3 normalVector = Vector3.back;
     [SerializeField] LineRenderer lineRenderer;
     [SerializeField] Transform parentLineRenderers;
     [SerializeField] Vector2 startEndWidth = new Vector2(0.1f, 0f);
+    [SerializeField] UnityEvent onInstanceRegistered;
+    [ReadOnly] public DoorBehavior doorBehavior;
+    [SerializeField] UnityEvent onClothTearingSuccess;
     [Header("Gizmos")]
     [SerializeField] float pointSphereRadius = 0.1f;
     [SerializeField] Color pointSphereColor = Color.blue;
@@ -98,6 +103,10 @@ public class ClothTearingBehavior : MonoBehaviour {
         }*/
     }
 
+    void Awake() {
+        if (Instance == null || Instance != this) { Instance = this; onInstanceRegistered?.Invoke(); }
+    }
+
     void Start() {
         if (clothMeshFilter != null) {
             clothMesh = new Mesh();
@@ -123,6 +132,20 @@ public class ClothTearingBehavior : MonoBehaviour {
         GenerateMesh();
         vertices = new Vector3[points.Length];
         random = new System.Random();
+    }
+
+    public void ClothTearFinish() {
+        onClothTearingSuccess?.Invoke();
+        if (doorBehavior != null) {
+            doorBehavior.InteractSuccess();
+            doorBehavior = null;
+        }
+    }
+
+    public void ClothTearAbort() {
+        if (doorBehavior != null) { 
+            doorBehavior.InteractAbort();
+            doorBehavior = null; }
     }
 
     [ContextMenu("Generate Mesh")]
@@ -215,7 +238,13 @@ public class ClothTearingBehavior : MonoBehaviour {
         sticks = newSticks.ToArray();
     }
 
-    void FixedUpdate() {        
+    void FixedUpdate() {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Quote)) {
+            Debug.LogWarning("[²] - Lock picking cheat code");
+            ClothTearFinish();
+        }
+#endif
         Simulate();
         DrawCloth();
     }
@@ -224,7 +253,7 @@ public class ClothTearingBehavior : MonoBehaviour {
         currentMousePosition = mousePosition;
         foreach (var stick in sticks) {
             var stickCenter = (stick.PointA.Position + stick.PointB.Position) / 2f;
-            float dist = Vector3.Distance(mousePosition, stickCenter);
+            float dist = Vector3.Distance(mousePosition, transform.TransformPoint(stickCenter));
             if (dist <= distanceToCut) {
                 stick.IsActive = false;
             }

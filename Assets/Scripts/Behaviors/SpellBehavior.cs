@@ -10,8 +10,10 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
+    [SerializeField] Transform transformToPunch;
+    [SerializeField] float afterDelayPunch = 0.5f;
     [SerializeField] DoPunchScaleParameters punchScaleParameters = new DoPunchScaleParameters(Vector3.one * 1.1f, 0.25f);
-    float currentCooldown = 0f;
+    float currentCooldown = 0f, currentPunchDelay = 0f;
 
     public Hero GetHero() {
         return hero;
@@ -22,7 +24,7 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     void OnEnable() {
-        punchScaleParameters.DoPunchScale(transform);
+        currentPunchDelay = afterDelayPunch;
     }
 
     public void OnSpellClick() {
@@ -36,6 +38,10 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     void FixedUpdate() {
+        if (currentPunchDelay > 0f) {
+            currentPunchDelay -= Time.deltaTime;
+            if (currentPunchDelay <= 0f && transformToPunch != null) { punchScaleParameters.DoPunchScale(transformToPunch); }
+        }
         if (currentCooldown <= 0f) { return; }
         currentCooldown -= Time.deltaTime;
         spellCooldown.fillAmount = Mathf.Clamp01(currentCooldown / cooldown);

@@ -17,8 +17,10 @@ public class CameraRaycasterEvents : MonoBehaviour {
     [SerializeField] bool debugRay = false;
     [SerializeField] Color rayHitColor = Color.green;
     [SerializeField] Color rayMissColor = Color.red;
+    [SerializeField] Color hitSpherecolor = Color.grey;
+    [SerializeField] float hitSphereSize = 0.1f;
 
-    Vector3 screenPosition;
+    Vector3 screenPosition, hitPosition;
     Ray ray;
     bool isHitting = false, lastInputMouse;
 
@@ -37,7 +39,8 @@ public class CameraRaycasterEvents : MonoBehaviour {
         ray = Camera.main.ScreenPointToRay(screenPosition);
         if (Physics.Raycast(ray, out var hitData, maxDistance, layerToCast, hitTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore)) {
             if (string.IsNullOrEmpty(tagToCheck) || (!string.IsNullOrEmpty(hitData.collider.tag) && hitData.collider.CompareTag(tagToCheck))) {
-                onHitPosition?.Invoke(hitData.point);
+                hitPosition = hitData.point;
+                onHitPosition?.Invoke(hitPosition);
                 if (!isHitting) {
                     isHitting = true;
                     onRaycastHit?.Invoke();
@@ -59,6 +62,10 @@ public class CameraRaycasterEvents : MonoBehaviour {
         if (debugRay) {
             Gizmos.color = isHitting ? rayHitColor : rayMissColor;
             Gizmos.DrawRay(ray.origin, ray.direction * maxDistance);
+            if (isHitting) {
+                Gizmos.color = hitSpherecolor;
+                Gizmos.DrawSphere(hitPosition, hitSphereSize);
+            }
         }
     }
 }

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1753fca9445143428453363060d84e2, type: 3}
-  m_Name: Ennemy_OutOfRange
+  m_Name: SFX_PlayerSpotted
   m_EditorClassIdentifier: 
-  AudioClip: {fileID: 8300000, guid: fc6bcd35cc33266479d8948899ff38dc, type: 3}
-  Volume: 0.5
+  AudioClip: {fileID: 8300000, guid: 9f995b0aae4d94d4cbc3ddbe14a0f479, type: 3}
+  Volume: 1
   Pitch: 1
   IsLooping: 0
-  MinMaxRandomPitch: {x: -0.1, y: 0.1}
+  MinMaxRandomPitch: {x: 0, y: 0}

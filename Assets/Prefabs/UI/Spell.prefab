@@ -222,9 +222,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hero: 1
+  heroName: 
+  spellName: 
+  spellDescription: 
   spellButton: {fileID: 8362048270483598534}
   spellCooldown: {fileID: 512346905772380284}
   cooldown: 3
+  transformToPunch: {fileID: 8362048270726578773}
   punchScaleParameters:
     Punch: {x: 1.05, y: 1.05, z: 1.05}
     Duration: 0.5

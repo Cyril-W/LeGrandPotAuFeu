@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7788662354438453056}
   - component: {fileID: 321461906042025992}
-  - component: {fileID: 1992683014024352988}
   m_Layer: 0
   m_Name: OnKeyEvents
   m_TagString: Untagged
@@ -45,10 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08a4726faacd2d547be06fb4fe1972c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  keyCodeUI: {fileID: 4887246323089270567}
-  keyCodeText: {fileID: 2467934158480799996}
   keyCodeSubstring: -1
-  keyCodeTextUGUI: {fileID: 0}
   keyCode: 101
   OnKeyDown:
     m_PersistentCalls:
@@ -57,42 +53,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnKeyUp:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &1992683014024352988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 341024472511910491}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54e314b1c31f4c8488113e6c08e265f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnStartEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 341024472511910491}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnEnableEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnDisableEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  EventToSend:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &618839891633707530

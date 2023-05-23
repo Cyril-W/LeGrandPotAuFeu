@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Music_LockPicking
   m_EditorClassIdentifier: 
   AudioClip: {fileID: 8300000, guid: b85cdb8f3cb20ca43af59ceb57163ee5, type: 3}
-  Volume: 1
+  Volume: 0.5
   Pitch: 1
   IsLooping: 0
+  isAmbiance: 0

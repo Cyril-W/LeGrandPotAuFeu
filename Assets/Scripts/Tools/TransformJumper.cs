@@ -15,6 +15,12 @@ public class TransformJumper : MonoBehaviour {
     void Start() {
         if (jumpOnStart) { Jump(); }
     }
+
+    public void Reset() {
+        if (tweenTransform == null || startTransform == null) { return; }
+        tweenTransform.position = startTransform.position;
+    }
+
     public void Jump() {
         if (tweenTransform == null || startTransform == null || endTransform == null) { return; }
         tweenTransform.DOMove(startTransform.position, startEndDuration.x).OnComplete(() => JumpNumberTime());

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1753fca9445143428453363060d84e2, type: 3}
-  m_Name: OpenJail
+  m_Name: SFX_Footstep_1
   m_EditorClassIdentifier: 
-  AudioClip: {fileID: 8300000, guid: e4d3d6522699aa141bfd63919d1e6197, type: 3}
-  Volume: 1
+  AudioClip: {fileID: 8300000, guid: 141683702c6f38349a791407b83b6c42, type: 3}
+  Volume: 0.1
   Pitch: 1
   IsLooping: 0
   MinMaxRandomPitch: {x: -0.1, y: 0.1}

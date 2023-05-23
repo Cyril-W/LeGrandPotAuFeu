@@ -23,7 +23,8 @@ public class FloatTweener : MonoBehaviour {
             currentDuration -= Time.deltaTime;
             if (currentDuration < 0f) {
                 enabled = false;
-                currentFloat = startEndFloat.y;
+                currentFloat = !isReverse ? startEndFloat.y : startEndFloat.x;
+                onCurrentFloat?.Invoke(currentFloat);
                 onFloatEnd?.Invoke();
                 return;
             }

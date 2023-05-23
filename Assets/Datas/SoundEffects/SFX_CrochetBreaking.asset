@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a5b53427a9bb934186ba8b94d5ef673, type: 3}
-  m_Name: Music_Ambiance
+  m_Script: {fileID: 11500000, guid: c1753fca9445143428453363060d84e2, type: 3}
+  m_Name: SFX_CrochetBreaking
   m_EditorClassIdentifier: 
-  AudioClip: {fileID: 8300000, guid: d38426dc267841d44b5c802c29186db9, type: 3}
+  AudioClip: {fileID: 8300000, guid: f503f441b9619aa4cb4136076952c00e, type: 3}
   Volume: 1
   Pitch: 1
-  IsLooping: 1
-  isAmbiance: 1
+  IsLooping: 0
+  MinMaxRandomPitch: {x: -0.1, y: 0.1}
