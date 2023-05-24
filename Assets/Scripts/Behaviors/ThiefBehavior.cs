@@ -14,12 +14,12 @@ public class ThiefBehavior : HeroBehavior {
     }
 
     void Start() {
-        TryFillNull();
+        TryFillNull(true);
     }
 
-    void TryFillNull() {
-            if (jails == null || jails.Length <= 0) { jails = FindObjectsOfType<LockedObjectBehavior>(); }
-            if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
+    void TryFillNull(bool force = false) {
+        if (force || jails == null || jails.Length <= 0) { jails = FindObjectsOfType<LockedObjectBehavior>(true); }
+        if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
     }
 
     protected override void OverrideDoSpell() {        

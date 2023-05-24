@@ -71,7 +71,7 @@ public class LockPickingBehavior : MonoBehaviour {
 
     void FixedUpdate() {
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.Quote)) {
+        if (Input.GetKey(KeyCode.Quote)) {
             Debug.LogWarning("[²] - Lock picking cheat code");
             onLockPickSuccess?.Invoke();
             if (jailBehavior != null) {

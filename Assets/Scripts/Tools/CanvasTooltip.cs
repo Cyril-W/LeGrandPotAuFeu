@@ -36,14 +36,7 @@ public class CanvasTooltip : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        var anchoredPosition = Input.mousePosition / canvasRectTransform.localScale.x;
-        if (anchoredPosition.x - backgroundRectTransform.rect.width < 0) {
-            anchoredPosition.x = backgroundRectTransform.rect.width;
-        }
-        if (anchoredPosition.y + backgroundRectTransform.rect.height > canvasRectTransform.rect.height) {
-            anchoredPosition.y = canvasRectTransform.rect.height - backgroundRectTransform.rect.height;
-        }
-        rectTransform.anchoredPosition = anchoredPosition;
+        SetPosition();
         if (currentTime > 0f) {
             currentTime -= Time.deltaTime;
             if (currentTime < 0f &&toolTipFunc == null) { 
@@ -52,6 +45,17 @@ public class CanvasTooltip : MonoBehaviour {
         } else if (toolTipFunc != null) { 
             SetText(toolTipFunc(), true);
         }
+    }
+
+    void SetPosition() {
+        var anchoredPosition = Input.mousePosition / canvasRectTransform.localScale.x;
+        if (anchoredPosition.x - backgroundRectTransform.rect.width < 0) {
+            anchoredPosition.x = backgroundRectTransform.rect.width;
+        }
+        if (anchoredPosition.y + backgroundRectTransform.rect.height > canvasRectTransform.rect.height) {
+            anchoredPosition.y = canvasRectTransform.rect.height - backgroundRectTransform.rect.height;
+        }
+        rectTransform.anchoredPosition = anchoredPosition;
     }
 
     public void ShowTooltip(string newShortTooltop, System.Func<string> newToolTipFunc) {
@@ -65,6 +69,7 @@ public class CanvasTooltip : MonoBehaviour {
     }
 
     void SetTooltip(string newShortTooltip, string newLongTooltip = "") {
+        SetPosition();
         gameObject.SetActive(true);
         currentTime = timeBeforeLongTooltip;
         shortTooltip = ReplaceChars(newShortTooltip);

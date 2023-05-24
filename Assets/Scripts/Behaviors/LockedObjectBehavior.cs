@@ -46,6 +46,7 @@ public class LockedObjectBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (LevelManager.Instance != null && LevelManager.Instance.IsPaused) { return; }
         /*progressLocalScale = unlockProgressBarPivot.localScale;
         progressLocalScale.x = 1f - Mathf.Clamp01(currentUnlockTime / unlockTime);
         unlockProgressBarPivot.localScale = progressLocalScale;*/

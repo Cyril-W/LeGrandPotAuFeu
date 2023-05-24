@@ -7,7 +7,11 @@ public class DisableOnPlayManager : MonoBehaviour {
     }
 
     void Start() {
-        for (int i = disableOnPlays.Length - 1; i >= 0; i--) { Destroy(disableOnPlays[i]); }
+        for (int i = disableOnPlays.Length - 1; i >= 0; i--) {
+            var disableOnPlay = disableOnPlays[i];
+            disableOnPlay.Disable();
+            Destroy(disableOnPlay);
+        }
         disableOnPlays = null;
     }
 }

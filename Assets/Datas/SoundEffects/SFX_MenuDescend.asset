@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SFX_MenuDescend
   m_EditorClassIdentifier: 
   AudioClip: {fileID: 8300000, guid: 7ac5a43f36e7f4b448a594b7cebe02de, type: 3}
-  Volume: 1
+  Volume: 0.5
   Pitch: 1
   IsLooping: 0
   MinMaxRandomPitch: {x: 0, y: 0}

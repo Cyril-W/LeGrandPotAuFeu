@@ -240,8 +240,8 @@ public class ClothTearingBehavior : MonoBehaviour {
 
     void FixedUpdate() {
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.Quote)) {
-            Debug.LogWarning("[²] - Lock picking cheat code");
+        if (Input.GetKey(KeyCode.Quote)) {
+            Debug.LogWarning("[²] - Cloth tearing cheat code");
             ClothTearFinish();
         }
 #endif

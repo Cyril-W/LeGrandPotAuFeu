@@ -8,8 +8,10 @@ public class DoorBehavior : MonoBehaviour {
     [SerializeField] UnityEvent onInteracted;
 
     float currentInteractTime;
+    bool isInToOut = false;
 
     void FixedUpdate() {
+        if (LevelManager.Instance != null && LevelManager.Instance.IsPaused) { return; }
         if (currentInteractTime > 0f) {
             currentInteractTime -= Time.deltaTime;
             if (currentInteractTime <= 0f) {
@@ -23,13 +25,17 @@ public class DoorBehavior : MonoBehaviour {
         }
     }
 
+    public void SetIsInToOut(bool b) {
+        isInToOut = b;
+    }
+
     public void InteractAbort() {
         interactor.SetActive(true);
         Interact(false);
     }
 
     public void InteractSuccess() {
-        var newPos = transform.position + transform.forward * offsetForward;
+        var newPos = transform.position + transform.forward * offsetForward * (isInToOut ? -1f : 1f);
         newPos.y = 0;
         GroupManager.Instance.MovePlayerPosition(newPos);
         gameObject.SetActive(false);
