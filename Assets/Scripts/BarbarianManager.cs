@@ -75,7 +75,7 @@ public class BarbarianManager : MonoBehaviour {
             foreach (var hero in heroesToSave) {
                 recap += "\n - " + hero + " (200 gold)";
             }
-            recap += "\n - " + Hero.Ranger + " (200 gold)";
+            //recap += "\n - " + Hero.Ranger + " (200 gold)";
         }
         recap += "\n-----------------------";
         recap += "\n<u>Total:</u> " + (heroesToSave.Count > 0 ? (heroesToSave.Count + 1) * 200 : 0) + " gold";

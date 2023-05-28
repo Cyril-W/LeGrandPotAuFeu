@@ -46,8 +46,24 @@ public class GuardsManager : MonoBehaviour {
     public Vector3[] GetGuardsPositions() {
         var positions = new List<Vector3>();
         foreach (var guard in guards) {
-            positions.Add(guard.GetGuardPosition());
+            if (guard.gameObject.activeSelf) {
+                positions.Add(guard.GetGuardPosition());
+            } else {
+                positions.Add(new Vector3(0f, Mathf.Infinity, 0f));
+            }
         }
         return positions.ToArray();
+    }
+
+    public void DisableGuard(int guardIndex) {
+        if (guardIndex < 0 || guardIndex >= guards.Length) { return; }
+        var guard = guards[guardIndex];
+        guard.gameObject.SetActive(false);
+        if (DestinyManager.Instance != null) { DestinyManager.Instance.LostTrack(guard); }
+    }
+
+    public void ImmobilizeGuard(int guardIndex) {
+        if (guardIndex < 0 || guardIndex >= guards.Length) { return; }
+        guards[guardIndex].ImmobilizeGuard();
     }
 }

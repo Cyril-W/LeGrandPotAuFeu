@@ -625,7 +625,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1179028777073978688}
   m_Layer: 0
-  m_Name: Mesh
+  m_Name: Ranger Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -862,7 +862,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f22aca5acd8d24c90572dbc628f52b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkIntEvents: 0
+  randomOnStart: 0
   minMaxInt: {x: 0, y: 2}
   onIntGenerated:
     m_PersistentCalls:
@@ -908,10 +908,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08a4726faacd2d547be06fb4fe1972c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  keyCodeUI: {fileID: 0}
-  keyCodeText: {fileID: 0}
   keyCodeSubstring: -1
-  keyCodeTextUGUI: {fileID: 0}
+  onChangeUpdateTextUI: 0
   keyCode: 306
   OnKeyDown:
     m_PersistentCalls:

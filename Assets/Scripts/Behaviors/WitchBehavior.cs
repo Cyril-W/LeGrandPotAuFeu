@@ -60,7 +60,8 @@ public class WitchBehavior : HeroBehavior {
         if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsLayer(isActive ? enemiLayer : defaultLayer); }
     }
 
-    void FixedUpdate() {
+    protected override void FixedUpdate() {
+        base.FixedUpdate();
         if (currentTeleportTime > 0f) {
             currentTeleportTime -= Time.deltaTime;
             if (currentTeleportTime <= 0f) { SetThirdPersonControllerEnabled(true); }
@@ -77,7 +78,7 @@ public class WitchBehavior : HeroBehavior {
         SetThirdPersonControllerEnabled(false);
         GetTeleportPoints();
         if (teleportPoints.Count <= 0 || GroupManager.Instance == null) return;
-        GroupManager.Instance.MovePlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
+        GroupManager.Instance.SetPlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
     }
 
     void SetThirdPersonControllerEnabled(bool b) {

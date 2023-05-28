@@ -7,13 +7,18 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] string heroName;
     [SerializeField] string spellName;
     [SerializeField, TextArea] string spellDescription;
+    [SerializeField] CanvasGroup canvasGroup;
+    [SerializeField] Vector2 minMaxAlphaCanvasGroup = new Vector2(0.25f, 1f);
+    [SerializeField] GameObject chainsGameObject;
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
     [SerializeField] Transform transformToPunch;
     [SerializeField] float afterDelayPunch = 0.5f;
     [SerializeField] DoPunchScaleParameters punchScaleParameters = new DoPunchScaleParameters(Vector3.one * 1.1f, 0.25f);
+
     float currentCooldown = 0f, currentPunchDelay = 0f;
+    bool currentIsSaved = false;
 
     public Hero GetHero() {
         return hero;
@@ -24,10 +29,19 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     void OnEnable() {
-        currentPunchDelay = afterDelayPunch;
+        if (currentIsSaved) { currentPunchDelay = afterDelayPunch; }
+    }
+
+    public void SetSaved(bool isSaved) {
+        if (chainsGameObject == null || canvasGroup == null) { return; }
+        chainsGameObject.SetActive(!isSaved);
+        canvasGroup.alpha = !isSaved ? minMaxAlphaCanvasGroup.x : minMaxAlphaCanvasGroup.y;
+        canvasGroup.interactable = isSaved;
+        currentIsSaved = isSaved;
     }
 
     public void OnSpellClick() {
+        if (!currentIsSaved) { return; }
         currentCooldown = cooldown;
         spellButton.interactable = false;
         if (GroupManager.Instance != null) { GroupManager.Instance.OnSpellClick?.Invoke(hero); }

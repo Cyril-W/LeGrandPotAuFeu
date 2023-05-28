@@ -167,6 +167,11 @@ public class GuardBehavior : MonoBehaviour {
         DrawFieldOfView();
     }
 
+    public void ImmobilizeGuard() {
+        canMove = false;
+        previousCanMove = false;
+    }
+
     public Vector3 GetGuardPosition() {
         return guardTransform.position;
     }
@@ -202,7 +207,7 @@ public class GuardBehavior : MonoBehaviour {
             currentTimeAfterSpot = 0f;
             canMove = previousCanMove;
             if (currentDetectionTime <= 0f) {
-                // Former Catch
+                // Former Catch mechanic here
             }
         }
         if (coneViewMaterial != null) coneViewMaterial.SetFloat(MATERIAL_FLOAT_FILL, 1f - Mathf.Clamp01(currentDetectionTime / detectionTime));

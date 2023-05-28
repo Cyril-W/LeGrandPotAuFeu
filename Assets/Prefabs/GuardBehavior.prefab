@@ -633,7 +633,7 @@ MonoBehaviour:
   lineWidth: 0.5
   canMove: 1
   speed: 3
-  spottingSpeedRatio: 2
+  spottingSpeedRatio: 1.85
   timeAfterSpot: 3
   distanceToWaypoint: 0.1
   moveUp: 1

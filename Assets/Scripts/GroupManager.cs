@@ -43,10 +43,10 @@ public class GroupManager : MonoBehaviour {
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
 #if !UNITY_EDITOR
-        foreach (var heroe in heroes) {
-            heroe.Saved = false;
+        foreach (var hero in heroes) {
+            hero.Saved = hero.Hero == Hero.Ranger/*false*/;
         }
-        numberHeroSaved = 0;
+        numberHeroSaved = 1;
 #endif
     }
 
@@ -56,7 +56,7 @@ public class GroupManager : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) { Crouch(false); return; }
+        if (currentCrouchTime > 0f && ((DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) || (LevelManager.Instance != null && LevelManager.Instance.IsPaused))) { Crouch(false); return; }
         if (currentCrouchTime > 0f) {            
             currentCrouchTime -= Time.deltaTime;
             var newScale = Mathf.Lerp(crouchStandScale.x, crouchStandScale.y, Mathf.Clamp01(currentCrouchTime / timeToCrouch));
@@ -80,7 +80,7 @@ public class GroupManager : MonoBehaviour {
     }
 
     public void Crouch(bool isCrouched) {
-        if (rangerTransform == null) { return; }
+        if (rangerTransform == null || LevelManager.Instance == null || LevelManager.Instance.IsPaused) { return; }
         if (isCrouched) {
             currentCrouchTime = timeToCrouch;
         } else {
@@ -104,8 +104,22 @@ public class GroupManager : MonoBehaviour {
         return transform.position;
     }
 
-    public void MovePlayerPosition(Vector3 newPosition) {
+    public void SetPlayerPosition(Vector3 newPosition) {
         transform.position = newPosition;
+    }
+
+    public Vector3[] GetUnsavedHeroPositions() {
+        var heroPos = new List<Vector3>();
+        foreach (var hero in heroes) {
+            if (hero.Hero != Hero.Ranger && !hero.Saved) { heroPos.Add(hero.HeroBehavior.GetSavedHeroPosition()); }
+        }
+        return heroPos.ToArray();
+    }
+
+    public void SetPlayerRotation(float yRotation) {
+        var newRotation = transform.rotation.eulerAngles;
+        newRotation.y = yRotation;
+        transform.rotation = Quaternion.Euler(newRotation);
     }
 
     public ThirdPersonController GetThirdPersonController() {
@@ -120,7 +134,7 @@ public class GroupManager : MonoBehaviour {
     }
 
     public bool LoseRandomMember() {
-        var savedHeroes = heroes.Where(h => h.Saved);
+        var savedHeroes = heroes.Where(h => h.Hero != Hero.Ranger && h.Saved);
         if (savedHeroes == null || savedHeroes.Count() <= 0) { return false;}
         var lostHero = savedHeroes.ElementAt(UnityEngine.Random.Range(0, savedHeroes.Count()));
         if (lostHero != null) { 
@@ -134,14 +148,15 @@ public class GroupManager : MonoBehaviour {
 
     void UpdateHero(HeroModel hero) {
         if (hero.Model != null) { hero.Model.SetActive(hero.Saved); }
-        if (hero.SpellBehavior != null) { hero.SpellBehavior.gameObject.SetActive(hero.Saved); }
+        if (hero.SpellBehavior != null) { hero.SpellBehavior.SetSaved(hero.Saved); }
         if (hero.HeroBehavior != null) {
             hero.HeroBehavior.enabled = hero.Saved;
-            hero.HeroBehavior.transform.GetChild(0).gameObject.SetActive(!hero.Saved);
+            if (hero.Hero != Hero.Ranger) { hero.HeroBehavior.transform.GetChild(0).gameObject.SetActive(!hero.Saved); }
         }
     }
 
     void UpdateHero(HeroModel hero, bool saved) {
+        if (hero.Hero == Hero.Ranger && !saved) { return; }
         hero.Saved = saved;
         numberHeroSaved += hero.Saved ? 1 : -1;
         UpdateHero(hero);

@@ -6,6 +6,7 @@ public class OnKeyEvents : MonoBehaviour {
     //[Header("UI")]
     //[SerializeField] GameObject keyCodeUI;
     //[SerializeField] TextMeshPro keyCodeText;
+    [SerializeField] bool checkForPause = true;
     [SerializeField] int keyCodeSubstring = -1;
     [SerializeField] bool onChangeUpdateTextUI = false;
     //[SerializeField] TextMeshProUGUI keyCodeTextUGUI;
@@ -32,6 +33,7 @@ public class OnKeyEvents : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (checkForPause && (LevelManager.Instance == null || LevelManager.Instance.IsPaused)) { return; }
         var getKey = Input.GetKey(keyCode);
         if (getKey) {
             OnKeyPressed?.Invoke();
@@ -45,6 +47,7 @@ public class OnKeyEvents : MonoBehaviour {
             }
         }
     }
+
     void UpdateKeyCodeTexts() {
         if (!onChangeUpdateTextUI) { return; }
         var keyCodeName = keyCode.ToString();

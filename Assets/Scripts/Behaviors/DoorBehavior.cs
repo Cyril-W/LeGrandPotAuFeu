@@ -12,17 +12,27 @@ public class DoorBehavior : MonoBehaviour {
 
     void FixedUpdate() {
         if (LevelManager.Instance != null && LevelManager.Instance.IsPaused) { return; }
+        if (DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) { 
+            currentInteractTime = 0f;
+            SetImageFill(0f);
+            interactor.SetActive(false);
+            return;
+        }
         if (currentInteractTime > 0f) {
             currentInteractTime -= Time.deltaTime;
             if (currentInteractTime <= 0f) {
-                if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(0f); }
+                SetImageFill(0f);
                 interactor.SetActive(false);
-                ClothTearingBehavior.Instance.doorBehavior = this;
+                if (ClothTearingBehavior.Instance != null) { ClothTearingBehavior.Instance.doorBehavior = this; }
                 onInteracted?.Invoke();
             } else {
-                if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(1f - Mathf.Clamp01(currentInteractTime / interactTime)); }
+                SetImageFill(1f - Mathf.Clamp01(currentInteractTime / interactTime));
             }
         }
+    }
+
+    void SetImageFill(float newImagefill) {
+        if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(newImagefill); }
     }
 
     public void SetIsInToOut(bool b) {
@@ -37,12 +47,12 @@ public class DoorBehavior : MonoBehaviour {
     public void InteractSuccess() {
         var newPos = transform.position + transform.forward * offsetForward * (isInToOut ? -1f : 1f);
         newPos.y = 0;
-        GroupManager.Instance.MovePlayerPosition(newPos);
+        GroupManager.Instance.SetPlayerPosition(newPos);
         gameObject.SetActive(false);
     }
 
     public void Interact(bool isInteracting) {
-        if (DestinyManager.Instance.AnyTrackingGuard()) { return; }
+        if (DestinyManager.Instance == null || DestinyManager.Instance.AnyTrackingGuard()) { return; }
         currentInteractTime = isInteracting ? interactTime : 0f;
         if (WorldToUIManager.Instance != null) { WorldToUIManager.Instance.SetImageFill(0f); }
     }
