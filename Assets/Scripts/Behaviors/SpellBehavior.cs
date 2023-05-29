@@ -13,6 +13,8 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
+    [SerializeField] float missedCooldown = 0.5f;
+    [SerializeField] float range = 0f;
     [SerializeField] Transform transformToPunch;
     [SerializeField] float afterDelayPunch = 0.5f;
     [SerializeField] DoPunchScaleParameters punchScaleParameters = new DoPunchScaleParameters(Vector3.one * 1.1f, 0.25f);
@@ -41,15 +43,28 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     public void OnSpellClick() {
-        if (!currentIsSaved) { return; }
-        currentCooldown = cooldown;
         spellButton.interactable = false;
-        if (GroupManager.Instance != null) { GroupManager.Instance.OnSpellClick?.Invoke(hero); }
+        if (!currentIsSaved) { return; }        
+        if (GroupManager.Instance != null) { 
+            if (GroupManager.Instance.OnSpellClick.GetInvocationList().Length > 0) {
+                if (GroupManager.Instance.OnSpellClick.Invoke(hero)) {
+                    currentCooldown = cooldown;
+                } else {
+                    currentCooldown = missedCooldown;
+                }
+            } else {
+                Debug.LogWarning("Too few function are registered in GroupManager.OnSpellClick (" + GroupManager.Instance.OnSpellClick.GetInvocationList().Length + ")");
+                currentCooldown = missedCooldown;
+            }
+        } else {
+            Debug.LogError("GroupManager is null");
+            currentCooldown = missedCooldown;
+        }
     }
 
-    public void SetCurrentCooldown(float newCooldown) {
+    /*public void SetCurrentCooldown(float newCooldown) {
         currentCooldown = newCooldown;
-    }
+    }*/
 
     void FixedUpdate() {
         if (currentPunchDelay > 0f) {
@@ -70,9 +85,11 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData) {
         if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.ShowTooltip("<u>" + heroName + "</u>: " + spellName, GetToolTip); }
+        if (GroupManager.Instance != null) { GroupManager.Instance.SetRangeIndicator(range); }
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData) {
         if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.HideTooltip(); }
+        if (GroupManager.Instance != null) { GroupManager.Instance.SetRangeIndicator(0f); }
     }
 }

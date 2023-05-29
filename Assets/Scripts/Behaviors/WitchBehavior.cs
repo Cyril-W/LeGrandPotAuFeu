@@ -68,17 +68,19 @@ public class WitchBehavior : HeroBehavior {
         }
     }
 
-    protected override void OverrideDoSpell() {
-        Teleport();
+    protected override bool OverrideDoSpell() {
+        return Teleport();
     }
 
     [ContextMenu("Teleport")]
-    void Teleport() {
+    bool Teleport() {
+        if (GroupManager.Instance == null) { return false; }
         currentTeleportTime = teleportationDuration;
         SetThirdPersonControllerEnabled(false);
         GetTeleportPoints();
-        if (teleportPoints.Count <= 0 || GroupManager.Instance == null) return;
+        if (teleportPoints.Count <= 0) { return false; }
         GroupManager.Instance.SetPlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
+        return true;
     }
 
     void SetThirdPersonControllerEnabled(bool b) {

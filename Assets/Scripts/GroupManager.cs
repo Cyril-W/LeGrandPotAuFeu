@@ -31,10 +31,11 @@ public class GroupManager : MonoBehaviour {
     [SerializeField] Transform rangerTransform;
     [SerializeField] float timeToCrouch = 0.5f;
     [SerializeField] Vector2 crouchStandScale = new Vector2(0.75f, 1f);
+    [SerializeField] Transform rangeIndicator;
     [SerializeField] HeroModel[] heroes;
     [SerializeField] UnityEvent onHeroLost;
 
-    public Action<Hero> OnSpellClick;
+    public Func<Hero, bool> OnSpellClick;
 
     ThirdPersonController thirdPersonController;
     float currentCrouchTime = 0;
@@ -90,6 +91,11 @@ public class GroupManager : MonoBehaviour {
         }
         if (thirdPersonController == null) { return; }
         thirdPersonController.SetIsCrouched(isCrouched);
+    }
+
+    public void SetRangeIndicator(float rangeScale) {
+        if (rangeIndicator == null) { return; }
+        rangeIndicator.localScale = Vector3.one * rangeScale * 2f;
     }
 
     public List<Hero> GetHeroList() {

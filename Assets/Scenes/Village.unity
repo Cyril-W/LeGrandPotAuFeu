@@ -7610,6 +7610,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
+      propertyPath: range
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: cooldown
       value: 30
       objectReference: {fileID: 0}
@@ -9234,8 +9238,6 @@ MonoBehaviour:
   minValidRandomDistance: 2
   arrowTarget: {fileID: 220524445}
   arrowJumper: {fileID: 1449796586}
-  spellBehavior: {fileID: 1786444352}
-  coolDownOnMiss: 1
   sphereRightColor: {r: 0, g: 1, b: 0, a: 1}
   sphereMiddleColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   sphereWrongColor: {r: 1, g: 0, b: 0, a: 1}
@@ -11523,7 +11525,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1363727258
 Transform:
   m_ObjectHideFlags: 0
@@ -13376,8 +13378,6 @@ MonoBehaviour:
   - {fileID: 1567405712}
   - {fileID: 2128962118}
   minDistanceToJail: 4
-  spellBehavior: {fileID: 891635507}
-  coolDownOnMiss: 1
   sphereColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1697990427 stripped
 MonoBehaviour:
@@ -14081,6 +14081,10 @@ PrefabInstance:
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: hero
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
+      propertyPath: range
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: cooldown
@@ -17312,12 +17316,16 @@ PrefabInstance:
       objectReference: {fileID: 6966995812159601601}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[2].Saved
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[3].Model
       value: 
       objectReference: {fileID: 6966995812159601602}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[3].Saved
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[0].HeroName
       value: Ranger
@@ -17529,6 +17537,18 @@ PrefabInstance:
     - target: {fileID: 7100605137328279087, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: onIntGeneratedEvents.Array.data[2].OnIntEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: SoundEffectData, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 8530832639134785408, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8530832639134785408, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8530832639134785408, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eaec1db876152d247944192fe0bc5156, type: 3}

@@ -46,8 +46,8 @@ public class RangerBehavior : HeroBehavior {
         }
     }
 
-    protected override void OverrideDoSpell() {
-        Track();
+    protected override bool OverrideDoSpell() {
+        return Track();
     }
 
     void SetThirdPersonControllerEnabled(bool b) {
@@ -56,8 +56,8 @@ public class RangerBehavior : HeroBehavior {
     }
 
     [ContextMenu("Track")]
-    void Track() {
-        if (GroupManager.Instance == null) { return; }
+    bool Track() {
+        if (GroupManager.Instance == null) { return false; }
         var playerPos = GroupManager.Instance.GetPlayerPosition();
         var heroPositions = GroupManager.Instance.GetUnsavedHeroPositions();
         var closestDistance = Mathf.Infinity;
@@ -82,6 +82,7 @@ public class RangerBehavior : HeroBehavior {
                 spriteArrowDirection.enabled = true;
                 currentShowingTime = arrowShowTime;
             }
-        }
+            return true;
+        } else { return false; }
     }
 }

@@ -4,8 +4,6 @@ using UnityEngine;
 public class ThiefBehavior : HeroBehavior {
     [SerializeField] LockedObjectBehavior[] jails;
     [SerializeField] float minDistanceToJail = 4f;
-    [SerializeField] SpellBehavior spellBehavior;
-    [SerializeField] float coolDownOnMiss = 1f;
     [Header("Gizmos")]
     [SerializeField] Color sphereColor = Color.black;
 
@@ -19,16 +17,15 @@ public class ThiefBehavior : HeroBehavior {
 
     void TryFillNull(bool force = false) {
         if (force || jails == null || jails.Length <= 0) { jails = FindObjectsOfType<LockedObjectBehavior>(true); }
-        if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
     }
 
-    protected override void OverrideDoSpell() {        
-        LockPick();
+    protected override bool OverrideDoSpell() {        
+        return LockPick();
     }
 
     [ContextMenu("Lock Pick")]
-    void LockPick() {
-        if (GroupManager.Instance == null) { return; }
+    bool LockPick() {
+        if (GroupManager.Instance == null) { return false; }
         var currentNearestDistance = Mathf.Infinity;
         LockedObjectBehavior currentJail = null;
         var currentDistance = 0f;
@@ -42,9 +39,8 @@ public class ThiefBehavior : HeroBehavior {
         }
         if (currentJail != null) {
             currentJail.LockPickSuccess();
-        } else { 
-            spellBehavior.SetCurrentCooldown(coolDownOnMiss);
-        }
+            return true;
+        } else { return false; }
     }
 
     void OnDrawGizmos() {

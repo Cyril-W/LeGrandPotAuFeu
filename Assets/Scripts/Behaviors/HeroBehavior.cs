@@ -35,14 +35,14 @@ public abstract class HeroBehavior : MonoBehaviour {
         }
     }
 
-    void DoSpell(Hero hero) {
+    bool DoSpell(Hero hero) {
         if (hero == GetHero()) {
             OnSpellClicked?.Invoke();
-            OverrideDoSpell();
-        }
+            return OverrideDoSpell();
+        } else { return false; }
     }
 
-    protected abstract void OverrideDoSpell();
+    protected abstract bool OverrideDoSpell();
 
     public Hero GetHero() {
         return hero;

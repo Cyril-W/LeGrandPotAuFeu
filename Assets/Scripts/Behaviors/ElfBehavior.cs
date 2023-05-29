@@ -13,8 +13,6 @@ public class ElfBehavior : HeroBehavior {
     [SerializeField] float minValidRandomDistance = 0.5f;
     [SerializeField] Transform arrowTarget;
     [SerializeField] TransformJumper arrowJumper;
-    [SerializeField] SpellBehavior spellBehavior;
-    [SerializeField] float coolDownOnMiss = 1f;
     [Header("Gizmos")]
     [SerializeField] Color sphereRightColor = Color.green;
     [SerializeField] Color sphereMiddleColor = Color.yellow;
@@ -36,7 +34,6 @@ public class ElfBehavior : HeroBehavior {
 
     void TryFillNull() {
         if (virtualCamera == null) virtualCamera = FindObjectOfType<CinemachineVirtualCamera>();
-        if (spellBehavior == null) { spellBehavior = FindObjectsOfType<SpellBehavior>().Where(sB => sB.GetHero() == GetHero()).FirstOrDefault(); }
     }
 
     protected override void OnEnable() {
@@ -58,8 +55,8 @@ public class ElfBehavior : HeroBehavior {
         }
     }
 
-    protected override void OverrideDoSpell() {
-        Arrow();
+    protected override bool OverrideDoSpell() {
+        return Arrow();
     }
 
     void SetVision(bool isActivated) {
@@ -72,8 +69,8 @@ public class ElfBehavior : HeroBehavior {
     }
 
     [ContextMenu("Arrow")]
-    void Arrow() {
-        if (GuardsManager.Instance == null || GroupManager.Instance == null) { return; }
+    bool Arrow() {
+        if (GuardsManager.Instance == null || GroupManager.Instance == null) { return false; }
         var playerPos = GroupManager.Instance.GetPlayerPosition();
         var positions = GuardsManager.Instance.GetGuardsPositions();
         var closestDistance = Mathf.Infinity;
@@ -88,7 +85,6 @@ public class ElfBehavior : HeroBehavior {
             }
         }        
         if (closestDistance > 0f && closestDistance < maxRange) {
-            lastPosFound = true;
             if (Random.Range(0f, 100f) <= chancePercentage) {
                 lastArrowHit = true;
                 arrowTarget.position = lastPos + Vector3.up;
@@ -106,10 +102,11 @@ public class ElfBehavior : HeroBehavior {
             arrowJumper.Reset();
             arrowJumper.gameObject.SetActive(true);
             arrowJumper.Jump();
+            lastPosFound = true;
         } else {
             lastPosFound = false;
-            spellBehavior.SetCurrentCooldown(coolDownOnMiss);
         }
+        return lastPosFound;
     }
 
     public void TryKillLastGuard() {
