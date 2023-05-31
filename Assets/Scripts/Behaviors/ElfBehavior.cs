@@ -1,6 +1,5 @@
 using UnityEngine;
 using Cinemachine;
-using System.Linq;
 
 public class ElfBehavior : HeroBehavior {
     [SerializeField] CinemachineVirtualCamera virtualCamera;

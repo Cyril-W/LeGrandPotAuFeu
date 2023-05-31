@@ -10,7 +10,7 @@ public abstract class HeroBehavior : MonoBehaviour {
 
     protected virtual void OnEnable() {
         if (GroupManager.Instance != null) {
-            GroupManager.Instance.OnSpellClick += DoSpell;
+            GroupManager.Instance.RegisterHero(hero, DoSpell);
             registered = true;
         } else {
             Debug.LogWarning("No GroupManager.Instance to register " + hero);
@@ -20,7 +20,7 @@ public abstract class HeroBehavior : MonoBehaviour {
 
     protected virtual void OnDisable() {
         if (GroupManager.Instance != null) {
-            GroupManager.Instance.OnSpellClick -= DoSpell;
+            GroupManager.Instance.UnregisterHero(hero);
             registered = false;
         } else {
             Debug.LogWarning("No GroupManager.Instance to unregister " + hero);
@@ -30,16 +30,16 @@ public abstract class HeroBehavior : MonoBehaviour {
     protected virtual void FixedUpdate() {
         if (!registered) {
             Debug.LogWarning("FixedUpdate register of " + hero);
-            GroupManager.Instance.OnSpellClick += DoSpell;
+            GroupManager.Instance.RegisterHero(hero, DoSpell);
             registered = true;
         }
     }
 
-    bool DoSpell(Hero hero) {
-        if (hero == GetHero()) {
+    bool DoSpell() {
+        //if (hero == GetHero()) {
             OnSpellClicked?.Invoke();
             return OverrideDoSpell();
-        } else { return false; }
+        //} else { return false; }
     }
 
     protected abstract bool OverrideDoSpell();

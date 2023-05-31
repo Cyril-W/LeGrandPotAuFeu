@@ -44,18 +44,9 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void OnSpellClick() {
         spellButton.interactable = false;
-        if (!currentIsSaved) { return; }        
+        if (!currentIsSaved || currentCooldown > 0f) { return; }        
         if (GroupManager.Instance != null) { 
-            if (GroupManager.Instance.OnSpellClick.GetInvocationList().Length > 0) {
-                if (GroupManager.Instance.OnSpellClick.Invoke(hero)) {
-                    currentCooldown = cooldown;
-                } else {
-                    currentCooldown = missedCooldown;
-                }
-            } else {
-                Debug.LogWarning("Too few function are registered in GroupManager.OnSpellClick (" + GroupManager.Instance.OnSpellClick.GetInvocationList().Length + ")");
-                currentCooldown = missedCooldown;
-            }
+            currentCooldown = GroupManager.Instance.CallHeroSpell(hero) ? cooldown : missedCooldown; 
         } else {
             Debug.LogError("GroupManager is null");
             currentCooldown = missedCooldown;

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class WitchBehavior : HeroBehavior {
+    [SerializeField, Range(0, 100)] float chancePercentage = 75f;
+    [SerializeField] float sheepDuration = 2f;
     [SerializeField] float teleportationDuration = 1f;
     [SerializeField] Collider[] collidersToAvoid;
     [SerializeField, Layer] int obstacleLayer = 3;
@@ -75,12 +77,18 @@ public class WitchBehavior : HeroBehavior {
     [ContextMenu("Teleport")]
     bool Teleport() {
         if (GroupManager.Instance == null) { return false; }
-        currentTeleportTime = teleportationDuration;
         SetThirdPersonControllerEnabled(false);
-        GetTeleportPoints();
-        if (teleportPoints.Count <= 0) { return false; }
-        GroupManager.Instance.SetPlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
-        return true;
+        if (Random.Range(0f, 100f) <= chancePercentage) {            
+            currentTeleportTime = teleportationDuration;
+            GetTeleportPoints();
+            if (teleportPoints.Count <= 0) { return false; }
+            GroupManager.Instance.SetPlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
+            return true;
+        } else {
+            currentTeleportTime = sheepDuration;
+            GroupManager.Instance.SetSheep(sheepDuration);
+            return false;            
+        }
     }
 
     void SetThirdPersonControllerEnabled(bool b) {

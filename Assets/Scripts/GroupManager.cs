@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Linq;
-using System;
 using UnityEngine.Events;
 using System.Collections.Generic;
 
@@ -21,6 +20,7 @@ public class GroupManager : MonoBehaviour {
         [HideInInspector] public string HeroName;
         public Hero Hero;
         public GameObject Model;
+        public GameObject Sheep;
         public SpellBehavior SpellBehavior;
         public HeroBehavior HeroBehavior;
         public bool Saved = false;
@@ -35,10 +35,10 @@ public class GroupManager : MonoBehaviour {
     [SerializeField] HeroModel[] heroes;
     [SerializeField] UnityEvent onHeroLost;
 
-    public Func<Hero, bool> OnSpellClick;
+    Dictionary<Hero, System.Func<bool>> onSpellClick = new Dictionary<Hero, System.Func<bool>>();
 
     ThirdPersonController thirdPersonController;
-    float currentCrouchTime = 0;
+    float currentCrouchTime = 0, currentSheepDuration = 0f;
     int numberHeroSaved = 0;
 
     void Awake() {
@@ -53,10 +53,17 @@ public class GroupManager : MonoBehaviour {
 
     void Start() {
         if (thirdPersonController == null) { thirdPersonController = GetComponent<ThirdPersonController>(); }
+        onSpellClick.Clear();
         UpdateHeroes();
     }
 
     void FixedUpdate() {
+        if (currentSheepDuration > 0f) {
+            currentSheepDuration -= Time.deltaTime;
+            if (currentSheepDuration <= 0f) {
+                UpdateSheepsAndModels(false);
+            }
+        }
         if (currentCrouchTime > 0f && ((DestinyManager.Instance != null && DestinyManager.Instance.AnyTrackingGuard()) || (LevelManager.Instance != null && LevelManager.Instance.IsPaused))) { Crouch(false); return; }
         if (currentCrouchTime > 0f) {            
             currentCrouchTime -= Time.deltaTime;
@@ -68,6 +75,24 @@ public class GroupManager : MonoBehaviour {
         }
     }
 
+    public void RegisterHero(Hero hero, System.Func<bool> heroSpell) {
+        if (onSpellClick.ContainsKey(hero)) { return; }
+        onSpellClick.Add(hero, heroSpell);
+    }
+
+    public void UnregisterHero(Hero hero) {
+        if (!onSpellClick.ContainsKey(hero)) { return; }
+        onSpellClick.Remove(hero);
+    }
+
+    public bool CallHeroSpell(Hero hero) {
+        if (!onSpellClick.ContainsKey(hero)) {
+            Debug.LogError("No HeroSpell function registered for " + hero);
+            return false;
+        }
+        return onSpellClick[hero]();
+    }
+
     [ContextMenu("Update Heroes")]
     void UpdateHeroes() {
         numberHeroSaved = 0;
@@ -76,6 +101,20 @@ public class GroupManager : MonoBehaviour {
             if (h.Saved) {
                 if (BarbarianManager.Instance != null) { BarbarianManager.Instance.SaveHero(h.Hero); }
                 numberHeroSaved++;
+            }
+        }
+    }
+
+    public void SetSheep(float duration) {
+        currentSheepDuration = duration;
+        UpdateSheepsAndModels(true);
+    }
+
+    void UpdateSheepsAndModels(bool isSheep) {
+        foreach (var h in heroes) {
+            if (h.Model && h.Sheep) { 
+                h.Model.SetActive(h.Saved && !isSheep);
+                h.Sheep.SetActive(h.Saved && isSheep);
             }
         }
     }

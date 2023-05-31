@@ -1668,6 +1668,11 @@ Transform:
   m_Father: {fileID: 1150449920}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &126649172 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5017791690773358094, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &128575452
 GameObject:
   m_ObjectHideFlags: 0
@@ -2620,6 +2625,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  chancePercentage: 75
+  sheepDuration: 2
   teleportationDuration: 1.5
   collidersToAvoid:
   - {fileID: 818617461}
@@ -5340,11 +5347,6 @@ BoxCollider:
   m_CorrespondingSourceObject: {fileID: 3667267683928027553, guid: eac21be0ce240ab4bacdd6e2b0e66e56, type: 3}
   m_PrefabInstance: {fileID: 452571794}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &571631574 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6131285279943982993, guid: eaec1db876152d247944192fe0bc5156, type: 3}
-  m_PrefabInstance: {fileID: 6966995812159601600}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &573403750
 GameObject:
   m_ObjectHideFlags: 0
@@ -7987,11 +7989,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &953950621 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1748481472, guid: eaec1db876152d247944192fe0bc5156, type: 3}
-  m_PrefabInstance: {fileID: 6966995812159601600}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &954419782
 GameObject:
   m_ObjectHideFlags: 3
@@ -11525,7 +11522,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1363727258
 Transform:
   m_ObjectHideFlags: 0
@@ -12788,6 +12785,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50f2b1711f186f749b0cfcc0a0cdf79f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1575155980 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8166786683697186490, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1577286673
 GameObject:
   m_ObjectHideFlags: 0
@@ -17297,35 +17299,51 @@ PrefabInstance:
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[0].Model
       value: 
-      objectReference: {fileID: 571631574}
+      objectReference: {fileID: 6966995812159601608}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[0].Saved
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[0].Sheep
+      value: 
+      objectReference: {fileID: 6966995812159601607}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[1].Model
       value: 
-      objectReference: {fileID: 953950621}
+      objectReference: {fileID: 6966995812159601606}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[1].Saved
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[1].Sheep
+      value: 
+      objectReference: {fileID: 6966995812159601605}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[2].Model
       value: 
-      objectReference: {fileID: 6966995812159601601}
+      objectReference: {fileID: 6966995812159601604}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[2].Saved
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[2].Sheep
+      value: 
+      objectReference: {fileID: 6966995812159601603}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[3].Model
       value: 
-      objectReference: {fileID: 6966995812159601602}
+      objectReference: {fileID: 1575155980}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[3].Saved
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[3].Sheep
+      value: 
+      objectReference: {fileID: 126649172}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[0].HeroName
       value: Ranger
@@ -17417,6 +17435,10 @@ PrefabInstance:
     - target: {fileID: 6966995812720158144, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: m_Name
       value: Ranger (Player)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6966995812720158144, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6966995812720158146, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: m_RootOrder
@@ -17552,14 +17574,34 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eaec1db876152d247944192fe0bc5156, type: 3}
---- !u!1 &6966995812159601601 stripped
+--- !u!1 &6966995812159601603 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 1680165402224276819, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_CorrespondingSourceObject: {fileID: 4340916201092490232, guid: eaec1db876152d247944192fe0bc5156, type: 3}
   m_PrefabInstance: {fileID: 6966995812159601600}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6966995812159601602 stripped
+--- !u!1 &6966995812159601604 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 5253439849470122899, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_CorrespondingSourceObject: {fileID: 564352610049378429, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6966995812159601605 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 529916590665683983, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6966995812159601606 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6893595310894359971, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6966995812159601607 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 126374137098488889, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+  m_PrefabInstance: {fileID: 6966995812159601600}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6966995812159601608 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1499480082504137620, guid: eaec1db876152d247944192fe0bc5156, type: 3}
   m_PrefabInstance: {fileID: 6966995812159601600}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8094479955544848499
@@ -17678,6 +17720,10 @@ PrefabInstance:
       value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
+      propertyPath: cooldown
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: heroName
       value: La Magicienne
       objectReference: {fileID: 0}
@@ -17688,6 +17734,10 @@ PrefabInstance:
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: spellName
       value: "T\xE9l\xE9portation"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
+      propertyPath: missedCooldown
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3394867304524689312, guid: 5fa1128aec05a2a4ab8810b8969bd096, type: 3}
       propertyPath: spellDescription
