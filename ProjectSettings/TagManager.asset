@@ -35,7 +35,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Player
   - Enemies
   m_SortingLayers:
   - name: Default

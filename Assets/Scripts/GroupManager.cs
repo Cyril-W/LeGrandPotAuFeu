@@ -23,6 +23,7 @@ public class GroupManager : MonoBehaviour {
         public GameObject Sheep;
         public SpellBehavior SpellBehavior;
         public HeroBehavior HeroBehavior;
+        public SteeringBehavior SteeringBehavior;
         public bool Saved = false;
     }
 
@@ -71,6 +72,9 @@ public class GroupManager : MonoBehaviour {
             if (rangerTransform != null) { rangerTransform.localScale = new Vector3(crouchStandScale.y, newScale, crouchStandScale.y); }
             if (currentCrouchTime <= 0f) {
                 if (GuardsManager.Instance != null) { GuardsManager.Instance.SetGuardsVisionOffset(true); }
+                foreach (var h in heroes) {
+                    if (h.SteeringBehavior != null) { h.SteeringBehavior.SetIsCrouched(true); }
+                }
             }
         }
     }
@@ -112,9 +116,12 @@ public class GroupManager : MonoBehaviour {
 
     void UpdateSheepsAndModels(bool isSheep) {
         foreach (var h in heroes) {
-            if (h.Model && h.Sheep) { 
-                h.Model.SetActive(h.Saved && !isSheep);
-                h.Sheep.SetActive(h.Saved && isSheep);
+            if (h.SteeringBehavior) {
+                h.SteeringBehavior.gameObject.SetActive(h.Saved);
+            }
+            if (h.Saved && h.Model && h.Sheep) { 
+                h.Model.SetActive(!isSheep);
+                h.Sheep.SetActive(isSheep);
             }
         }
     }
@@ -130,6 +137,11 @@ public class GroupManager : MonoBehaviour {
         }
         if (thirdPersonController == null) { return; }
         thirdPersonController.SetIsCrouched(isCrouched);
+        if (!isCrouched) {
+            foreach (var h in heroes) {
+                if (h.SteeringBehavior != null) { h.SteeringBehavior.SetIsCrouched(isCrouched); }
+            }
+        }
     }
 
     public void SetRangeIndicator(float rangeScale) {
@@ -171,6 +183,15 @@ public class GroupManager : MonoBehaviour {
         return thirdPersonController;
     }
 
+    public void HitGroup(Vector3 position) {
+        foreach (var hero in heroes) {
+            if (hero.SteeringBehavior != null) {
+                hero.SteeringBehavior.GetHit(position);
+            }
+        }
+        if (thirdPersonController != null) { thirdPersonController.GetHit(position); }
+    }
+
     public void SaveHero(Hero hero) {
         if (heroes.Any(h => h.Hero == hero)) {
             var savedHero = heroes.Where(h => h.Hero == hero).FirstOrDefault();
@@ -178,13 +199,23 @@ public class GroupManager : MonoBehaviour {
         }
     }
 
+    public bool LoseMember(Hero hero) {
+        if (hero == Hero.Ranger) { return false; }
+        var savedHeroes = heroes.Where(h => h.Hero == hero && h.Saved);
+        if (savedHeroes == null || savedHeroes.Count() <= 0) { return false; }
+        return LoseHero(savedHeroes.ElementAt(0));
+    }
+
     public bool LoseRandomMember() {
         var savedHeroes = heroes.Where(h => h.Hero != Hero.Ranger && h.Saved);
         if (savedHeroes == null || savedHeroes.Count() <= 0) { return false;}
-        var lostHero = savedHeroes.ElementAt(UnityEngine.Random.Range(0, savedHeroes.Count()));
-        if (lostHero != null) { 
-            lostHero.Saved = false;
-            UpdateHero(lostHero);
+        return LoseHero(savedHeroes.ElementAt(Random.Range(0, savedHeroes.Count())));        
+    }
+
+    bool LoseHero(HeroModel heroModel) {
+        if (heroModel != null) {
+            heroModel.Saved = false;
+            UpdateHero(heroModel);
             if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.HideTooltip(); }
             onHeroLost?.Invoke();
             return true;
@@ -192,7 +223,13 @@ public class GroupManager : MonoBehaviour {
     }
 
     void UpdateHero(HeroModel hero) {
-        if (hero.Model != null) { hero.Model.SetActive(hero.Saved); }
+        if (hero.SteeringBehavior) {
+            hero.SteeringBehavior.gameObject.SetActive(hero.Saved);
+        }
+        if (hero.Saved && hero.Model && hero.Sheep) {
+            hero.Model.SetActive(true);
+            hero.Sheep.SetActive(false);
+        }
         if (hero.SpellBehavior != null) { hero.SpellBehavior.SetSaved(hero.Saved); }
         if (hero.HeroBehavior != null) {
             hero.HeroBehavior.enabled = hero.Saved;

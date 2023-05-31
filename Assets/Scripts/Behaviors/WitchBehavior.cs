@@ -133,7 +133,7 @@ public class WitchBehavior : HeroBehavior {
         }
     }
 
-    void OnDrawGizmos() {
+    void OnDrawGizmosSelected() {
         Gizmos.color = teleportSphereColor;
         foreach (var teleportPoint in teleportPoints) {
             Gizmos.DrawSphere(teleportPoint, teleportSphereSize);

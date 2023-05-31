@@ -36,6 +36,7 @@ public class GuardBehavior : MonoBehaviour {
     [SerializeField, Range(0.1f, 100f)] float visionLength = 1f;
     [SerializeField] float visionProximity = 0.3f;
     [SerializeField] float visionOffset = 1f;
+    [SerializeField, Range(0, 1)] float visionRatio = 1f;
     [SerializeField] LayerMask viewMask;
     [SerializeField] float detectionTime = 2f;
     [SerializeField] float detectionDistance = 0.5f;
@@ -117,7 +118,7 @@ public class GuardBehavior : MonoBehaviour {
             coneViewMeshFilter.mesh = viewMesh;
         }
         if (coneViewMeshRenderer != null) { coneViewMaterial = coneViewMeshRenderer.material; }
-        if (coneViewMaterial != null) { coneViewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, visionLength + 1f); }
+        if (coneViewMaterial != null) { coneViewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, (visionLength * visionRatio) + 1f); }
         if (circleViewMeshRenderer != null) { 
             circleViewMaterial = circleViewMeshRenderer.material;
             circleViewMeshRenderer.transform.localScale = new Vector3(visionProximity * 2f, 0.01f, visionProximity * 2f);
@@ -187,6 +188,11 @@ public class GuardBehavior : MonoBehaviour {
         visionOffset = newVisionOffset;
     }
 
+    public void SetGuardVisionRatio(float newVisionRatio) {
+        visionRatio = Mathf.Clamp01(newVisionRatio);
+        if (coneViewMaterial != null) { coneViewMaterial.SetFloat(MATERIAL_FLOAT_VISIONLENGTH, (visionLength * visionRatio) + 1f); }
+    }
+
     void PopulateWaypoints() {
         if (waypointsHolder == null || waypointsHolder.childCount <= 0) return;
 
@@ -229,7 +235,7 @@ public class GuardBehavior : MonoBehaviour {
         if (player == null) return false;
         offsetGuardPosition = guardTransform.position + Vector3.up * visionOffset;
         offsetPlayerPosition = player.position + Vector3.up * visionOffset;
-        if (Vector3.Distance(offsetGuardPosition, offsetPlayerPosition) <= visionLength) {
+        if (Vector3.Distance(offsetGuardPosition, offsetPlayerPosition) <= (visionLength * visionRatio)) {
             if (Vector3.Distance(offsetGuardPosition, offsetPlayerPosition) <= visionProximity || Vector3.Angle(guardTransform.forward, (offsetPlayerPosition - offsetGuardPosition).normalized) <= (visionAngle / 2f)) {
                 if (!Physics.Linecast(offsetGuardPosition, offsetPlayerPosition, viewMask)) {
                     Debug.DrawLine(offsetGuardPosition, offsetPlayerPosition, Color.red);
@@ -244,7 +250,7 @@ public class GuardBehavior : MonoBehaviour {
         if (guardTransform == null || guardRigidbody == null) return;
         currentDistance = Vector3.Distance(offsetGuardPosition, offsetPlayerPosition);
         if (playerSpotted) {
-            if (DestinyManager.Instance != null) { DestinyManager.Instance.DestinyTimeScale(this, 1f - Mathf.Clamp01(currentDistance / (visionLength - detectionDistance))); }
+            if (DestinyManager.Instance != null) { DestinyManager.Instance.DestinyTimeScale(this, 1f - Mathf.Clamp01(currentDistance / ((visionLength * visionRatio) - detectionDistance))); }
             if (currentDistance <= detectionDistance) {
                 if (GroupManager.Instance != null && !GroupManager.Instance.LoseRandomMember()) {
                     if (DestinyManager.Instance != null) { DestinyManager.Instance.DestinyPointLose(this); }
@@ -364,7 +370,7 @@ public class GuardBehavior : MonoBehaviour {
 
     ViewCastInfo ViewCast(float angle) {
         RaycastHit hit;
-        var targetPos = offsetGuardPosition + GetCartesianFromPolar(visionLength, angle);
+        var targetPos = offsetGuardPosition + GetCartesianFromPolar((visionLength * visionRatio), angle);
         if (Physics.Linecast(offsetGuardPosition, targetPos, out hit, viewMask)) {
             return new ViewCastInfo(true, hit.point, hit.distance, angle);
         } else {
@@ -388,11 +394,11 @@ public class GuardBehavior : MonoBehaviour {
                 Gizmos.DrawSphere(viewPoint, gizmosSphereSize);
             }            
             Gizmos.color = targetLineColor;
-            if (rayNumber == 0 || rayNumber == 1) Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar(visionLength, 0f));
+            if (rayNumber == 0 || rayNumber == 1) Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar((visionLength * visionRatio), 0f));
             else {
                 for (int i = 0; i < rayNumber; i++) {
                     var angle = (-visionAngle / 2f) + i * (visionAngle / (rayNumber - 1));
-                    Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar(visionLength, angle));
+                    Gizmos.DrawLine(guardPos, guardPos + GetCartesianFromPolar((visionLength * visionRatio), angle));
                 }
             }
         }

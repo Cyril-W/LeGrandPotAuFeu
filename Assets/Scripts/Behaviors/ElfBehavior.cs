@@ -114,8 +114,8 @@ public class ElfBehavior : HeroBehavior {
         arrowJumper.gameObject.SetActive(false);
     }
 
-    void OnDrawGizmos() {
-        if (GroupManager.Instance == null) { return; }
+    void OnDrawGizmosSelected() {
+        if (!isActiveAndEnabled || GroupManager.Instance == null) { return; }
         Gizmos.color = lastPosFound ? (lastArrowHit ? sphereRightColor : sphereMiddleColor) : sphereWrongColor;
         Gizmos.DrawWireSphere(GroupManager.Instance.GetPlayerPosition(), maxRange);
         Gizmos.color = spherePositionColor;

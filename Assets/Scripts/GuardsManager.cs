@@ -6,6 +6,7 @@ public class GuardsManager : MonoBehaviour {
 
     [SerializeField] GuardBehavior[] guards;
     [SerializeField] Vector2 crouchStandVisionOffset = new Vector2(0.25f, 1f);
+    [SerializeField] Vector2 offOnVisionRatio = new Vector2(0.5f, 1f);
 
     void Awake() {
         if (Instance == null || Instance != this) { Instance = this; }
@@ -34,6 +35,12 @@ public class GuardsManager : MonoBehaviour {
     public void SetGuardsVisionOffset(bool isCrouching) {
         foreach (var guard in guards) {
             guard.SetGuardOffsetVision(isCrouching ? crouchStandVisionOffset.x : crouchStandVisionOffset.y);
+        }
+    }
+
+    public void SetGuardsVisionRatio(bool isActive) {
+        foreach (var guard in guards) {
+            guard.SetGuardVisionRatio(isActive ? offOnVisionRatio.x : offOnVisionRatio.y);
         }
     }
 

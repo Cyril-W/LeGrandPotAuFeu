@@ -593,6 +593,7 @@ MonoBehaviour:
   visionLength: 15
   visionProximity: 3
   visionOffset: 1.25
+  visionRatio: 1
   viewMask:
     serializedVersion: 2
     m_Bits: 64
