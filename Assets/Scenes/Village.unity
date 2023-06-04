@@ -7173,11 +7173,18 @@ MonoBehaviour:
   crouchStandScale: {x: 0.75, y: 1}
   turnSmoothTime: 0.1
   transformTarget: {fileID: 1271154500}
+  maxTargetRange: 10
   minMaxDistanceToTarget: {x: 0.5, y: 1.5}
   minMaxDistanceToObstacles: {x: 0.5, y: 2}
   directionLineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   goodLineColor: {r: 0, g: 1, b: 0, a: 0.5019608}
   badLineColor: {r: 1, g: 0, b: 0, a: 0.5019608}
+  targetColor: {r: 1, g: 0, b: 1, a: 1}
+  targetSphereSize: 0.1
+  showTargetRange: 1
+  showObstacleRange: 0
+  showTarget: 0
+  showObstacles: 0
   rayOffset: 0.25
   timeBetweenSteps: 0.4
   onFootStep:
@@ -7287,11 +7294,18 @@ MonoBehaviour:
   crouchStandScale: {x: 0.75, y: 1}
   turnSmoothTime: 0.1
   transformTarget: {fileID: 1047880488}
+  maxTargetRange: 10
   minMaxDistanceToTarget: {x: 0.5, y: 1.5}
   minMaxDistanceToObstacles: {x: 0.5, y: 2}
   directionLineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   goodLineColor: {r: 0, g: 1, b: 0, a: 0.5019608}
   badLineColor: {r: 1, g: 0, b: 0, a: 0.5019608}
+  targetColor: {r: 1, g: 0, b: 1, a: 1}
+  targetSphereSize: 0.1
+  showTargetRange: 1
+  showObstacleRange: 0
+  showTarget: 0
+  showObstacles: 0
   rayOffset: 0.25
   timeBetweenSteps: 0.4
   onFootStep:
@@ -14383,11 +14397,18 @@ MonoBehaviour:
   crouchStandScale: {x: 0.75, y: 1}
   turnSmoothTime: 0.1
   transformTarget: {fileID: 930735146}
+  maxTargetRange: 10
   minMaxDistanceToTarget: {x: 0.5, y: 1.5}
   minMaxDistanceToObstacles: {x: 0.5, y: 2}
   directionLineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   goodLineColor: {r: 0, g: 1, b: 0, a: 0.5019608}
   badLineColor: {r: 1, g: 0, b: 0, a: 0.5019608}
+  targetColor: {r: 1, g: 0, b: 1, a: 1}
+  targetSphereSize: 0.1
+  showTargetRange: 1
+  showObstacleRange: 0
+  showTarget: 0
+  showObstacles: 0
   rayOffset: 0.32
   timeBetweenSteps: 0.4
   onFootStep:

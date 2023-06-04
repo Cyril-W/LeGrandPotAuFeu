@@ -46,6 +46,16 @@ public class SteeringManager : MonoBehaviour {
         return false;
     }
 
+    public bool RaycastHitAnyObstacle(Ray ray, float maxDistance) {
+        var layerMask = 1 << obstacleLayer;
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, maxDistance, layerMask)) {
+            //Debug.Log(hit.collider.gameObject.name);
+            return true;
+        }
+        return false;
+    }
+
     Vector3[] GetActiveSteeringBehaviorsPosition() {
         var positions = new List<Vector3>();
         foreach (var sB in steeringBehaviors) {
@@ -66,25 +76,27 @@ public class SteeringManager : MonoBehaviour {
 
     public bool GetClosestCollision(SteeringBehavior sB, Vector3 position, Vector3 direction, float maxDistance, out Vector3 collision) {
         collision = position;
-
         /*int layerMask = 1 << obstacleLayer;
         RaycastHit hit;
         if (Physics.Raycast(position, direction, out hit, maxDistance, layerMask)) {
             return hit.point;
         }*/
-
-        // check for other steering behaviors
-        var positions = GetActiveSteeringBehaviorsPosition();
+        var positions = new List<Vector3>(GetActiveSteeringBehaviorsPosition());
+        foreach (var coll in collidersToAvoid) {
+            positions.Add(coll.ClosestPointOnBounds(position));
+        }
         var closestDistance = Mathf.Infinity;
         var highestDot = 0f;
         var currentId = -1;
-        for (int i = 0; i < positions.Length; i++) {
+        float currentDistance, currentDot;
+        Vector3 currentDirectionNormalized;
+        for (int i = 0; i < positions.Count; i++) {
             if (i == System.Array.IndexOf(steeringBehaviors, sB)) { continue; }
             var sBPos = positions[i];
-            var currentDistance = Vector3.Distance(position, sBPos);
+            currentDistance = Vector3.Distance(position, sBPos);
             if (currentDistance <= maxDistance) {
-                var currentDirectionNormalized = (sBPos - position).normalized;
-                var currentDot = Vector3.Dot(currentDirectionNormalized, direction);
+                currentDirectionNormalized = (sBPos - position).normalized;
+                currentDot = Vector3.Dot(currentDirectionNormalized, direction);
                 if (currentDot >= 0 && currentDot > highestDot && currentDistance < closestDistance) {
                     highestDot = currentDot;
                     closestDistance = currentDistance;
@@ -96,10 +108,6 @@ public class SteeringManager : MonoBehaviour {
             collision = positions[currentId];
             return true;
         }
-
-        // check for obstacles
-        // get closest point of bounds, direction = this point - transform
-
         return false;
     }
 }

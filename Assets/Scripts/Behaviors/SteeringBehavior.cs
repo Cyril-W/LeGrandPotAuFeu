@@ -12,11 +12,18 @@ public class SteeringBehavior : MonoBehaviour {
     [SerializeField] Vector2 crouchStandScale = new Vector2(0.75f, 1f);
     [SerializeField] float turnSmoothTime = 0.1f;
     [SerializeField] Transform transformTarget;
+    [SerializeField] float maxTargetRange = 10f;
     [SerializeField] Vector2 minMaxDistanceToTarget = new Vector2(0.25f, 0.5f);
     [SerializeField] Vector2 minMaxDistanceToObstacles = new Vector2(0.5f, 2f);
     [SerializeField] Color directionLineColor = Color.yellow;
     [SerializeField] Color goodLineColor = Color.green;
     [SerializeField] Color badLineColor = Color.red;
+    [SerializeField] Color targetColor = Color.magenta;
+    [SerializeField] float targetSphereSize = 0.1f;
+    [SerializeField] bool showTargetRange = false;
+    [SerializeField] bool showObstacleRange = false;
+    [SerializeField] bool showTarget = false;
+    [SerializeField] bool showObstacles = false;
     [SerializeField] float rayOffset = 0.25f;
     [SerializeField] float timeBetweenSteps = 0.4f;
     [SerializeField] UnityEvent onFootStep;
@@ -26,14 +33,15 @@ public class SteeringBehavior : MonoBehaviour {
         new Vector3(0, 0, -1), new Vector3(-1, 0, -1), new Vector3(-1, 0, 0), new Vector3(-1, 0, 1)
     };
     Vector3[] closestDirectionalCollision = new Vector3[8];
-    Vector3 currentDirection, directionToTargetNormalized, directionToObstacleNormalized;
+    Vector3 currentDirection, directionToTargetNormalized, directionToObstacleNormalized, lastTarget;
+    Ray ray;
     bool[] displayClosestDirectionalCollision = new bool[8];
     float[] interests = new float[8];
     float[] dangers = new float[8];
     float[] results = new float[8];
     float currentTimeBetweenUpdate = 0f, currentTimeBetweenSteps = 0f, currentTimeBetweenHits = 0f;
-    float turnSmoothVelocity, targetAngle, angle, collisionDistance, collisionDistanceRatio, targetDistanceRatio, targetDistance;
-    bool isCrouched = false, hasHit = true;
+    float turnSmoothVelocity, targetAngle, angle, collisionDistance, collisionDistanceRatio, targetDistanceRatio, targetDistance, lastRaycastMaxDistance;
+    bool isCrouched = false, hasHit = true, lastRaycast = false;
 
     void OnValidate() {
         TryFillNull();
@@ -53,6 +61,20 @@ public class SteeringBehavior : MonoBehaviour {
         if (steeringRb != null) {
             steeringRb.MovePosition(transformTarget.position);
         }
+        CheckTarget();
+    }
+
+    void CheckTarget() {
+        if (transformTarget == null || steeringRb == null) { return; }
+        if (Vector3.Distance(steeringRb.position, transformTarget.position) > maxTargetRange) { return; }
+        if (SteeringManager.Instance != null) {
+            ray = new Ray(steeringRb.position + Vector3.up * 0.5f, transformTarget.position - steeringRb.position);
+            lastRaycastMaxDistance = Vector3.Distance(transformTarget.position, steeringRb.position);
+            lastRaycast = SteeringManager.Instance.RaycastHitAnyObstacle(ray, lastRaycastMaxDistance);
+            if (lastRaycast) { return; }
+        }
+        lastTarget = transformTarget.position;
+        
     }
 
     void TryFillNull() {
@@ -67,6 +89,7 @@ public class SteeringBehavior : MonoBehaviour {
         if (currentTimeBetweenUpdate > 0f) {
             currentTimeBetweenUpdate -= Time.deltaTime;
             if (currentTimeBetweenUpdate <= 0f) {
+                CheckTarget();
                 CheckDirections();               
                 currentTimeBetweenUpdate = timeBetweenUpdates;
             }
@@ -94,9 +117,9 @@ public class SteeringBehavior : MonoBehaviour {
 
     void CheckDirections() {
         if (steeringRb == null) { return; }
-        directionToTargetNormalized = (transformTarget.position - steeringRb.position).normalized;
+        directionToTargetNormalized = (lastTarget - steeringRb.position).normalized;
         currentDirection = Vector3.zero;
-        targetDistance = Vector3.Distance(transformTarget.position, steeringRb.position);
+        targetDistance = Vector3.Distance(lastTarget, steeringRb.position);
         targetDistanceRatio = targetDistance >= minMaxDistanceToTarget.y ? 1 : Mathf.Clamp01((targetDistance - minMaxDistanceToTarget.x) / (minMaxDistanceToTarget.y - minMaxDistanceToTarget.x)); // 0 = between 0 and min, 0-1 = between min and max, 1 = beyond max
         Vector3 closestCollision;
         for (int i = 0; i < directions.Length; i++) {
@@ -108,7 +131,9 @@ public class SteeringBehavior : MonoBehaviour {
                     collisionDistance = Vector3.Distance(closestCollision, steeringRb.position);
                     collisionDistanceRatio = collisionDistance <= minMaxDistanceToObstacles.x ? 1 : Mathf.Clamp01((minMaxDistanceToObstacles.y - collisionDistance) / minMaxDistanceToObstacles.y); // 1 = too close, 0 = too far away, 1-0 = between min and max
                     directionToObstacleNormalized = (closestCollision - steeringRb.position).normalized;
-                    dangers[i] = Mathf.Clamp01(Vector3.Dot(directionToObstacleNormalized, directions[i]) * collisionDistanceRatio); // 0 = too far or side or back, 1 = in front or too close
+                    //var shapedDot = 1f - Mathf.Abs(Vector3.Dot(directionToObstacleNormalized, directions[i]) - 0.65f); // Removes the front and favors the side
+                    var shapedDot = Vector3.Dot(directionToObstacleNormalized, directions[i]);
+                    dangers[i] = Mathf.Clamp01(shapedDot * collisionDistanceRatio); // 0 = too far or side or back, 1 = in front or too close
                 } else {
                     dangers[i] = 0f;
                     displayClosestDirectionalCollision[i] = false;
@@ -117,6 +142,7 @@ public class SteeringBehavior : MonoBehaviour {
                 dangers[i] = 0f;
             }
             results[i] = interests[i] - dangers[i];
+            //currentDirection += Mathf.Clamp01(results[i]) * directions[i];
             currentDirection += results[i] * directions[i];
         }
         currentDirection /= directions.Length;
@@ -124,9 +150,9 @@ public class SteeringBehavior : MonoBehaviour {
     }
 
     void Move() {
-        if (steeringRb == null || currentDirection.magnitude < 0.05f) { return; }
+        if (steeringRb == null /*|| currentDirection.magnitude < 0.05f*/) { return; }
         steeringRb.MovePosition(steeringRb.position + currentDirection * speed * (isCrouched ? crouchSpeedRatio : 1f) * Time.deltaTime);
-        if (currentDirection.magnitude < 0.1f) { return; }
+        if (currentDirection.magnitude < 0.05f) { return; }
         targetAngle = Mathf.Atan2(currentDirection.x, currentDirection.z) * Mathf.Rad2Deg;
         angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
         steeringRb.MoveRotation(Quaternion.Euler(0f, angle, 0f));
@@ -162,16 +188,31 @@ public class SteeringBehavior : MonoBehaviour {
 
     void OnDrawGizmosSelected() {
         if (steeringRb == null || transformTarget == null) { return; }
-        Gizmos.color = goodLineColor;
-        Gizmos.DrawSphere(transformTarget.position, minMaxDistanceToTarget.x);
-        Gizmos.DrawWireSphere(transformTarget.position, minMaxDistanceToTarget.y);
-        Gizmos.color = directionLineColor;
-        Gizmos.DrawWireSphere(steeringRb.position, minMaxDistanceToObstacles.y);
-        Gizmos.color = badLineColor;
-        for (int i = 0; i < closestDirectionalCollision.Length; i++) {
-            if (displayClosestDirectionalCollision[i]) {
-                Gizmos.DrawSphere(closestDirectionalCollision[i], minMaxDistanceToObstacles.x);
-                Gizmos.DrawWireSphere(closestDirectionalCollision[i], minMaxDistanceToObstacles.y);
+        if (showTargetRange) {
+            Gizmos.color = targetColor;
+            Gizmos.DrawWireSphere(steeringRb.position, maxTargetRange);
+            Gizmos.DrawSphere(lastTarget, targetSphereSize);
+            if (lastRaycast) {
+                Gizmos.color = badLineColor;
+            }            
+            Gizmos.DrawRay(ray.origin, ray.direction * lastRaycastMaxDistance);
+        }
+        if (showTarget) {
+            Gizmos.color = goodLineColor;
+            Gizmos.DrawSphere(transformTarget.position, minMaxDistanceToTarget.x);
+            Gizmos.DrawWireSphere(transformTarget.position, minMaxDistanceToTarget.y);
+        }
+        if (showObstacleRange) {
+            Gizmos.color = directionLineColor;
+            Gizmos.DrawWireSphere(steeringRb.position, minMaxDistanceToObstacles.y);
+        }
+        if (showObstacles) {
+            Gizmos.color = badLineColor;
+            for (int i = 0; i < closestDirectionalCollision.Length; i++) {
+                if (displayClosestDirectionalCollision[i]) {
+                    Gizmos.DrawSphere(closestDirectionalCollision[i], minMaxDistanceToObstacles.x);
+                    Gizmos.DrawWireSphere(closestDirectionalCollision[i], minMaxDistanceToObstacles.y);
+                }
             }
         }
         Gizmos.color = Color.blue;
