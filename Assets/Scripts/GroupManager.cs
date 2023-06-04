@@ -161,8 +161,9 @@ public class GroupManager : MonoBehaviour {
         return transform.position;
     }
 
-    public void SetPlayerPosition(Vector3 newPosition) {
+    public void SetGroupPosition(Vector3 newPosition) {
         transform.position = newPosition;
+        if (SteeringManager.Instance != null) { SteeringManager.Instance.ResetPositions(); }
     }
 
     public Vector3[] GetUnsavedHeroPositions() {

@@ -50,16 +50,42 @@ public class GuardsManager : MonoBehaviour {
         }
     }
 
-    public Vector3[] GetGuardsPositions() {
+    Vector3[] GetActiveGuardsPositions() {
         var positions = new List<Vector3>();
         foreach (var guard in guards) {
-            if (guard.gameObject.activeSelf) {
-                positions.Add(guard.GetGuardPosition());
+            if (guard.gameObject.activeSelf && guard.enabled) {
+                positions.Add(guard.GetPosition());
             } else {
                 positions.Add(new Vector3(0f, Mathf.Infinity, 0f));
             }
         }
         return positions.ToArray();
+    }
+
+    public bool CollideWithAny(Vector3 position, float distance) {
+        foreach (var guardPosition in GetActiveGuardsPositions()) {
+            if (Vector3.Distance(guardPosition, position) <= distance) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool GetClosestGuard(Vector3 position, float maxDistance, out int lastGuardIndex, out Vector3 lastPos) {
+        var positions = GetActiveGuardsPositions();
+        var closestDistance = Mathf.Infinity;
+        lastGuardIndex = -1;
+        lastPos = position;
+        for (int i = 0; i < positions.Length; i++) {
+            var pos = positions[i];
+            var newDistance = Vector3.Distance(position, pos);
+            if (newDistance < maxDistance && newDistance < closestDistance) {
+                closestDistance = newDistance;
+                lastPos = pos;
+                lastGuardIndex = i;
+            }
+        }
+        return lastGuardIndex == -1;
     }
 
     public void DisableGuard(int guardIndex) {

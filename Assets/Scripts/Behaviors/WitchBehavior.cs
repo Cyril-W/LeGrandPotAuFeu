@@ -5,8 +5,6 @@ public class WitchBehavior : HeroBehavior {
     [SerializeField, Range(0, 100)] float chancePercentage = 75f;
     [SerializeField] float sheepDuration = 2f;
     [SerializeField] float teleportationDuration = 1f;
-    [SerializeField] Collider[] collidersToAvoid;
-    [SerializeField, Layer] int obstacleLayer = 3;
     [SerializeField] BoxCollider teleportArea;
     [SerializeField, Range(0, 100)] int numberXTeleportPoints = 20;
     [SerializeField, Range(0, 100)] int numberZTeleportPoints = 20;
@@ -22,13 +20,8 @@ public class WitchBehavior : HeroBehavior {
     List<Vector3> teleportPoints = new List<Vector3>();
     float currentTeleportTime = 0f;
 
-    void Awake() {
-        TryFillVoid(false);
-    }
-
     protected override void OnEnable() {
         base.OnEnable();
-        TryFillVoid(false);
         GetTeleportPoints();
         SetGuardLayer(true);
     }
@@ -36,26 +29,6 @@ public class WitchBehavior : HeroBehavior {
     protected override void OnDisable() {
         base.OnDisable();
         SetGuardLayer(false);
-    }
-
-    void TryFillVoid(bool force = true) {
-        if (force || collidersToAvoid.Length <= 0) {
-            var allCollidersToAvoid = new List<Collider>();
-            var boxColliders = FindObjectsOfType<BoxCollider>();
-            foreach (var coll in boxColliders) {
-                if (coll.enabled && coll.gameObject.layer == obstacleLayer) allCollidersToAvoid.Add(coll);
-            }
-            var sphereColliders = FindObjectsOfType<SphereCollider>();
-            foreach (var coll in sphereColliders) {
-                if (coll.enabled && coll.gameObject.layer == obstacleLayer) allCollidersToAvoid.Add(coll);
-            }
-            collidersToAvoid = allCollidersToAvoid.ToArray();
-        }
-    }
-
-    [ContextMenu("Try Fill arrays")]
-    void ContextTryFillVoid() {
-        TryFillVoid();
     }
 
     void SetGuardLayer(bool isActive) {
@@ -82,7 +55,7 @@ public class WitchBehavior : HeroBehavior {
             currentTeleportTime = teleportationDuration;
             GetTeleportPoints();
             if (teleportPoints.Count <= 0) { return false; }
-            GroupManager.Instance.SetPlayerPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
+            GroupManager.Instance.SetGroupPosition(teleportPoints[Random.Range(0, teleportPoints.Count)]);
             return true;
         } else {
             currentTeleportTime = sheepDuration;
@@ -109,20 +82,12 @@ public class WitchBehavior : HeroBehavior {
                 var point = new Vector3(x, 0f, z);
                 if (GroupManager.Instance != null && Vector3.Distance(GroupManager.Instance.GetPlayerPosition(), point) > distanceToPlayer) {
                     var isToAvoid = false;
-                    foreach (var coll in collidersToAvoid) {
-                        if (coll.bounds.Contains(point) || Vector3.Distance(coll.ClosestPointOnBounds(point), point) <= distanceToObstacles) {
-                            isToAvoid = true;
-                            break;
-                        }
+                    if (!isToAvoid && GuardsManager.Instance != null) {
+                        isToAvoid = GuardsManager.Instance.CollideWithAny(point, distanceToObstacles);
                     }
-                    if (GuardsManager.Instance != null) {
-                        foreach (var guardPosition in GuardsManager.Instance.GetGuardsPositions()) {
-                            if (Vector3.Distance(guardPosition, point) <= distanceToObstacles) {
-                                isToAvoid = true;
-                                break;
-                            }
-                        }
-                    }
+                    if (!isToAvoid && SteeringManager.Instance != null) {
+                        isToAvoid = SteeringManager.Instance.CollideWithAny(point, distanceToObstacles);
+                    }                    
                     if (!isToAvoid) {
                         teleportPoints.Add(point);
                     }

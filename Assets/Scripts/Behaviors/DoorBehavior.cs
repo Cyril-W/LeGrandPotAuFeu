@@ -47,7 +47,7 @@ public class DoorBehavior : MonoBehaviour {
     public void InteractSuccess() {
         var newPos = transform.position + transform.forward * offsetForward * (isInToOut ? -1f : 1f);
         newPos.y = 0;
-        GroupManager.Instance.SetPlayerPosition(newPos);
+        GroupManager.Instance.SetGroupPosition(newPos);
         gameObject.SetActive(false);
     }
 

@@ -70,20 +70,7 @@ public class ElfBehavior : HeroBehavior {
     [ContextMenu("Arrow")]
     bool Arrow() {
         if (GuardsManager.Instance == null || GroupManager.Instance == null) { return false; }
-        var playerPos = GroupManager.Instance.GetPlayerPosition();
-        var positions = GuardsManager.Instance.GetGuardsPositions();
-        var closestDistance = Mathf.Infinity;
-        lastPos = playerPos;
-        for (int i = 0; i < positions.Length; i++) {
-            var pos = positions[i];
-            var newDistance = Vector3.Distance(playerPos, pos);
-            if (newDistance < closestDistance) {
-                closestDistance = newDistance;
-                lastPos = pos;
-                lastGuardIndex = i;
-            }
-        }        
-        if (closestDistance > 0f && closestDistance < maxRange) {
+        if (GuardsManager.Instance.GetClosestGuard(GroupManager.Instance.GetPlayerPosition(), maxRange, out lastGuardIndex, out lastPos)) {
             if (Random.Range(0f, 100f) <= chancePercentage) {
                 lastArrowHit = true;
                 arrowTarget.position = lastPos + Vector3.up;

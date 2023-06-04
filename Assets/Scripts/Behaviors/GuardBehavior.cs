@@ -173,7 +173,7 @@ public class GuardBehavior : MonoBehaviour {
         previousCanMove = false;
     }
 
-    public Vector3 GetGuardPosition() {
+    public Vector3 GetPosition() {
         return guardTransform.position;
     }
 

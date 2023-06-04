@@ -8,11 +8,12 @@ public class ThirdPersonController : MonoBehaviour {
     [SerializeField, Range(0f, 1f)] float crouchSpeedRatio = 0.5f;
     [SerializeField] float turnSmoothTime = 0.1f;
     //[SerializeField] float gravityMultiplier = 1f;
+    [SerializeField] Vector2 minMaxTimeBetweenHits = new Vector2(1f, 3f);
     [SerializeField] float timeBetweenSteps = 0.4f;
     [SerializeField] UnityEvent onFootStep;
 
     Vector3 direction;
-    float turnSmoothVelocity, targetAngle, angle, horizontal, vertical/*, velocity, gravity = -9.81f*/, currentTimeBetweenSteps = 0f;
+    float turnSmoothVelocity, targetAngle, angle, horizontal, vertical/*, velocity, gravity = -9.81f*/, currentTimeBetweenSteps = 0f, currentTimeBetweenHits = 0f;
     bool isCrouched = false;
 
     void OnValidate() {
@@ -29,6 +30,7 @@ public class ThirdPersonController : MonoBehaviour {
 
     void FixedUpdate() {
         if (playerRb == null) { return; }
+        if (currentTimeBetweenHits > 0f) { currentTimeBetweenHits -= Time.deltaTime; }
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
         direction = new Vector3(horizontal, 0f, vertical).normalized;
@@ -64,7 +66,8 @@ public class ThirdPersonController : MonoBehaviour {
     }
 
     public void GetHit(Vector3 position) {
-        if (playerRb == null || Vector3.Distance(playerRb.position, position) <= 0.1f) { return; }
+        if (playerRb == null || Vector3.Distance(playerRb.position, position) <= 0.1f || currentTimeBetweenHits > 0) { return; }
+        currentTimeBetweenHits = Random.Range(minMaxTimeBetweenHits.x, minMaxTimeBetweenHits.y);
         var direction = (playerRb.position - position).normalized;
         playerRb.AddForce(direction * hitStrength, ForceMode.Impulse);
     }
