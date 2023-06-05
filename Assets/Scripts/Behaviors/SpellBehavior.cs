@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     [SerializeField] Hero hero;
@@ -10,6 +10,8 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] CanvasGroup canvasGroup;
     [SerializeField] Vector2 minMaxAlphaCanvasGroup = new Vector2(0.25f, 1f);
     [SerializeField] GameObject chainsGameObject;
+    [SerializeField] GameObject skullGameObject;
+    [SerializeField] GameObject lostGameObject;
     [SerializeField] Button spellButton;
     [SerializeField] Image spellCooldown;
     [SerializeField] float cooldown;
@@ -20,7 +22,7 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] DoPunchScaleParameters punchScaleParameters = new DoPunchScaleParameters(Vector3.one * 1.1f, 0.25f);
 
     float currentCooldown = 0f, currentPunchDelay = 0f;
-    bool currentIsSaved = false;
+    bool currentIsSaved = false, currentIsOutOfRange = false, currentIsDead = false;
 
     public Hero GetHero() {
         return hero;
@@ -34,17 +36,34 @@ public class SpellBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (currentIsSaved) { currentPunchDelay = afterDelayPunch; }
     }
 
-    public void SetSaved(bool isSaved) {
-        if (chainsGameObject == null || canvasGroup == null) { return; }
-        chainsGameObject.SetActive(!isSaved);
-        canvasGroup.alpha = !isSaved ? minMaxAlphaCanvasGroup.x : minMaxAlphaCanvasGroup.y;
-        canvasGroup.interactable = isSaved;
+    public void SetIsSaved(bool isSaved) {
         currentIsSaved = isSaved;
+        UpdateIsInteractable();
+        if (chainsGameObject != null) { chainsGameObject.SetActive(!currentIsSaved);}        
+    }
+
+    public void SetIsDead(bool isDead) {
+        currentIsDead = isDead;
+        if (skullGameObject != null) { skullGameObject.SetActive(currentIsDead); }
+        UpdateIsInteractable();
+    }
+
+    public void SetOutOfRange(bool isOutOfRange) {
+        currentIsOutOfRange = isOutOfRange;
+        if (lostGameObject != null) { lostGameObject.SetActive(!currentIsDead && currentIsSaved && currentIsOutOfRange); }
+        UpdateIsInteractable();
+    }
+
+    void UpdateIsInteractable() {
+        if (canvasGroup == null) { return; }
+        var isInteractable = currentIsSaved && !currentIsOutOfRange && !currentIsDead;
+        canvasGroup.alpha = !isInteractable ? minMaxAlphaCanvasGroup.x : minMaxAlphaCanvasGroup.y;
+        canvasGroup.interactable = isInteractable;
     }
 
     public void OnSpellClick() {
         spellButton.interactable = false;
-        if (!currentIsSaved || currentCooldown > 0f) { return; }        
+        if (!currentIsSaved || currentIsDead || currentIsOutOfRange || currentCooldown > 0f) { return; }        
         if (GroupManager.Instance != null) { 
             currentCooldown = GroupManager.Instance.CallHeroSpell(hero) ? cooldown : missedCooldown; 
         } else {

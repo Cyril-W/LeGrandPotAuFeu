@@ -34,7 +34,7 @@ public class SteeringBehavior : MonoBehaviour {
     };
     Vector3[] closestDirectionalCollision = new Vector3[8];
     Vector3 currentDirection, directionToTargetNormalized, directionToObstacleNormalized, lastTarget;
-    Ray ray;
+    Ray[] rays = new Ray[3];
     bool[] displayClosestDirectionalCollision = new bool[8];
     float[] interests = new float[8];
     float[] dangers = new float[8];
@@ -68,9 +68,18 @@ public class SteeringBehavior : MonoBehaviour {
         if (transformTarget == null || steeringRb == null) { return; }
         if (Vector3.Distance(steeringRb.position, transformTarget.position) > maxTargetRange) { return; }
         if (SteeringManager.Instance != null) {
-            ray = new Ray(steeringRb.position + Vector3.up * 0.5f, transformTarget.position - steeringRb.position);
-            lastRaycastMaxDistance = Vector3.Distance(transformTarget.position, steeringRb.position);
-            lastRaycast = SteeringManager.Instance.RaycastHitAnyObstacle(ray, lastRaycastMaxDistance);
+            var offsetposition = steeringRb.position + new Vector3(-0.5f, 0.5f, 0f);
+            rays[0] = new Ray(offsetposition, transformTarget.position - offsetposition);
+            offsetposition = steeringRb.position + Vector3.up * 0.5f;
+            rays[1] = new Ray(offsetposition, transformTarget.position - offsetposition);
+            offsetposition = steeringRb.position + new Vector3(0.5f, 0.5f, 0f);
+            rays[2] = new Ray(offsetposition, transformTarget.position - offsetposition);
+            lastRaycast = false;
+            for (int i = 0; i < 3; i++) {
+                lastRaycastMaxDistance = Vector3.Distance(rays[i].origin, transformTarget.position);
+                lastRaycast |= SteeringManager.Instance.RaycastHitAnyObstacle(rays[i], lastRaycastMaxDistance);
+            }
+            
             if (lastRaycast) { return; }
         }
         lastTarget = transformTarget.position;
@@ -86,10 +95,10 @@ public class SteeringBehavior : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        CheckTarget();
         if (currentTimeBetweenUpdate > 0f) {
             currentTimeBetweenUpdate -= Time.deltaTime;
-            if (currentTimeBetweenUpdate <= 0f) {
-                CheckTarget();
+            if (currentTimeBetweenUpdate <= 0f) {        
                 CheckDirections();               
                 currentTimeBetweenUpdate = timeBetweenUpdates;
             }
@@ -194,8 +203,10 @@ public class SteeringBehavior : MonoBehaviour {
             Gizmos.DrawSphere(lastTarget, targetSphereSize);
             if (lastRaycast) {
                 Gizmos.color = badLineColor;
+            }
+            for (int i = 0; i < 3; i++) {
+                Gizmos.DrawRay(rays[i].origin, rays[i].direction * lastRaycastMaxDistance);
             }            
-            Gizmos.DrawRay(ray.origin, ray.direction * lastRaycastMaxDistance);
         }
         if (showTarget) {
             Gizmos.color = goodLineColor;

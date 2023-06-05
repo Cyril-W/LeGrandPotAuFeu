@@ -85,7 +85,7 @@ public class GuardsManager : MonoBehaviour {
                 lastGuardIndex = i;
             }
         }
-        return lastGuardIndex == -1;
+        return lastGuardIndex != -1;
     }
 
     public void DisableGuard(int guardIndex) {

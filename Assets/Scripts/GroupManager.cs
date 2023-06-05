@@ -24,7 +24,9 @@ public class GroupManager : MonoBehaviour {
         public SpellBehavior SpellBehavior;
         public HeroBehavior HeroBehavior;
         public SteeringBehavior SteeringBehavior;
-        public bool Saved = false;
+        public bool IsSaved = false;
+        public bool IsOutOfRange = false;
+        public bool IsDead = false;
     }
 
     public static GroupManager Instance { get; private set; }
@@ -33,8 +35,10 @@ public class GroupManager : MonoBehaviour {
     [SerializeField] float timeToCrouch = 0.5f;
     [SerializeField] Vector2 crouchStandScale = new Vector2(0.75f, 1f);
     [SerializeField] Transform rangeIndicator;
+    [SerializeField] float groupRange = 6f;
     [SerializeField] HeroModel[] heroes;
     [SerializeField] UnityEvent onHeroLost;
+    [SerializeField] Color groupRangeColor = Color.cyan;
 
     Dictionary<Hero, System.Func<bool>> onSpellClick = new Dictionary<Hero, System.Func<bool>>();
 
@@ -59,6 +63,7 @@ public class GroupManager : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        CheckGroupRange();
         if (currentSheepDuration > 0f) {
             currentSheepDuration -= Time.deltaTime;
             if (currentSheepDuration <= 0f) {
@@ -96,13 +101,28 @@ public class GroupManager : MonoBehaviour {
         }
         return onSpellClick[hero]();
     }
+    
+    void CheckGroupRange() {
+        if (rangerTransform == null) { return; }
+        foreach (var h in heroes) {
+            if (h.SteeringBehavior != null) { 
+                var newOutOfRange = Vector3.Distance(h.SteeringBehavior.GetPosition(), rangerTransform.position) > groupRange;
+                if (h.IsOutOfRange != newOutOfRange) {
+                    h.IsOutOfRange = newOutOfRange;
+                    if (h.SpellBehavior != null) {
+                        h.SpellBehavior.SetOutOfRange(h.IsOutOfRange);
+                    }
+                }
+            }
+        }
+    }
 
     [ContextMenu("Update Heroes")]
     void UpdateHeroes() {
         numberHeroSaved = 0;
         foreach (var h in heroes) {
             UpdateHero(h);
-            if (h.Saved) {
+            if (h.IsSaved) {
                 if (BarbarianManager.Instance != null) { BarbarianManager.Instance.SaveHero(h.Hero); }
                 numberHeroSaved++;
             }
@@ -117,9 +137,9 @@ public class GroupManager : MonoBehaviour {
     void UpdateSheepsAndModels(bool isSheep) {
         foreach (var h in heroes) {
             if (h.SteeringBehavior) {
-                h.SteeringBehavior.gameObject.SetActive(h.Saved);
+                h.SteeringBehavior.gameObject.SetActive(h.IsSaved);
             }
-            if (h.Saved && h.Model && h.Sheep) { 
+            if (h.IsSaved && h.Model && h.Sheep) { 
                 h.Model.SetActive(!isSheep);
                 h.Sheep.SetActive(isSheep);
             }
@@ -169,7 +189,7 @@ public class GroupManager : MonoBehaviour {
     public Vector3[] GetUnsavedHeroPositions() {
         var heroPos = new List<Vector3>();
         foreach (var hero in heroes) {
-            if (hero.Hero != Hero.Ranger && !hero.Saved) { heroPos.Add(hero.HeroBehavior.GetSavedHeroPosition()); }
+            if (hero.Hero != Hero.Ranger && !hero.IsSaved) { heroPos.Add(hero.HeroBehavior.GetSavedHeroPosition()); }
         }
         return heroPos.ToArray();
     }
@@ -202,20 +222,21 @@ public class GroupManager : MonoBehaviour {
 
     public bool LoseMember(Hero hero) {
         if (hero == Hero.Ranger) { return false; }
-        var savedHeroes = heroes.Where(h => h.Hero == hero && h.Saved);
+        var savedHeroes = heroes.Where(h => h.Hero == hero && h.IsSaved);
         if (savedHeroes == null || savedHeroes.Count() <= 0) { return false; }
         return LoseHero(savedHeroes.ElementAt(0));
     }
 
     public bool LoseRandomMember() {
-        var savedHeroes = heroes.Where(h => h.Hero != Hero.Ranger && h.Saved);
+        var savedHeroes = heroes.Where(h => h.Hero != Hero.Ranger && h.IsSaved);
         if (savedHeroes == null || savedHeroes.Count() <= 0) { return false;}
         return LoseHero(savedHeroes.ElementAt(Random.Range(0, savedHeroes.Count())));        
     }
 
     bool LoseHero(HeroModel heroModel) {
         if (heroModel != null) {
-            heroModel.Saved = false;
+            //heroModel.IsSaved = false;
+            heroModel.IsDead = true;
             UpdateHero(heroModel);
             if (CanvasTooltip.Instance != null) { CanvasTooltip.Instance.HideTooltip(); }
             onHeroLost?.Invoke();
@@ -225,23 +246,26 @@ public class GroupManager : MonoBehaviour {
 
     void UpdateHero(HeroModel hero) {
         if (hero.SteeringBehavior) {
-            hero.SteeringBehavior.gameObject.SetActive(hero.Saved);
+            hero.SteeringBehavior.gameObject.SetActive(hero.IsSaved && !hero.IsDead);
         }
-        if (hero.Saved && hero.Model && hero.Sheep) {
+        if (hero.IsSaved && hero.Model && hero.Sheep) {
             hero.Model.SetActive(true);
             hero.Sheep.SetActive(false);
         }
-        if (hero.SpellBehavior != null) { hero.SpellBehavior.SetSaved(hero.Saved); }
+        if (hero.SpellBehavior != null) { 
+            hero.SpellBehavior.SetIsSaved(hero.IsSaved);
+            hero.SpellBehavior.SetIsDead(hero.IsDead);
+        }
         if (hero.HeroBehavior != null) {
-            hero.HeroBehavior.enabled = hero.Saved;
-            if (hero.Hero != Hero.Ranger) { hero.HeroBehavior.transform.GetChild(0).gameObject.SetActive(!hero.Saved); }
+            hero.HeroBehavior.enabled = hero.IsSaved;
+            if (hero.Hero != Hero.Ranger) { hero.HeroBehavior.transform.GetChild(0).gameObject.SetActive(!hero.IsSaved); }
         }
     }
 
     void UpdateHero(HeroModel hero, bool saved) {
         if (hero.Hero == Hero.Ranger && !saved) { return; }
-        hero.Saved = saved;
-        numberHeroSaved += hero.Saved ? 1 : -1;
+        hero.IsSaved = saved;
+        numberHeroSaved += hero.IsSaved ? 1 : -1;
         UpdateHero(hero);
     }
 
@@ -262,5 +286,10 @@ public class GroupManager : MonoBehaviour {
             if (h.SpellBehavior == null) { h.SpellBehavior = spellBehaviors.FirstOrDefault(sB => sB.GetHero() == h.Hero); }
             if (h.HeroBehavior == null) { h.HeroBehavior = heroBehaviors.FirstOrDefault(hB => hB.GetHero() == h.Hero); }
         }
+    }
+
+    private void OnDrawGizmosSelected() {
+        Gizmos.color = groupRangeColor;
+        Gizmos.DrawWireSphere(rangerTransform.position, groupRange);
     }
 }

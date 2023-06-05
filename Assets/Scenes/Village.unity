@@ -17903,7 +17903,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2124580597
 Transform:
   m_ObjectHideFlags: 0
@@ -18551,6 +18551,22 @@ PrefabInstance:
       propertyPath: heroes.Array.data[3].Sheep
       value: 
       objectReference: {fileID: 1720869432}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[0].IsSaved
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[1].IsSaved
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[2].IsSaved
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
+      propertyPath: heroes.Array.data[3].IsSaved
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6065856951620042200, guid: eaec1db876152d247944192fe0bc5156, type: 3}
       propertyPath: heroes.Array.data[0].HeroName
       value: Ranger
